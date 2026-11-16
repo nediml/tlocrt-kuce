@@ -84,7 +84,6 @@
       <span><i style="background:var(--wall)"></i>zid (vanjski 30 cm, pregradni 20 cm)</span>
       <span><i style="background:var(--glass)"></i>prozor / staklo</span>
       <span><svg class="lg" viewBox="0 0 16 16"><path d="M2 14L2 2A12 12 0 0 1 14 14" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>vrata i smjer otvaranja</span>
-      <span><svg class="lg" viewBox="0 0 16 16"><path d="M1 8H15" stroke="currentColor" stroke-width="3.5"/></svg>klizna vrata</span>
       <span><i style="background:var(--stairs)"></i>stepenište</span>
       <span><i style="background:var(--terrace)"></i>terasa</span>
       <span><i style="background:var(--furn);opacity:.6"></i>namještaj</span>
@@ -102,7 +101,7 @@
     <tbody>
       <tr><td>Dnevni + kuhinja + trpezarija</td><td class="num">37,9 m²</td><td>6,60 × 5,80 m: kuhinja u obliku slova U s poluotokom, sto za 8 uz ugaono staklo, garnitura prema TV-u.</td></tr>
       <tr><td>Kotlovnica (pelet)</td><td class="num">9,1 m²</td><td>3,80 × 2,40 m: kotao, spremnik peleta i mjesto za paletu vreća. Ulaz iz ostave i vanjska vrata na zapadu.</td></tr>
-      <tr><td>Ostava</td><td class="num">5,2 m²</td><td>2,15 × 2,40 m, klizna vrata odmah do kuhinje. Iz nje se ulazi u kotlovnicu (zapadno) i u prostor ispod stepeništa (istočno).</td></tr>
+      <tr><td>Ostava</td><td class="num">5,2 m²</td><td>2,15 × 2,40 m, vrata odmah do kuhinje. Iz nje se ulazi u kotlovnicu (zapadno) i u prostor ispod stepeništa (istočno).</td></tr>
       <tr><td>WC s tuš-kabinom</td><td class="num">4,2 m²</td><td>1,75 × 2,40 m: šolja, umivaonik, tuš 90 × 90. Bez prozora: ventilacija kanalom.</td></tr>
       <tr><td>Stepenište</td><td class="num">6,7 m²</td><td>2,10 × 3,20 m, dvokrako, krak 1,00 m, 2 × 8 gazišta od 27 cm. Ulaz iz predulaza. Ispod gornjeg kraka je ostava s vratima 75 cm iz ostave; visina ispod kraka na mjestu vrata je oko 1,7–2,2 m.</td></tr>
       <tr><td>Predulaz</td><td class="num">6,5 m²</td><td>3,60 × 2,15 m umanjeno za stepenište; ormar 1,60 m na južnom zidu, vrata WC-a i mesdžida u istočnim uglovima.</td></tr>
@@ -135,7 +134,7 @@
     <tbody>
       <tr><td><i class="key" style="background:var(--wall)"></i>Crno</td><td>Zid. Vanjski zidovi i zidovi prema terasi 30 cm, svi pregradni zidovi 20 cm, ograda terase 10 cm.</td></tr>
       <tr><td><i class="key" style="background:var(--glass)"></i>Plavo</td><td>Prozor ili staklena stijena, u punoj debljini zida.</td></tr>
-      <tr><td><i class="key" style="background:var(--floor);border:1px solid var(--line)"></i>Otvor s lukom</td><td>Vrata; luk pokazuje krilo i smjer otvaranja. Debela crta uz zid su klizna vrata. Otvor bez oznake je prolaz bez krila.</td></tr>
+      <tr><td><i class="key" style="background:var(--floor);border:1px solid var(--line)"></i>Otvor s lukom</td><td>Vrata; luk pokazuje krilo i smjer otvaranja. Otvor bez luka je prolaz bez krila.</td></tr>
       <tr><td><i class="key" style="background:var(--stairs)"></i>Sivo</td><td>Stepenište: dvokrako, krak 1,00 m, 2 × 8 gazišta od 27 cm, međupodest na sjevernoj strani.</td></tr>
       <tr><td><i class="key" style="background:var(--terrace)"></i>Zeleno</td><td>Terasa na spratu, iznad dijela prizemlja.</td></tr>
       <tr><td><i class="key" style="background:var(--furn);opacity:.6"></i>Smeđe</td><td>Namještaj i oprema, orijentaciono; služe za provjeru da prostorija radi.</td></tr>
@@ -238,7 +237,7 @@ const plans = {
     doors: [
       { r: [0, 1.50, .30, .90], s: [[.30, 2.40, 1.20, 2.40, .30, 1.50]] },                    // kotlovnica vani
       { r: [4.10, 1.75, .20, .80], s: [[4.10, 2.55, 3.30, 2.55, 4.10, 1.75]] },                // kotlovnica iz ostave
-      { r: [4.40, 2.70, .80, .20], s: [], l: [5.20, 2.66, 6.00, 2.66] },                         // ostava – klizna
+      { r: [4.40, 2.70, .80, .20], s: [[5.20, 2.70, 5.20, 1.90, 4.40, 2.70]] },                // ostava
       { r: [6.45, 1.80, .20, .75], s: [[6.45, 2.55, 5.70, 2.55, 6.45, 1.80]] },                // ostava → ispod stepeništa
       { r: [9.90, 2.70, .70, .20], s: [[10.60, 2.70, 10.60, 2.00, 9.90, 2.70]] },              // WC
       { r: [6.90, 3.85, .20, 1.15], s: [] },                                                   // dnevni–predulaz
@@ -264,7 +263,7 @@ const plans = {
     ],
     tiny: [
       [2.25, 3.20, 'kuhinja'], [1.75, 5.22, 'poluotok'], [1.70, 7.35, 'sto'], [3.87, 7.90, 'garnitura'],
-      [6.70, 5.90, 'TV'], [7.80, 6.45, 'police'], [8.50, 5.50, 'radni sto'], [10.22, 7.65, 'kibla'], [8.75, 4.80, 'ormar'], [5.60, 2.50, 'klizna'], [7.15, 2.45, 'ostava ispod'], [7.15, 2.65, 'stepeništa'],
+      [6.70, 5.90, 'TV'], [7.80, 6.45, 'police'], [8.50, 5.50, 'radni sto'], [10.22, 7.65, 'kibla'], [8.75, 4.80, 'ormar'], [7.15, 2.45, 'ostava ispod'], [7.15, 2.65, 'stepeništa'],
       [1.85, .90, 'pelet'], [3.00, .85, 'kotao'],
       [10.25, .80, 'tuš'], [10.05, 1.65, 'WC + tuš'], [10.05, 1.87, '4,2 m²'],
     ],
@@ -302,7 +301,7 @@ const plans = {
       { r: [5.50, 4.60, .80, .20], s: [[6.30, 4.80, 6.30, 5.60, 5.50, 4.80]] },                // dječaci
       { r: [6.70, 4.60, .80, .20], s: [[6.70, 4.80, 6.70, 5.60, 7.50, 4.80]] },                // djevojčice
       { r: [.45, 4.60, .90, .30], s: [[.45, 4.90, .45, 5.80, 1.35, 4.90]] },                   // roditelji → terasa
-      { r: [2.00, 5.60, .30, .90], s: [], l: [1.96, 6.50, 1.96, 7.40] },                         // dječaci → terasa, klizna
+      { r: [2.00, 5.60, .30, .90], s: [[2.00, 6.50, 1.10, 6.50, 2.00, 5.60]] },                // dječaci → terasa
     ],
     furn: [
       [1.00, .30, 1.80, 2.00], [.50, .30, .45, .45], [2.85, .30, .45, .45], [3.90, .30, .60, 2.10], [1.50, 3.40, .60, 1.15],   // roditelji + ormari
@@ -320,7 +319,7 @@ const plans = {
       [1.05, 8.15, 'Terasa', '7,6 m²'],
     ],
     tiny: [
-      [1.90, 1.40, 'krevet'], [4.20, 1.40, 'ormar'], [1.80, 4.05, 'ormar'], [1.50, 5.40, 'izlaz'], [1.40, 6.10, 'klizna'],
+      [1.90, 1.40, 'krevet'], [4.20, 1.40, 'ormar'], [1.80, 4.05, 'ormar'], [1.50, 5.40, 'izlaz'], [1.50, 6.20, 'izlaz'],
       [5.35, 1.85, 'vešeraj'], [5.35, 2.07, '5,3 m²'], [6.15, 1.45, 'VM'], [6.15, 2.05, 'SM'], [5.85, .75, 'izlaz'],
       [9.82, .72, 'kada'], [9.82, 2.40, 'kupatilo'], [9.82, 2.62, '5,3 m²'],
       [3.05, 5.15, 'ormar'], [4.60, 5.15, 'ormar'], [8.37, 5.15, 'ormar'], [9.92, 5.15, 'ormar'],
