@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="bs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tlocrt kuće – 11 × 9 m</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f6f4ef; --card: #ffffff; --ink: #1f1d1a; --muted: #6b665e; --line: #ddd6c8;
+    --wall: #2a2724; --floor: #f1d9b0; --stairs: #d6d4cf; --terrace: #dfe8d2;
+    --furn: #8a7460; --glass: #7fb4d6; --accent: #c2410c;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  h2 { font-size: 1.1rem; margin: 28px 0 8px; }
+  p.lead { color: var(--muted); margin: 0 0 16px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 0 0 18px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .stat b { display: block; font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--muted); font-size: .85rem; }
+  .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px; }
+  .toggle { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .toggle button { font: inherit; padding: 8px 14px; border: 0; background: var(--card); color: var(--ink); cursor: pointer; }
+  .toggle button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; color: var(--muted); font-size: .875rem; }
+  .legend i { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 5px; }
+  .plan { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 8px; }
+  svg { display: block; width: 100%; height: auto; }
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  td.num { white-space: nowrap; font-variant-numeric: tabular-nums; }
+  tr.sum td { font-weight: 600; }
+  ul { padding-left: 20px; margin: 0; }
+  li { margin: 4px 0; }
+
+  .wall { fill: var(--wall); }
+  .room { fill: var(--floor); }
+  .terrace { fill: var(--terrace); }
+  .stairs { fill: var(--stairs); }
+  .tread { stroke: var(--muted); stroke-width: 1.5; }
+  .open { fill: var(--floor); }
+  .glass { fill: var(--glass); }
+  .swing { fill: none; stroke: var(--ink); stroke-width: 2; }
+  .furn { fill: var(--furn); fill-opacity: .55; stroke: var(--furn); stroke-width: 2; }
+  .hill { font-size: 17px; fill: var(--muted); text-anchor: middle; font-style: italic; }
+  .name { font-size: 24px; font-weight: 600; fill: var(--ink); text-anchor: middle; }
+  .sub { font-size: 17px; fill: var(--ink); text-anchor: middle; }
+  .tiny { font-size: 14px; fill: var(--ink); text-anchor: middle; }
+  .wd { font-size: 12px; fill: var(--ink); text-anchor: middle; paint-order: stroke; stroke: var(--floor); stroke-width: 4px; stroke-linejoin: round; }
+  .rug { fill: var(--accent); fill-opacity: .18; stroke: var(--accent); stroke-width: 2; }
+  .kibla { fill: none; stroke: var(--accent); stroke-width: 4; stroke-linecap: round; }
+  .fd { font-size: 9px; fill: var(--ink); text-anchor: middle; }
+  .dim { stroke: var(--muted); stroke-width: 1.5; }
+  .dimt { font-size: 17px; fill: var(--muted); text-anchor: middle; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Tlocrt kuće – 11,00 × 9,00 m</h1>
+  <p class="lead">Gabarit 11,00 × 9,00 m. Sjeverni zid prizemlja je u brdu, pa su uz njega samo prostorije kojima ne treba prozor. Sprat je iznad terena i ima prozore i izlaz na sjever.</p>
+
+  <div class="stats">
+    <div class="stat"><b>99 m²</b><span>bruto po etaži, 198 m² ukupno</span></div>
+    <div class="stat"><b>82 + 73 m²</b><span>neto prizemlje + sprat</span></div>
+    <div class="stat"><b>3 spavaće</b><span>djeca 2 × 16,0 m², roditelji 14,9 m²</span></div>
+    <div class="stat"><b>≈ 8,2 m²</b><span>terasa na spratu, lijevo (jugozapad)</span></div>
+  </div>
+
+  <div class="bar">
+    <div class="toggle" role="group" aria-label="Tlocrt">
+      <button data-p="ground" aria-pressed="true">Prizemlje</button>
+      <button data-p="upper" aria-pressed="false">Sprat</button>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--glass)"></i>staklo</span>
+      <span><i style="background:var(--furn);opacity:.6"></i>namještaj</span>
+      <span><i style="background:var(--terrace)"></i>terasa</span>
+    </div>
+  </div>
+
+  <div class="plan"><svg id="svg" viewBox="-110 -150 1330 1250" role="img" aria-label="Tlocrt"></svg></div>
+
+  <h2>Prizemlje</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Prostorija</th><th>Površina</th><th>Napomena</th></tr></thead>
+    <tbody>
+      <tr><td>Dnevni + kuhinja + trpezarija</td><td class="num">37,9 m²</td><td>6,60 × 5,80 m (bilo 5,60 m dubine): kuhinja u obliku slova U s poluotokom, sto za 8 uz ugaono staklo, garnitura prema TV-u.</td></tr>
+      <tr><td>Kotlovnica (pelet)</td><td class="num">9,1 m²</td><td>3,80 × 2,40 m: kotao, spremnik peleta i mjesto za paletu vreća. Ulaz iz ostave i vanjska vrata na zapadu.</td></tr>
+      <tr><td>Ostava</td><td class="num">4,7 m²</td><td>1,95 × 2,40 m, vrata odmah do kuhinje; kroz nju se ulazi u kotlovnicu, pa su police uz sjeverni i istočni zid.</td></tr>
+      <tr><td>WC s tuš-kabinom</td><td class="num">4,2 m²</td><td>1,75 × 2,40 m: šolja, umivaonik, tuš 90 × 90. Bez prozora: ventilacija kanalom.</td></tr>
+      <tr><td>Stepenište</td><td class="num">6,7 m²</td><td>2,10 × 3,20 m, dvokrako, krak 1,00 m, 2 × 8 gazišta od 27 cm. Ulaz iz predulaza.</td></tr>
+      <tr><td>Predulaz</td><td class="num">6,5 m²</td><td>Ormar na južnom zidu; vrata za WC, stepenište, mesdžid i dnevni.</td></tr>
+      <tr><td>Mesdžid + radna soba + biblioteka</td><td class="num">12,4 m²</td><td>3,60 × 3,45 m (bilo 3,40 × 3,25 m), samo za porodicu: police 3,45 m uz zapadni zid, radni sto 1,50 m uz sjeverni zid, prozori na jug i istok. Slobodan pod oko 3,1 × 2,7 m, kibla prema jugoistoku.</td></tr>
+      <tr class="sum"><td>Neto ukupno</td><td class="num">≈ 82 m²</td><td></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>Sprat</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Prostorija</th><th>Površina</th><th>Napomena</th></tr></thead>
+    <tbody>
+      <tr><td>Spavaća – dječaci</td><td class="num">16,0 m²</td><td>4,10 × 3,90 m (bilo 4,00 × 3,70 m): krevet na sprat uz bočni zid, dva radna stola od 1,30 m pod prozorom, dva ormara po 1,50 m; vrata na terasu.</td></tr>
+      <tr><td>Spavaća – djevojčice</td><td class="num">16,0 m²</td><td>4,10 × 3,90 m (bilo 4,00 × 3,70 m): isti raspored, bez izlaza na terasu.</td></tr>
+      <tr><td>Spavaća – roditelji</td><td class="num">14,9 m²</td><td>4,20 × 3,00 m (bilo 4,00 m širine) + proširenje 1,80 × 1,30 m prema terasi, s drugim ormarom; prozori na sjever i zapad, vrata na terasu.</td></tr>
+      <tr><td>Vešeraj</td><td class="num">5,3 m²</td><td>1,75 × 3,00 m, ulaz direktno iz hodnika i staklena vrata na sjever, na teren iza kuće. Veš-mašina, sušilica, sudoper i police.</td></tr>
+      <tr><td>Kupatilo</td><td class="num">5,3 m²</td><td>1,75 × 3,00 m, tačno iznad WC-a u prizemlju: kada 170 cm, šolja, umivaonik; prozori na istok i sjever.</td></tr>
+      <tr><td>Hodnik + stepenište</td><td class="num">15,9 m²</td><td>Hodnik 8,40 × 1,10 m, prozor na istok.</td></tr>
+      <tr><td>Terasa</td><td class="num">≈ 8,2 m²</td><td>2,00 × 4,10 m u jugozapadnom uglu, izlaz iz sobe roditelja i iz sobe dječaka.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>Pretpostavke i šta provjeriti</h2>
+  <ul>
+    <li><strong>Terasa</strong> je kraća za 1,25 m, jer je taj dio pripao sobi roditelja. Na nju se više ne izlazi iz hodnika, nego iz sobe roditelja i sobe dječaka.</li>
+    <li><strong>Vešeraj</strong> je oko 3 m od vertikale kupatila, pa mu treba vlastiti odvod (iznad ostave u prizemlju).</li>
+    <li><strong>Sjeverni zid:</strong> ukopano je samo prizemlje. Na spratu su na sjeveru prozori sobe roditelja, stepeništa i kupatila te izlaz iz vešeraja; visinu praga prema terenu treba uskladiti na licu mjesta.</li>
+    <li><strong>Zapadni zid:</strong> prozor iznad kuhinjske ploče crtan je uz pretpostavku da je teren tu ispod parapeta.</li>
+    <li><strong>Mesdžid:</strong> vanjska vrata na jugu su zamijenjena prozorom. Sto i police su iza i sa strane onih koji klanjaju, jer je kibla prema jugoistočnom uglu; tačan ugao treba provjeriti kompasom na parceli.</li>
+    <li><strong>Kotlovnica:</strong> treba dimnjak i dovod zraka za sagorijevanje.</li>
+    <li><strong>Instalacijski kanal:</strong> zid između ostave i stepeništa u prizemlju je 40 cm umjesto 20 cm, jer je stepenište pomjereno 20 cm na istok da soba roditelja iznad dobije širinu. Tih 20 cm služi za vertikale ventilacije i odvoda.</li>
+    <li><strong>Zidovi</strong> su crtani 30 cm (vanjski i prema terasi) i 20 cm (svi pregradni); mjere u prostorijama su svijetle mjere.</li>
+  </ul>
+</main>
+
+<script>
+const U = 100;
+const fmt = n => n.toFixed(2).replace('.', ',');
+const rect = (x, y, w, h, cls) => `<rect x="${x*U}" y="${y*U}" width="${w*U}" height="${h*U}" class="${cls}"/>`;
+const text = (x, y, s, cls) => `<text x="${x*U}" y="${y*U}" class="${cls}">${s}</text>`;
+const line = (x1, y1, x2, y2, cls) => `<line x1="${x1*U}" y1="${y1*U}" x2="${x2*U}" y2="${y2*U}" class="${cls}"/>`;
+// krilo vrata: šarka, kraj otvorenog krila, kraj zatvorenog krila
+function swing([hx, hy, lx, ly, cx, cy]) {
+  const r = Math.hypot(lx - hx, ly - hy) * U;
+  const cross = (lx - hx) * (cy - hy) - (ly - hy) * (cx - hx);
+  return `<path class="swing" d="M${hx*U} ${hy*U}L${lx*U} ${ly*U}A${r} ${r} 0 0 ${cross > 0 ? 1 : 0} ${cx*U} ${cy*U}"/>`;
+}
+function label(cx, cy, name, ...subs) {
+  let s = text(cx, cy, name, 'name');
+  subs.forEach((t, i) => s += text(cx, cy + 0.27 * (i + 1), t, 'sub'));
+  return s;
+}
+function hdim(x1, x2, y, t) {
+  return line(x1, y, x2, y, 'dim') + line(x1, y - .07, x1, y + .07, 'dim') + line(x2, y - .07, x2, y + .07, 'dim')
+    + text((x1 + x2) / 2, y - .1, t, 'dimt');
+}
+function vdim(y1, y2, x, t) {
+  const cx = (x - .1) * U, cy = (y1 + y2) / 2 * U;
+  return line(x, y1, x, y2, 'dim') + line(x - .07, y1, x + .07, y1, 'dim') + line(x - .07, y2, x + .07, y2, 'dim')
+    + `<text class="dimt" transform="translate(${cx} ${cy}) rotate(-90)">${t}</text>`;
+}
+// mjere zidova: širina uz gornji i donji zid, dužina uz lijevi i desni
+function wdims([x, y, w, h]) {
+  const v = (px) => `<text class="wd" transform="translate(${px*U} ${(y + h / 2)*U}) rotate(-90)">${fmt(h)}</text>`;
+  return text(x + w / 2, y + .17, fmt(w), 'wd') + text(x + w / 2, y + h - .07, fmt(w), 'wd') + v(x + .17) + v(x + w - .06);
+}
+// mjere namještaja u cm (širina × dubina), uz donji ili desni rub komada
+function fdim([x, y, w, h]) {
+  const t = `${Math.round(w * 100)}×${Math.round(h * 100)}`;
+  if (w < .55 && h > w)
+    return `<text class="fd" transform="translate(${(x + w - .04)*U} ${(y + h / 2)*U}) rotate(-90)">${t}</text>`;
+  return text(x + w / 2, y + h - .04, t, 'fd');
+}
+function stairs(x, y, w, len) {
+  let s = rect(x, y, w, len, 'stairs');
+  const gap = .1, fw = (w - gap) / 2, top = y + len - 8 * .27;
+  for (let i = 0; i < 8; i++) {
+    const ty = top + i * .27;
+    s += line(x, ty, x + fw, ty, 'tread') + line(x + fw + gap, ty, x + w, ty, 'tread');
+  }
+  s += line(x + fw, top, x + fw, y + len, 'tread') + line(x + fw + gap, top, x + fw + gap, y + len, 'tread');
+  s += text(x + w / 2, y + (top - y) / 2 + .05, 'Stepenište', 'tiny');
+  return s;
+}
+
+const plans = {
+  ground: {
+    W: 11.0, H: 9.0, hill: true,
+    rooms: [
+      [.30, .30, 3.80, 2.40], [4.30, .30, 1.95, 2.40], [8.95, .30, 1.75, 2.40],   // kotlovnica, ostava, WC
+      [.30, 2.90, 6.60, 5.80], [7.10, 2.90, 3.60, 2.15], [7.10, 5.25, 3.60, 3.45], // dnevni, predulaz, mesdžid
+    ],
+    walls: [[6.45, 2.90, 1.20, .80], [8.75, 2.90, .20, .60]],
+    extra: `<path class="kibla" d="M970 770L1035 835M1035 835L1035 805M1035 835L1005 835"/>`,
+    stairs: [6.65, .30, 2.10, 3.20],
+    glass: [[0, 3.70, .30, 1.20], [0, 6.00, .30, 2.70], [0, 8.70, 1.00, .30], [2.90, 8.70, 3.70, .30],
+            [8.10, 8.70, 1.80, .30], [10.70, 7.00, .30, 1.20]],                                // mesdžid: jug i istok
+    doors: [
+      { r: [0, 1.50, .30, .90], s: [[.30, 2.40, 1.20, 2.40, .30, 1.50]] },                    // kotlovnica vani
+      { r: [4.10, 1.75, .20, .80], s: [[4.10, 2.55, 3.30, 2.55, 4.10, 1.75]] },                // kotlovnica iz ostave
+      { r: [4.40, 2.70, .80, .20], s: [[5.20, 2.70, 5.20, 1.90, 4.40, 2.70]] },                // ostava
+      { r: [9.25, 2.70, .70, .20], s: [[9.95, 2.70, 9.95, 2.00, 9.25, 2.70]] },                // WC
+      { r: [6.90, 3.85, .20, 1.15], s: [] },                                                   // dnevni–predulaz
+      { r: [10.70, 3.30, .30, 1.40], s: [[11.00, 3.30, 11.70, 3.30, 11.00, 4.00], [11.00, 4.70, 11.70, 4.70, 11.00, 4.00]] }, // ulaz
+      { r: [7.55, 5.05, .85, .20], s: [[8.40, 5.25, 8.40, 6.10, 7.55, 5.25]] },                // mesdžid iz predulaza
+    ],
+    furn: [
+      [.30, 2.90, 3.95, .60], [.30, 3.50, .60, 2.00], [.90, 4.90, 1.70, .60],                  // kuhinja + poluotok
+      [1.20, 6.30, 1.00, 2.00],                                                                // sto
+      [.70, 6.45, .42, .42], [.70, 7.09, .42, .42], [.70, 7.73, .42, .42],
+      [2.28, 6.45, .42, .42], [2.28, 7.09, .42, .42], [2.28, 7.73, .42, .42],
+      [3.40, 6.30, .95, 2.30], [4.35, 6.30, 1.35, .90],                                        // garnitura
+      [5.00, 7.60, .90, .60], [6.50, 6.00, .40, 2.50],                                         // stolić, TV
+      [9.80, .30, .90, .90], [9.10, .30, .40, .65], [8.95, 1.45, .45, .55],                    // tuš, šolja, umivaonik
+      [8.70, 4.60, 1.60, .45],                                                                 // ormar
+      [7.10, 5.25, .30, 3.45], [8.70, 5.25, 1.50, .60],                                        // mesdžid: police, radni sto
+      [1.30, .35, 1.10, 1.00], [2.60, .35, .80, .90],                                          // pelet, kotao
+    ],
+    labels: [
+      [2.20, 1.75, 'Kotlovnica', '3,80 × 2,40', '9,1 m²'], [5.27, 1.30, 'Ostava', '1,95 × 2,40', '4,7 m²'],
+      [4.95, 4.30, 'Dnevni + kuhinja', '+ trpezarija', '37,9 m²'],
+      [9.30, 4.05, 'Predulaz', '6,5 m²'], [9.90, 6.25, 'Mesdžid', '+ radna soba', '12,4 m²'],
+    ],
+    tiny: [
+      [2.25, 3.20, 'kuhinja'], [1.75, 5.22, 'poluotok'], [1.70, 7.35, 'sto'], [3.87, 7.90, 'garnitura'],
+      [6.70, 5.90, 'TV'], [7.80, 6.45, 'police'], [9.45, 5.50, 'radni sto'], [10.22, 7.65, 'kibla'], [9.50, 4.88, 'ormar'],
+      [1.85, .90, 'pelet'], [3.00, .85, 'kotao'],
+      [10.25, .80, 'tuš'], [10.05, 1.65, 'WC + tuš'], [10.05, 1.87, '4,2 m²'],
+    ],
+    top: [[.30, 4.10, '3,80'], [4.30, 6.25, '1,95'], [6.65, 8.75, '2,10'], [8.95, 10.70, '1,75']],
+    bottom: [[.30, 6.90, '6,60'], [7.10, 10.70, '3,60']],
+  },
+
+  upper: {
+    W: 11.0, H: 9.0, hill: '▲ sjever – sprat je iznad terena: prozori i izlaz iz vešeraja',
+    rooms: [
+      [.30, .30, 4.20, 3.00], [.30, 3.30, 1.80, 1.30],                            // roditelji + proširenje prema terasi
+      [4.70, .30, 1.75, 3.00], [8.95, .30, 1.75, 3.00],                           // vešeraj, kupatilo
+      [2.30, 3.50, 8.40, 1.10],                                                   // hodnik
+      [2.30, 4.80, 4.10, 3.90], [6.60, 4.80, 4.10, 3.90],                         // dječaci, djevojčice
+    ],
+    terrace: [.10, 4.90, 1.90, 4.00],
+    walls: [],
+    stairs: [6.65, .30, 2.10, 3.20],
+    rail: [7.70, 3.50, 8.75, 3.50],
+    glass: [
+      [0, 1.20, .30, 1.40], [0, 3.65, .30, .60], [10.70, 2.10, .30, .60], [10.70, 3.70, .30, .70],
+      [3.35, 8.70, 2.00, .30], [7.65, 8.70, 2.00, .30],
+      [1.10, 0, 1.60, .30], [7.20, 0, 1.00, .30], [9.40, 0, .80, .30],                         // sjever: roditelji, stepenište, kupatilo
+    ],
+    doors: [
+      { r: [5.55, 0, .80, .30], s: [[6.35, .30, 6.35, 1.10, 5.55, .30]] },                     // izlaz iz vešeraja na sjever
+      { r: [3.50, 3.30, .80, .20], s: [[4.30, 3.30, 4.30, 2.50, 3.50, 3.30]] },                // roditelji
+      { r: [4.85, 3.30, .80, .20], s: [[4.85, 3.30, 4.85, 2.50, 5.65, 3.30]] },                // vešeraj
+      { r: [9.15, 3.30, .70, .20], s: [[9.15, 3.30, 9.15, 2.60, 9.85, 3.30]] },                // kupatilo
+      { r: [5.50, 4.60, .80, .20], s: [[6.30, 4.80, 6.30, 5.60, 5.50, 4.80]] },                // dječaci
+      { r: [6.70, 4.60, .80, .20], s: [[6.70, 4.80, 6.70, 5.60, 7.50, 4.80]] },                // djevojčice
+      { r: [.45, 4.60, .90, .30], s: [[.45, 4.90, .45, 5.80, 1.35, 4.90]] },                   // roditelji → terasa
+      { r: [2.00, 5.60, .30, .90], s: [[2.30, 5.60, 3.20, 5.60, 2.30, 6.50]] },                // dječaci → terasa
+    ],
+    furn: [
+      [1.00, .30, 1.80, 2.00], [.50, .30, .45, .45], [2.85, .30, .45, .45], [3.90, .30, .60, 2.10], [1.50, 3.40, .60, 1.15],   // roditelji + ormari
+      [5.85, 1.10, .60, .60], [5.85, 1.70, .60, .60], [4.70, .30, .60, .70], [4.70, 1.00, .45, .60],  // VM, SM, sudoper, police
+      [8.95, .30, 1.75, .75], [10.05, 1.35, .65, .40], [8.95, 1.35, .45, .55],                        // kada, šolja, umivaonik
+      [2.30, 6.70, .95, 2.00], [3.45, 8.10, 1.30, .60], [4.85, 8.10, 1.30, .60],                      // krevet na sprat, 2 stola
+      [2.30, 4.80, 1.50, .60], [3.85, 4.80, 1.50, .60],                                               // dječaci
+      [9.75, 6.70, .95, 2.00], [6.85, 8.10, 1.30, .60], [8.25, 8.10, 1.30, .60],                      // krevet na sprat, 2 stola
+      [7.65, 4.80, 1.45, .60], [9.15, 4.80, 1.55, .60],                                               // djevojčice
+      [.55, 6.80, .90, .90],                                                                          // sto na terasi
+    ],
+    labels: [
+      [2.05, 2.68, 'Roditelji', '14,9 m² s proširenjem'], [8.00, 3.95, 'Hodnik', '9,2 m²'],
+      [4.50, 6.40, 'Dječaci', '4,10 × 3,90', '16,0 m²'], [8.55, 6.40, 'Djevojčice', '4,10 × 3,90', '16,0 m²'],
+      [1.05, 8.15, 'Terasa', '≈ 8,2 m²'],
+    ],
+    tiny: [
+      [1.90, 1.40, 'krevet'], [4.20, 1.40, 'ormar'], [1.80, 4.05, 'ormar'], [1.50, 5.40, 'izlaz'], [1.50, 6.10, 'izlaz'],
+      [5.35, 1.85, 'vešeraj'], [5.35, 2.07, '5,3 m²'], [6.15, 1.45, 'VM'], [6.15, 2.05, 'SM'], [5.85, .75, 'izlaz'],
+      [9.82, .72, 'kada'], [9.82, 2.40, 'kupatilo'], [9.82, 2.62, '5,3 m²'],
+      [3.05, 5.15, 'ormar'], [4.60, 5.15, 'ormar'], [8.37, 5.15, 'ormar'], [9.92, 5.15, 'ormar'],
+      [4.10, 8.45, 'sto'], [5.50, 8.45, 'sto'], [7.50, 8.45, 'sto'], [8.90, 8.45, 'sto'],
+      [2.77, 7.65, 'krevet'], [2.77, 7.87, 'na sprat'], [10.22, 7.65, 'krevet'], [10.22, 7.87, 'na sprat'],
+      [8.22, 3.42, 'ograda'],
+    ],
+    top: [[.30, 4.50, '4,20'], [4.70, 6.45, '1,75'], [6.65, 8.75, '2,10'], [8.95, 10.70, '1,75']],
+    bottom: [[0, 2.00, '2,00'], [2.30, 6.40, '4,10'], [6.60, 10.70, '4,10']],
+  },
+};
+
+function render(p) {
+  let s = '';
+  s += rect(0, 0, p.W, p.H, 'wall');
+  p.rooms.forEach(r => s += rect(...r, 'room'));
+  if (p.terrace) s += rect(...p.terrace, 'terrace');
+  p.walls.forEach(w => s += rect(...w, 'wall'));
+  s += stairs(...p.stairs);
+  if (p.rail) s += line(...p.rail, 'swing');
+  p.glass.forEach(g => s += rect(...g, 'glass'));
+  p.doors.forEach(d => { s += rect(...d.r, 'open'); d.s.forEach(a => s += swing(a)); });
+  p.furn.forEach(f => s += rect(...f, 'furn') + fdim(f));
+  if (p.extra) s += p.extra;
+  p.labels.forEach(l => s += label(...l));
+  p.tiny.forEach(t => s += text(...t, 'tiny'));
+  [...p.rooms, p.stairs, ...(p.terrace ? [p.terrace] : [])].forEach(r => s += wdims(r));
+  p.top.forEach(([a, b, t]) => s += hdim(a, b, -.45, t));
+  p.bottom.forEach(([a, b, t]) => s += hdim(a, b, p.H + 1.05, t));
+  if (p.hill) s += text(p.W / 2, -1.0, p.hill === true ? '▲ brdo – ukopani zid, bez prozora' : p.hill, 'hill');
+  s += hdim(0, p.W, p.H + 1.6, fmt(p.W) + ' m') + vdim(0, p.H, -.55, fmt(p.H) + ' m');
+  document.getElementById('svg').innerHTML = s;
+}
+
+const btns = [...document.querySelectorAll('.toggle button')];
+function show(key) {
+  btns.forEach(b => b.setAttribute('aria-pressed', b.dataset.p === key));
+  render(plans[key]);
+}
+btns.forEach(b => b.onclick = () => show(b.dataset.p));
+show('ground');
+</script>
+</body>
+</html>
