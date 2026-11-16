@@ -142,28 +142,12 @@
     <tbody>
       <tr><td>Orijentacija</td><td>Sjever je gore na oba crteža.</td></tr>
       <tr><td>Gabarit</td><td class="num">11,00 × 9,00 m, vanjske mjere, ista kontura na obje etaže.</td></tr>
+      <tr><td>Debljina zidova</td><td>Vanjski zidovi i zidovi prema terasi 30 cm; svi pregradni zidovi 20 cm; ograda terase 10 cm.</td></tr>
       <tr><td>Mjere prostorija</td><td>U metrima, svijetle mjere od zida do zida (bez maltera i obloga). Ispisane su uz sva četiri zida svake prostorije.</td></tr>
       <tr><td>Mjere iznad i ispod crteža</td><td>Svijetle širine prostorija u sjevernom i južnom nizu; ukupna mjera je vanjski gabarit.</td></tr>
       <tr><td>Mjere namještaja</td><td>U centimetrima, širina × dubina.</td></tr>
       <tr><td>Površine</td><td>Neto podne površine, izračunate iz svijetlih mjera.</td></tr>
-      <tr><td>Vrata</td><td>Sobna 80 cm, WC i kupatilo 70 cm, mesdžid 85 cm, vrata na terasu i kotlovnica vani 90 cm, ulazna dvokrilna 140 cm.</td></tr>
-    </tbody>
-  </table>
-  </div>
-
-  <h2>Zadato i otvoreno</h2>
-  <div class="tablewrap">
-  <table>
-    <thead><tr><th>Tema</th><th>Zadato</th><th>Ostaje projektantu</th></tr></thead>
-    <tbody>
-      <tr><td>Teren</td><td>Kuća je u padini. Prizemlje je ukopano sa sjeverne strane, pa sjeverni zid prizemlja nema otvora. Sprat je iznad terena i ima prozore i izlaz na sjever.</td><td>Kote terena, dubina ukopavanja bočnih zidova, hidroizolacija i drenaža.</td></tr>
-      <tr><td>Korisnici</td><td>Šest članova: roditelji i četvero djece (dvije sobe po dvoje).</td><td></td></tr>
-      <tr><td>Zidovi</td><td>Debljine na crtežu su radne: 30 cm vanjski, 20 cm pregradni.</td><td>Stvarna debljina s termoizolacijom, materijal, koji su zidovi nosivi.</td></tr>
-      <tr><td>Visine</td><td>Stepenište je računato za spratnu visinu oko 2,90 m (17 visina po 17 cm).</td><td>Svijetle visine etaža, parapeti i visine otvora.</td></tr>
-      <tr><td>Grijanje</td><td>Kotao na pelet u kotlovnici, s vanjskim vratima na zapadu za dopremu.</td><td>Dimnjak, dovod zraka, razvod.</td></tr>
-      <tr><td>Instalacije</td><td>Kupatilo na spratu je tačno iznad WC-a u prizemlju. WC u prizemlju nema prozor.</td><td>Vertikale, ventilacija WC-a, odvod vešeraja.</td></tr>
-      <tr><td>Mesdžid</td><td>Služi i kao radna soba i biblioteka, samo za porodicu; slobodan pod prema jugoistoku.</td><td>Tačan ugao kible na parceli.</td></tr>
-      <tr><td>Krov i fasada</td><td>Nije zadato.</td><td>Oblik krova, materijali, izgled.</td></tr>
+      <tr><td>Vrata i prolazi</td><td>Svijetla širina otvora u centimetrima, ispisana u samom otvoru na crtežu.</td></tr>
     </tbody>
   </table>
   </div>
@@ -206,6 +190,11 @@ function fdim([x, y, w, h]) {
   if (w < .55 && h > w)
     return `<text class="fd" transform="translate(${(x + w - .04)*U} ${(y + h / 2)*U}) rotate(-90)">${t}</text>`;
   return text(x + w / 2, y + h - .04, t, 'fd');
+}
+// širina vrata ili prolaza u cm, ispisana u samom otvoru
+function ddim([x, y, w, h]) {
+  if (w >= h) return text(x + w / 2, y + h / 2 + .035, Math.round(w * 100), 'fd');
+  return `<text class="fd" transform="translate(${(x + w / 2 + .035)*U} ${(y + h / 2)*U}) rotate(-90)">${Math.round(h * 100)}</text>`;
 }
 function stairs(x, y, w, len) {
   let s = rect(x, y, w, len, 'stairs');
@@ -332,7 +321,7 @@ function render(p) {
   s += stairs(...p.stairs);
   if (p.rail) s += line(...p.rail, 'swing');
   p.glass.forEach(g => s += rect(...g, 'glass'));
-  p.doors.forEach(d => { s += rect(...d.r, 'open'); d.s.forEach(a => s += swing(a)); });
+  p.doors.forEach(d => { s += rect(...d.r, 'open'); d.s.forEach(a => s += swing(a)); s += ddim(d.r); });
   p.furn.forEach(f => s += rect(...f, 'furn') + fdim(f));
   if (p.extra) s += p.extra;
   p.labels.forEach(l => s += label(...l));
