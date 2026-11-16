@@ -27,7 +27,10 @@
   .toggle button { font: inherit; padding: 8px 14px; border: 0; background: var(--card); color: var(--ink); cursor: pointer; }
   .toggle button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
   .legend { display: flex; flex-wrap: wrap; gap: 14px; color: var(--muted); font-size: .875rem; }
-  .legend svg.lg { width: 14px; height: 14px; vertical-align: -2px; margin-right: 5px; color: var(--ink); }
+  .legend { align-items: center; }
+  .legend span { display: inline-flex; align-items: center; }
+  .legend svg.lg { display: inline-block; flex: none; width: 14px; height: 14px; margin-right: 5px; color: var(--ink); }
+  .legend i { flex: none; }
   .legend i { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 5px; }
   .plan { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 8px; }
   svg { display: block; width: 100%; height: auto; }
