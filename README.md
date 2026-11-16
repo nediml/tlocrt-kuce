@@ -1,3 +1,6 @@
 # Tlocrt kuće
 
-Tlocrt prizemlja i sprata, 11,00 × 9,00 m. Otvori `index.html` u pregledniku.
+Tlocrt prizemlja i sprata.
+
+- Trenutna verzija (11,00 × 9,00 m): https://nediml.github.io/tlocrt-kuce/
+- Sve verzije: https://nediml.github.io/tlocrt-kuce/verzije/
