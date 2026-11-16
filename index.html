@@ -84,7 +84,7 @@
 <body>
 <main>
   <h1>Tlocrt kuće – Su + P, 11,00 × 9,00 m</h1>
-  <p class="lead">Su + P, gabarit 11,00 × 9,00 m. Sjeverni zid suterena je u brdu, pa su uz njega samo prostorije kojima ne treba prozor. Prizemlje je iznad terena i ima prozore i izlaz na sjever.</p>
+  <p class="lead">Su + P, gabarit 11,00 × 9,00 m <span id="area"></span>. Sjeverni zid suterena je u brdu, pa su uz njega samo prostorije kojima ne treba prozor. Prizemlje je iznad terena i ima prozore i izlaz na sjever.</p>
 
   <div class="bar">
     <div class="toggle" role="group" aria-label="Tlocrt">
@@ -373,6 +373,7 @@ const SITE = (() => {
 const btns = [...document.querySelectorAll('.toggle button')];
 function show(key) {
   btns.forEach(b => b.setAttribute('aria-pressed', b.dataset.p === key));
+  document.getElementById('area').textContent = { ground: '(suteren: bruto 99 m², neto 82 m²)', upper: '(prizemlje: bruto 99 m², neto 73 m²)', site: '(ukupno: bruto 198 m², neto 155 m²)' }[key];
   const svg = document.getElementById('svg');
   if (key === 'site') { svg.setAttribute('viewBox', '95 10 1100 1220'); svg.innerHTML = SITE; return; }
   svg.setAttribute('viewBox', '-110 -150 1330 1250');
