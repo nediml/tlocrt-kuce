@@ -93,7 +93,7 @@
     <tbody>
       <tr><td>Dnevni + kuhinja + trpezarija</td><td class="num">37,9 m²</td><td>6,60 × 5,80 m (bilo 5,60 m dubine): kuhinja u obliku slova U s poluotokom, sto za 8 uz ugaono staklo, garnitura prema TV-u.</td></tr>
       <tr><td>Kotlovnica (pelet)</td><td class="num">9,1 m²</td><td>3,80 × 2,40 m: kotao, spremnik peleta i mjesto za paletu vreća. Ulaz iz ostave i vanjska vrata na zapadu.</td></tr>
-      <tr><td>Ostava</td><td class="num">4,7 m²</td><td>1,95 × 2,40 m, vrata odmah do kuhinje; kroz nju se ulazi u kotlovnicu, pa su police uz sjeverni i istočni zid.</td></tr>
+      <tr><td>Ostava</td><td class="num">5,2 m²</td><td>2,15 × 2,40 m, vrata odmah do kuhinje; kroz nju se ulazi u kotlovnicu, pa su police uz sjeverni i istočni zid.</td></tr>
       <tr><td>WC s tuš-kabinom</td><td class="num">4,2 m²</td><td>1,75 × 2,40 m: šolja, umivaonik, tuš 90 × 90. Bez prozora: ventilacija kanalom.</td></tr>
       <tr><td>Stepenište</td><td class="num">6,7 m²</td><td>2,10 × 3,20 m, dvokrako, krak 1,00 m, 2 × 8 gazišta od 27 cm. Ulaz iz predulaza.</td></tr>
       <tr><td>Predulaz</td><td class="num">6,5 m²</td><td>Ormar na južnom zidu; vrata za WC, stepenište, mesdžid i dnevni.</td></tr>
@@ -127,7 +127,6 @@
     <li><strong>Zapadni zid:</strong> prozor iznad kuhinjske ploče crtan je uz pretpostavku da je teren tu ispod parapeta.</li>
     <li><strong>Mesdžid:</strong> vanjska vrata na jugu su zamijenjena prozorom. Sto i police su iza i sa strane onih koji klanjaju, jer je kibla prema jugoistočnom uglu; tačan ugao treba provjeriti kompasom na parceli.</li>
     <li><strong>Kotlovnica:</strong> treba dimnjak i dovod zraka za sagorijevanje.</li>
-    <li><strong>Instalacijski kanal:</strong> zid između ostave i stepeništa u prizemlju je 40 cm umjesto 20 cm, jer je stepenište pomjereno 20 cm na istok da soba roditelja iznad dobije širinu. Tih 20 cm služi za vertikale ventilacije i odvoda.</li>
     <li><strong>Zidovi</strong> su crtani 30 cm (vanjski i prema terasi) i 20 cm (svi pregradni); mjere u prostorijama su svijetle mjere.</li>
   </ul>
 </main>
@@ -186,7 +185,7 @@ const plans = {
   ground: {
     W: 11.0, H: 9.0, hill: true,
     rooms: [
-      [.30, .30, 3.80, 2.40], [4.30, .30, 1.95, 2.40], [8.95, .30, 1.75, 2.40],   // kotlovnica, ostava, WC
+      [.30, .30, 3.80, 2.40], [4.30, .30, 2.15, 2.40], [8.95, .30, 1.75, 2.40],   // kotlovnica, ostava, WC
       [.30, 2.90, 6.60, 5.80], [7.10, 2.90, 3.60, 2.15], [7.10, 5.25, 3.60, 3.45], // dnevni, predulaz, mesdžid
     ],
     walls: [[6.45, 2.90, 1.20, .80], [8.75, 2.90, .20, .60]],
@@ -216,7 +215,7 @@ const plans = {
       [1.30, .35, 1.10, 1.00], [2.60, .35, .80, .90],                                          // pelet, kotao
     ],
     labels: [
-      [2.20, 1.75, 'Kotlovnica', '3,80 × 2,40', '9,1 m²'], [5.27, 1.30, 'Ostava', '1,95 × 2,40', '4,7 m²'],
+      [2.20, 1.75, 'Kotlovnica', '3,80 × 2,40', '9,1 m²'], [5.37, 1.30, 'Ostava', '2,15 × 2,40', '5,2 m²'],
       [4.95, 4.30, 'Dnevni + kuhinja', '+ trpezarija', '37,9 m²'],
       [9.30, 4.05, 'Predulaz', '6,5 m²'], [9.90, 6.25, 'Mesdžid', '+ radna soba', '12,4 m²'],
     ],
@@ -226,7 +225,7 @@ const plans = {
       [1.85, .90, 'pelet'], [3.00, .85, 'kotao'],
       [10.25, .80, 'tuš'], [10.05, 1.65, 'WC + tuš'], [10.05, 1.87, '4,2 m²'],
     ],
-    top: [[.30, 4.10, '3,80'], [4.30, 6.25, '1,95'], [6.65, 8.75, '2,10'], [8.95, 10.70, '1,75']],
+    top: [[.30, 4.10, '3,80'], [4.30, 6.45, '2,15'], [6.65, 8.75, '2,10'], [8.95, 10.70, '1,75']],
     bottom: [[.30, 6.90, '6,60'], [7.10, 10.70, '3,60']],
   },
 
