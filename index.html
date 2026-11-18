@@ -23,9 +23,7 @@
   .stat b { display: block; font-size: 1.25rem; font-variant-numeric: tabular-nums; }
   .stat span { color: var(--muted); font-size: .85rem; }
   .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px; }
-  .toggle { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-  .toggle button { font: inherit; padding: 8px 14px; border: 0; background: var(--card); color: var(--ink); cursor: pointer; }
-  .toggle button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+  h2 small { font-weight: 400; color: var(--muted); font-size: .9rem; margin-left: 6px; }
   .legend { display: flex; flex-wrap: wrap; gap: 14px; color: var(--muted); font-size: .875rem; }
   .legend { align-items: center; }
   .legend span { display: inline-flex; align-items: center; }
@@ -84,14 +82,13 @@
 <body>
 <main>
   <h1>Tlocrt kuće – Su + P, 11,00 × 9,00 m</h1>
-  <p class="lead">Su + P, gabarit 11,00 × 9,00 m <span id="area"></span>. Sjeverni zid suterena je u brdu, pa su uz njega samo prostorije kojima ne treba prozor. Prizemlje je iznad terena i ima prozore i izlaz na sjever.</p>
+  <p class="lead">Su + P, gabarit 11,00 × 9,00 m (ukupno: bruto 198 m², neto 155 m²). Sjeverni zid suterena je u brdu, pa su uz njega samo prostorije kojima ne treba prozor. Prizemlje je iznad terena i ima prozore i izlaz na sjever.</p>
 
+  <h2>Pozicija na parceli</h2>
+  <div class="plan"><svg id="svg-site" viewBox="95 10 1100 1220" role="img" aria-label="Pozicija kuće na parceli"></svg></div>
+
+  <h2>Suteren <small>bruto 99 m², neto 82 m²</small></h2>
   <div class="bar">
-    <div class="toggle" role="group" aria-label="Tlocrt">
-      <button data-p="ground" aria-pressed="true">Suteren</button>
-      <button data-p="upper" aria-pressed="false">Prizemlje</button>
-      <button data-p="site" aria-pressed="false">Pozicija</button>
-    </div>
     <div class="legend">
       <span><i style="background:var(--wall)"></i>zid (vanjski 30 cm, pregradni 20 cm)</span>
       <span><i style="background:var(--glass)"></i>prozor / staklo</span>
@@ -102,7 +99,10 @@
     </div>
   </div>
 
-  <div class="plan"><svg id="svg" viewBox="-110 -150 1330 1250" role="img" aria-label="Tlocrt"></svg></div>
+  <div class="plan"><svg id="svg-ground" viewBox="-110 -150 1330 1250" role="img" aria-label="Tlocrt suterena"></svg></div>
+
+  <h2>Prizemlje <small>bruto 99 m², neto 73 m²</small></h2>
+  <div class="plan"><svg id="svg-upper" viewBox="-110 -150 1330 1250" role="img" aria-label="Tlocrt prizemlja"></svg></div>
 </main>
 
 <script>
@@ -298,7 +298,7 @@ function render(p) {
   p.bottom.forEach(([a, b, t]) => s += hdim(a, b, p.H + 1.05, t));
   if (p.hill) s += text(p.W / 2, -1.0, p.hill === true ? '▲ brdo – ukopani zid, bez prozora' : p.hill, 'hill');
   s += hdim(0, p.W, p.H + 1.6, fmt(p.W) + ' m') + vdim(0, p.H, -.55, fmt(p.H) + ' m');
-  document.getElementById('svg').innerHTML = s;
+  return s;
 }
 
 
@@ -370,17 +370,9 @@ const SITE = (() => {
   return s;
 })();
 
-const btns = [...document.querySelectorAll('.toggle button')];
-function show(key) {
-  btns.forEach(b => b.setAttribute('aria-pressed', b.dataset.p === key));
-  document.getElementById('area').textContent = { ground: '(suteren: bruto 99 m², neto 82 m²)', upper: '(prizemlje: bruto 99 m², neto 73 m²)', site: '(ukupno: bruto 198 m², neto 155 m²)' }[key];
-  const svg = document.getElementById('svg');
-  if (key === 'site') { svg.setAttribute('viewBox', '95 10 1100 1220'); svg.innerHTML = SITE; return; }
-  svg.setAttribute('viewBox', '-110 -150 1330 1250');
-  render(plans[key]);
-}
-btns.forEach(b => b.onclick = () => show(b.dataset.p));
-show('ground');
+document.getElementById('svg-site').innerHTML = SITE;
+document.getElementById('svg-ground').innerHTML = render(plans.ground);
+document.getElementById('svg-upper').innerHTML = render(plans.upper);
 </script>
 </body>
 </html>
