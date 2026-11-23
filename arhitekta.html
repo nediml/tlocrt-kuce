@@ -241,15 +241,15 @@ const plans = {
     ],
     skipDims: [0, 3, 4, 6],
     xdims: [
-      [.85, .57, '4,50'], [2.55, 2.73, '4,50'], [.47, 1.60, '2,40', 1], [4.74, 1.60, '2,40', 1],          // kotlovnica (gornja kota lijevo od dimnjaka)
+      [2.55, .57, '4,50'], [1.55, 2.73, '4,50'], [.47, 1.60, '2,40', 1], [4.74, .75, '2,40', 1],          // kotlovnica
       [3.32, 3.17, '6,05'], [.47, 5.85, '5,70', 1], [3.12, 8.63, '7,20'], [6.92, 3.97, '1,15'], [7.44, 8.30, '4,90', 1],   // dnevni
       [10.25, 3.17, '1,85'], [9.02, 3.63, '0,80', 1], [8.27, 3.97, '1,15'],                             // ulazni hol
       [9.20, 5.08, '3,00'], [10.64, 3.35, '2,15', 1],
     ],
     extra: `<path class="kibla" d="M970 770L1035 835M1035 835L1035 805M1035 835L1005 835"/>`
-      + `<rect x="250" y="40" width="60" height="30" class="col"/><rect x="256" y="45" width="10" height="20" class="col"/><circle cx="290" cy="55" r="9" class="col"/>`
       + kota(.75, 1.35) + kota(8.50, 8.25),
     stairs: [6.55, .40, 2.10, 3.40, '7,14 m²'],
+    chim: [[4.10, 2.40, .70, .40]],                                               // dvokanalni dimnjak: kotao + šporet
     glass: [
       [0, 5.35, .30, 3.35],                                                        // zapad, dnevni
       [.30, 8.70, 1.60, .30], [3.10, 8.70, 1.60, .30],                             // jug, dnevni
@@ -257,7 +257,7 @@ const plans = {
     ],
     doors: [
       { r: [0, 1.95, .30, .80], s: [[.30, 2.75, 1.10, 2.75, .30, 1.95]] },                    // kotlovnica vani
-      { r: [4.80, 1.95, .20, .80], s: [[4.80, 2.75, 4.00, 2.75, 4.80, 1.95]] },                // kotlovnica – ostava
+      { r: [4.80, 1.20, .20, .80], s: [[4.80, 1.20, 4.00, 1.20, 4.80, 2.00]] },                // kotlovnica – ostava
       { r: [5.10, 2.80, .80, .20], s: [[5.90, 3.00, 5.90, 3.80, 5.10, 3.00]] },                // ostava – dnevni
       { r: [9.90, 2.80, .70, .20], s: [[10.60, 2.80, 10.60, 2.10, 9.90, 2.80]] },              // kupatilo 1
       { r: [7.50, 3.80, .20, .90], s: [[7.50, 3.80, 6.60, 3.80, 7.50, 4.70]] },                                                   // dnevni – hol
@@ -276,13 +276,14 @@ const plans = {
       [9.80, .40, .90, .90], [9.00, .40, .40, .65], [8.85, 1.55, .45, .55],                    // tuš, šolja, umivaonik
       [8.85, 3.00, .90, .45],                                                                 // ormar
       [7.70, 6.25, .30, 2.45], [8.90, 5.35, 1.80, .60],                                        // mesdžid: police, radni sto
-      [1.40, .45, 1.00, 1.00], [3.20, .45, .80, .90],                                          // pelet, kotao
+      [2.05, 1.75, 1.00, 1.00], [3.20, 1.85, .80, .90],                                        // pelet, kotao (uz južni zid, kotao do dimnjaka)
+      [4.30, 3.00, .60, .60],                                                                  // šporet na drva
     ],
-    fh: [.9, .9, .9,  .75, .45, .45, .45, .45, .45, .45,  .7, .7, .7,  .4, .5,  .1, .4, .85,  2.1,  2.0, .75,  1.5, 1.4],
+    fh: [.9, .9, .9,  .75, .45, .45, .45, .45, .45, .45,  .7, .7, .7,  .4, .5,  .1, .4, .85,  2.1,  2.0, .75,  1.5, 1.4,  .85],
     fk: ['kitchen:S', 'counter:E', 'counter:S', 'table', 'chair:E', 'chair:E', 'chair:W', 'chair:W', 'chair:S', 'chair:N',
-         'couch:E', 'armchair:S', 'armchair:S', 'coffee', 'tv:W', 'shower:NE', 'wc:S', 'vanity:E', 'wardrobe:S', 'shelf:E', 'desk:S', 'pellet:S', 'boiler:S'],
+         'couch:E', 'armchair:S', 'armchair:S', 'coffee', 'tv:W', 'shower:NE', 'wc:S', 'vanity:E', 'wardrobe:S', 'shelf:E', 'desk:S', 'pellet:N', 'boiler:N', 'cooker:S'],
     labels: [
-      [2.40, 1.90, 'Kotlovnica', '4,50 × 2,40', '10,60 m²'], [5.77, 1.40, 'Ostava', '1,55 × 2,40', '3,72 m²'],
+      [2.55, 1.00, 'Kotlovnica', '4,50 × 2,40', '10,52 m²'], [5.77, 1.40, 'Ostava', '1,55 × 2,40', '3,72 m²'],
       [4.40, 4.10, 'Dnevni boravak', 's kuhinjom i trpezarijom', '40,12 m²'],
       [8.75, 4.35, 'Ulazni hol', '5,53 m²'], [9.30, 6.85, 'Mesdžid', '+ radna soba', '10,05 m²'],
     ],
@@ -290,7 +291,7 @@ const plans = {
       [2.25, 3.30, 'kuhinja'], [5.50, 9.40, 'izlaz'], [8.90, 9.40, 'izlaz'], [1.75, 4.98, 'poluotok'], [1.70, 7.10, 'sto'], [4.02, 6.60, 'trosjed'], [5.00, 5.82, 'fotelja'], [5.90, 5.82, 'fotelja'],
       [7.30, 6.70, 'TV'], [8.35, 7.60, 'police'], [9.80, 5.62, 'radni sto'], [10.22, 7.65, 'kibla'], [9.30, 3.28, 'ormar'],
       [7.02, 2.35, 'ostava ispod'], [7.02, 2.55, 'stepeništa'],
-      [1.90, 1.00, 'pelet'], [3.60, .95, 'kotao'], [2.80, .88, 'dimnjak'], [11.28, 3.58, 'ulaz'],
+      [2.55, 2.20, 'pelet'], [3.60, 2.25, 'kotao'], [4.45, 2.33, 'dimnjak'], [4.60, 3.28, 'šporet'], [11.28, 3.58, 'ulaz'],
       [10.25, .90, 'tuš'], [10.05, 1.75, 'Kupatilo 1'], [10.05, 1.97, '4,44 m²'],
     ],
     top: [[.30, 4.80, '4,50'], [5.00, 6.55, '1,55'], [6.55, 8.65, '2,10'], [8.85, 10.70, '1,85']],
@@ -312,10 +313,11 @@ const plans = {
     walls: [[6.35, 3.50, .20, .30], [8.65, 3.50, .20, .30]],
     skipDims: [0, 1],
     xdims: [
-      [2.40, .47, '4,20'], [4.44, 1.80, '3,00', 1], [3.00, 3.23, '2,40'], [.47, 2.45, '4,30', 1],      // roditelji
+      [2.40, .47, '4,20'], [4.44, 1.80, '3,00', 1], [2.75, 3.23, '2,40'], [.47, 2.45, '4,30', 1],      // roditelji
       [1.20, 4.53, '1,80'], [2.04, 3.95, '1,30', 1],
     ],
     stairs: [6.55, .30, 2.10, 3.50, '7,35 m²'],
+    chim: [[4.10, 2.40, .70, .40]],
     rail: [7.70, 3.80, 8.65, 3.80],
     glass: [
       [0, 1.20, .30, 1.40], [0, 3.65, .30, .60], [10.70, 2.10, .30, .60], [10.70, 3.70, .30, .70],
@@ -324,7 +326,7 @@ const plans = {
     ],
     doors: [
       { r: [5.45, 0, .80, .30], s: [[6.25, .30, 6.25, 1.10, 5.45, .30]] },                     // izlaz iz vešeraja na sjever
-      { r: [3.50, 3.30, .80, .20], s: [[4.30, 3.30, 4.30, 2.50, 3.50, 3.30]] },                // roditelji
+      { r: [3.40, 3.30, .80, .20], s: [[3.40, 3.30, 3.40, 2.50, 4.20, 3.30]] },                // roditelji
       { r: [5.45, 3.30, .80, .20], s: [[6.25, 3.30, 6.25, 2.50, 5.45, 3.30]] },                // vešeraj
       { r: [9.15, 3.30, .70, .20], s: [[9.15, 3.30, 9.15, 2.60, 9.85, 3.30]] },                // kupatilo
       { r: [5.50, 4.90, .80, .20], s: [[6.30, 5.10, 6.30, 5.90, 5.50, 5.10]] },                // dječaci
@@ -334,7 +336,7 @@ const plans = {
     ],
     furn: [
       [1.00, .30, 1.80, 2.00], [.50, .30, .45, .45], [2.85, .30, .45, .45], [3.90, .30, .60, 2.10], [1.50, 3.40, .60, 1.15],   // roditelji + ormari
-      [4.70, 1.60, .60, .60], [4.70, 2.20, .60, .60], [4.70, .30, .60, .70], [4.70, 1.00, .45, .60],  // VM, SM, sudoper, police
+      [4.70, 1.60, .60, .60], [4.80, 2.20, .60, .60], [4.70, .30, .60, .70], [4.70, 1.00, .45, .60],  // VM, SM, sudoper, police
       [8.85, .30, 1.80, .75], [10.05, 1.35, .65, .40], [8.85, 1.35, .45, .55],                        // kada, šolja, umivaonik
       [2.30, 6.70, .95, 2.00], [3.45, 8.10, 1.30, .60], [4.85, 8.10, 1.30, .60],                      // krevet na sprat, 2 stola
       [2.30, 5.10, 1.50, .60], [3.85, 5.10, 1.50, .60],                                               // dječaci
@@ -346,18 +348,18 @@ const plans = {
     fk: ['bed:S', 'night:S', 'night:S', 'wardrobe:W', 'wardrobe:W', 'washer:E', 'washer:E', 'sinkcab:E', 'shelf:E', 'tub:S', 'wc:W', 'vanity:E',
          'bunk:E', 'desk:N', 'desk:N', 'wardrobe:S', 'wardrobe:S', 'bunk:W:f', 'desk:N', 'desk:N', 'wardrobe:S', 'wardrobe:S', 'table'],
     labels: [
-      [2.05, 2.68, 'Roditelji', '14,9 m² s proširenjem'], [4.30, 4.25, 'Hodnik', '11,0 m²'],
+      [2.05, 2.68, 'Roditelji', '14,7 m² s proširenjem'], [4.30, 4.25, 'Hodnik', '11,0 m²'],
       [4.50, 6.60, 'Dječaci', '4,10 × 3,60', '14,8 m²'], [8.55, 6.60, 'Djevojčice', '4,10 × 3,60', '14,8 m²'],
       [1.05, 8.15, 'Terasa', '7,6 m²'],
     ],
     tiny: [
       [1.90, 1.40, 'krevet'], [4.20, 1.40, 'ormar'], [1.80, 4.05, 'ormar'], [1.50, 5.40, 'izlaz'], [1.50, 6.40, 'izlaz'],
-      [5.85, 1.75, 'vešeraj'], [5.85, 1.97, '5,0 m²'], [5.00, 1.95, 'VM'], [5.00, 2.55, 'SM'], [5.85, .75, 'izlaz'],
+      [5.85, 1.75, 'vešeraj'], [5.85, 1.97, '4,9 m²'], [5.00, 1.95, 'VM'], [5.10, 2.55, 'SM'], [5.85, .75, 'izlaz'],
       [9.82, .72, 'kada'], [9.82, 2.40, 'kupatilo'], [9.82, 2.62, '5,6 m²'],
       [3.05, 5.45, 'ormar'], [4.60, 5.45, 'ormar'], [8.37, 5.45, 'ormar'], [9.92, 5.45, 'ormar'],
       [4.10, 8.45, 'sto'], [5.50, 8.45, 'sto'], [7.50, 8.45, 'sto'], [8.90, 8.45, 'sto'],
       [2.77, 7.65, 'krevet'], [2.77, 7.87, 'na sprat'], [10.22, 7.65, 'krevet'], [10.22, 7.87, 'na sprat'],
-      [8.18, 4.02, 'ograda'],
+      [8.18, 4.02, 'ograda'], [3.55, 2.36, 'dimnjak'],
     ],
     top: [[.30, 4.50, '4,20'], [4.70, 6.35, '1,65'], [6.55, 8.65, '2,10'], [8.85, 10.70, '1,85']],
     bottom: [[0, 2.00, '2,00'], [2.30, 6.40, '4,10'], [6.60, 10.70, '4,10']],
@@ -381,6 +383,10 @@ function render(p) {
   (p.beams || []).forEach(b => s += line(...b, 'beam'));
   (p.hiwall || []).forEach(w => s += rect(...w, 'beam'));
   (p.cols || []).forEach(c => s += col(...c));
+  (p.chim || []).forEach(([x, y, w, h]) => {                                    // dimnjak: po jedan krug za svaki kanal
+    s += rect(x, y, w, h, 'col');
+    (w > .5 ? [x + .2, x + w - .2] : [x + w / 2]).forEach(cx => s += `<circle cx="${cx * U}" cy="${(y + h / 2) * U}" r="9" class="col"/>`);
+  });
   if (p.extra) s += p.extra;
   p.labels.forEach(l => s += label(...l));
   p.tiny.forEach(t => s += text(...t, 'tiny'));
@@ -517,12 +523,12 @@ function view3d(P, id, opt) {
     };
     const tbl = (ht, c, t) => { b(0, w, ht - .04, ht, 0, d, c); legs(.04, w - .04, .04, d - .04, ht - .04, t, c); };
     switch (type) {
-      case 'kitchen': {                                                                         // niz: sudoper, ploča za kuhanje, frižider na kraju
-        const fu = w - .6; counter(0, fu);
-        b(fu, w, 0, 2, 0, d - .02, M.steel); hline(fu, w, 1.25, d - .02);
+      case 'kitchen': {                                                                         // niz: sudoper, ploča za kuhanje, frižider, element do šporeta
+        const fu = w - 1.2, fe = fu + .6; counter(0, fu); counter(fe, w);
+        b(fu, fe, 0, 2, 0, d - .02, M.steel); hline(fu, fe, 1.25, d - .02);
         b(fu + .05, fu + .07, .7, 1.15, d - .02, d + .01, M.steelD); b(fu + .05, fu + .07, 1.35, 1.75, d - .02, d + .01, M.steelD);
-        b(1.0, 1.8, .9, .908, .08, d - .08, M.steel); b(1.05, 1.5, .9, .916, .12, d - .12, M.steelD); tap(1.28, .9, .03, .2);
-        b(2.3, 2.9, .9, .91, .05, d - .05, M.black); for (const u of [2.4, 2.66]) for (const q of [.1, .32]) b(u, u + .15, .91, .918, q, q + .15, M.gap);
+        b(.7, 1.5, .9, .908, .08, d - .08, M.steel); b(.75, 1.2, .9, .916, .12, d - .12, M.steelD); tap(.98, .9, .03, .2);
+        b(1.75, 2.35, .9, .91, .05, d - .05, M.black); for (const u of [1.85, 2.11]) for (const q of [.1, .32]) b(u, u + .15, .91, .918, q, q + .15, M.gap);
         if (full) { b(0, fu, 1.45, 2.15, 0, .35, M.white); for (let u = .6; u < fu - .1; u += .6) vline(u, 1.45, 2.15, .35); }
         break; }
       case 'counter': counter(0, w); break;
@@ -612,6 +618,11 @@ function view3d(P, id, opt) {
         for (const u of [.06, .47]) U(u, u + .03, 0, 1.61, d, d + .03, M.wood);                      // ljestve
         for (const y of [.3, .6, .9, 1.2]) U(.09, .47, y, y + .03, d, d + .03, M.wood);
         break; }
+      case 'cooker':                                                                            // šporet na drva, cijev kroz zid u dimnjak
+        b(0, w, 0, .08, .03, d - .05, M.black); b(0, w, .08, .82, 0, d - .02, M.white); b(0, w, .82, .85, 0, d, M.black);
+        b(.06, w - .06, .2, .55, d - .02, d - .008, M.steelD); b(.06, w / 2, .6, .78, d - .02, d - .008, M.black);
+        b(.24, .36, .85, 1.6, .04, .16, M.steelD); b(.24, .36, 1.48, 1.6, -.3, .04, M.steelD);
+        break;
       case 'washer':
         b(0, w, 0, .85, 0, d - .02, M.white); b(w / 2 - .19, w / 2 + .19, .2, .58, d - .02, d - .008, M.steelD); b(w / 2 - .14, w / 2 + .14, .25, .53, d - .02, d, M.black);
         b(.03, w - .03, .7, .8, d - .02, d - .01, M.steel);
@@ -671,6 +682,7 @@ function view3d(P, id, opt) {
     box(v, sx + fw, sx + fw + sp, zb, opt.down ? Math.min(1, H) : H, top, sy + sl, C.wall, C.cut);   // zid između krakova
     if (P.rail) box(v, P.rail[0], P.rail[2], 0, Math.min(1, H), P.rail[1] - .03, P.rail[1] + .03, C.cut);
     (P.over || []).forEach(w => box(v, w[0], w[0] + w[2], 0, H, w[1], w[1] + w[3], C.wall, C.cut));    // zid ispod gornjeg kraka
+    (P.chim || []).forEach(([x, y, w, h]) => box(v, x - .004, x + w + .004, 0, H + .12, y - .004, y + h + .004, M.red, C.cut));   // dimnjak
     // zid samo iznad stepenica: od donje ivice podesta i kraka do stropa, ispod otvoreno
     if (!opt.down) (P.hiwall || []).forEach(([wx, wy, ww, wh]) => {
       const left = wx + ww / 2 < sx + sw / 2;
