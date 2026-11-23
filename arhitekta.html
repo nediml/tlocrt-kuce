@@ -278,6 +278,8 @@ const plans = {
       [1.40, .45, 1.00, 1.00], [3.20, .45, .80, .90],                                          // pelet, kotao
     ],
     fh: [.9, .9, .9,  .75, .45, .45, .45, .45, .45, .45,  .7, .7,  .4, .5,  .1, .4, .85,  2.1,  2.0, .75,  1.5, 1.4],
+    fk: ['kitchen:S', 'counter:E', 'counter:S', 'table', 'chair:E', 'chair:E', 'chair:W', 'chair:W', 'chair:S', 'chair:N',
+         'sofa:E', 'sofa2:S', 'coffee', 'tv:W', 'shower:NE', 'wc:S', 'vanity:E', 'wardrobe:S', 'shelf:E', 'desk:S', 'pellet:S', 'boiler:S'],
     labels: [
       [2.05, 1.90, 'Kotlovnica', '3,80 × 2,40', '8,92 m²'], [5.40, 1.40, 'Ostava', '2,25 × 2,40', '5,40 m²'],
       [4.40, 4.10, 'Dnevni boravak', 's kuhinjom i trpezarijom', '40,12 m²'],
@@ -340,6 +342,8 @@ const plans = {
       [.55, 6.80, .90, .90],                                                                          // sto na terasi
     ],
     fh: [.5, .5, .5, 2.1, 2.1,  .85, .85, .9, 1.8,  .55, .4, .85,  1.7, .75, .75,  2.1, 2.1,  1.7, .75, .75,  2.1, 2.1,  .75],
+    fk: ['bed:S', 'night:S', 'night:S', 'wardrobe:W', 'wardrobe:W', 'washer:E', 'washer:E', 'sinkcab:E', 'shelf:E', 'tub:S', 'wc:W', 'vanity:E',
+         'bunk:E', 'desk:N', 'desk:N', 'wardrobe:S', 'wardrobe:S', 'bunk:W:f', 'desk:N', 'desk:N', 'wardrobe:S', 'wardrobe:S', 'table'],
     labels: [
       [2.05, 2.68, 'Roditelji', '14,9 m² s proširenjem'], [4.30, 4.25, 'Hodnik', '11,0 m²'],
       [4.50, 6.60, 'Dječaci', '4,10 × 3,60', '14,8 m²'], [8.55, 6.60, 'Djevojčice', '4,10 × 3,60', '14,8 m²'],
@@ -486,6 +490,142 @@ function view3d(P, id, opt) {
     f([-1, 0, 0], c, [x0, y0, z0], [x0, y0, z1], [x0, y1, z1], [x0, y1, z0]);
   }
 
+  // ---------- namještaj: modeli složeni od kutija; u ide po širini, v od leđa (zid) prema frontu ----------
+  const M = { wood: hex('#b58d62'), woodD: hex('#8c6a49'), white: hex('#f3f1ec'), whiteD: hex('#d6d3cc'), top: hex('#55524e'), steel: hex('#b9bec3'),
+              steelD: hex('#8a9096'), black: hex('#26262a'), screen: hex('#3b4652'), fab: hex('#7f8d9b'), fabL: hex('#9eabb8'), mat: hex('#f2eee6'),
+              pil: hex('#ffffff'), duv: hex('#9fb6c9'), duv2: hex('#e3b9a4'), duv3: hex('#b5cfa8'), cer: hex('#fbfbf9'), gap: hex('#5a5148'),
+              red: hex('#b5533c'), grey: hex('#a3a6a8'), dgrey: hex('#6e7377'), mirror: hex('#cfe2ec') };
+  const PAL = [M.duv, M.duv2, M.duv3, M.whiteD, M.woodD, M.fab, M.red];
+  function furnish(v, g, f, kind, h) {
+    const [type, dir = 'S', flag] = kind.split(':'), [fx, fz, fw, fd] = f, ew = dir === 'E' || dir === 'W';
+    const w = ew ? fd : fw, d = ew ? fw : fd;
+    const b = (u0, u1, y0, y1, v0, v1, c, ct) => {
+      const [x0, x1] = dir === 'S' ? [fx + u0, fx + u1] : dir === 'N' ? [fx + fw - u1, fx + fw - u0] : dir === 'E' ? [fx + v0, fx + v1] : [fx + fw - v1, fx + fw - v0];
+      const [z0, z1] = dir === 'S' ? [fz + v0, fz + v1] : dir === 'N' ? [fz + fd - v1, fz + fd - v0] : dir === 'E' ? [fz + u0, fz + u1] : [fz + fd - u1, fz + fd - u0];
+      box(v, x0, x1, y0, y1, z0, z1, c, ct);
+    };
+    const vline = (u, y0, y1, vf) => b(u - .004, u + .004, y0, y1, vf, vf + .01, M.gap);          // fuga između fronti
+    const hline = (u0, u1, y, vf) => b(u0, u1, y - .004, y + .004, vf, vf + .01, M.gap);
+    const legs = (u0, u1, v0, v1, y1, t, c) => { for (const u of [u0, u1 - t]) for (const q of [v0, v1 - t]) b(u, u + t, 0, y1, q, q + t, c); };
+    const tap = (u, y, vb, reach) => { b(u - .015, u + .015, y, y + .22, vb, vb + .03, M.steel); b(u - .015, u + .015, y + .19, y + .22, vb, vb + reach, M.steel); };
+    const counter = (u0, u1) => {                                                               // donji kuhinjski elementi s radnom pločom
+      b(u0, u1, 0, .1, 0, d - .06, M.black); b(u0, u1, .1, .86, 0, d - .02, M.white);
+      const n = Math.max(1, Math.round((u1 - u0) / .6)), cw = (u1 - u0) / n;
+      for (let k = 0; k < n; k++) { const a = u0 + k * cw; if (k) vline(a, .1, .86, d - .02); b(a + cw / 2 - .07, a + cw / 2 + .07, .78, .795, d - .02, d - .002, M.steelD); }
+      b(u0, u1, .86, .9, 0, d, M.top);
+    };
+    const tbl = (ht, c, t) => { b(0, w, ht - .04, ht, 0, d, c); legs(.04, w - .04, .04, d - .04, ht - .04, t, c); };
+    switch (type) {
+      case 'kitchen': {                                                                         // niz: sudoper, ploča za kuhanje, frižider na kraju
+        const fu = w - .6; counter(0, fu);
+        b(fu, w, 0, 2, 0, d - .02, M.steel); hline(fu, w, 1.25, d - .02);
+        b(fu + .05, fu + .07, .7, 1.15, d - .02, d + .01, M.steelD); b(fu + .05, fu + .07, 1.35, 1.75, d - .02, d + .01, M.steelD);
+        b(1.0, 1.8, .9, .908, .08, d - .08, M.steel); b(1.05, 1.5, .9, .916, .12, d - .12, M.steelD); tap(1.28, .9, .03, .2);
+        b(2.3, 2.9, .9, .91, .05, d - .05, M.black); for (const u of [2.4, 2.66]) for (const q of [.1, .32]) b(u, u + .15, .91, .918, q, q + .15, M.gap);
+        if (full) { b(0, fu, 1.45, 2.15, 0, .35, M.white); for (let u = .6; u < fu - .1; u += .6) vline(u, 1.45, 2.15, .35); }
+        break; }
+      case 'counter': counter(0, w); break;
+      case 'sinkcab': counter(0, w); b(.08, w - .08, .9, .908, .08, d - .08, M.steel); b(.13, w - .13, .9, .916, .14, d - .12, M.steelD); tap(w / 2, .9, .03, .2); break;
+      case 'table': tbl(.75, M.wood, .06); break;
+      case 'coffee': tbl(.4, M.woodD, .04); b(.06, w - .06, .12, .14, .06, d - .06, M.woodD); break;
+      case 'chair':
+        legs(0, w, 0, d, .43, .035, M.woodD); b(0, w, .43, .47, 0, d, M.fabL);
+        b(0, .035, .47, .9, 0, .035, M.woodD); b(w - .035, w, .47, .9, 0, .035, M.woodD); b(.035, w - .035, .6, .9, .005, .03, M.fabL);
+        break;
+      case 'sofa': case 'sofa2': {                                                              // sofa: glavni dio s uglom; sofa2: krak
+        const aL = type === 'sofa' ? .22 : 0, aR = .2;
+        b(0, w, .04, .25, 0, d, M.fab); b(0, w, .25, .85, 0, .22, M.fab);
+        if (aL) b(0, aL, .25, .85, .22, d, M.fab);
+        b(w - aR, w, .25, .62, .22, d, M.fab);
+        const n = Math.max(1, Math.round((w - aL - aR) / .75)), cw = (w - aL - aR) / n;
+        for (let k = 0; k < n; k++) { const u = aL + k * cw; b(u + .01, u + cw - .01, .25, .44, .36, d, M.fabL); b(u + .01, u + cw - .01, .44, .8, .22, .36, M.fabL); }
+        break; }
+      case 'tv': {                                                                              // komoda + ekran 65"
+        const c = w / 2;
+        b(.05, w - .05, 0, .08, .03, d - .05, M.black); b(0, w, .08, .45, 0, d - .02, M.wood);
+        for (let k = 1; k < 4; k++) vline(k * w / 4, .08, .45, d - .02);
+        b(c - .2, c + .2, .45, .47, .08, .3, M.black); b(c - .03, c + .03, .47, .6, .16, .2, M.black);
+        b(c - .72, c + .72, .58, 1.41, .16, .2, M.black); b(c - .7, c + .7, .6, 1.39, .2, .21, M.screen);
+        break; }
+      case 'shower': {                                                                          // dir = zidovi uz koje stoji (npr. NE); staklo na ostalim stranama
+        const x1 = fx + fw, z1 = fz + fd, pane = (a, c, e, q) => box(g, a, c, .08, 2, e, q, C.glass, C.glass, .3);
+        box(v, fx, x1, 0, .08, fz, z1, M.cer); box(v, fx + fw / 2 - .05, fx + fw / 2 + .05, .08, .09, fz + fd / 2 - .05, fz + fd / 2 + .05, M.steelD);
+        if (!dir.includes('W')) pane(fx, fx + .015, fz, z1); if (!dir.includes('E')) pane(x1 - .015, x1, fz, z1);
+        if (!dir.includes('N')) pane(fx, x1, fz, fz + .015); if (!dir.includes('S')) pane(fx, x1, z1 - .015, z1);
+        const n = dir.includes('N'), zc = n ? fz : z1 - .04, xc = fx + fw / 2;
+        box(v, xc - .015, xc + .015, .9, 2.1, zc, zc + .04, M.steel); box(v, xc - .11, xc + .11, 2.08, 2.1, n ? zc : zc - .26, n ? zc + .3 : zc + .04, M.steel);
+        break; }
+      case 'wc':
+        b(0, w, .38, .8, 0, .17, M.cer); b(.06, w - .06, 0, .36, .12, d - .08, M.cer); b(.01, w - .01, .36, .41, .17, d, M.cer, M.whiteD);
+        b(w / 2 - .03, w / 2 + .03, .8, .81, .06, .11, M.steel);
+        break;
+      case 'vanity':
+        b(0, w, .3, .78, 0, d - .03, M.wood); hline(0, w, .54, d - .03); b(0, w, .78, .85, 0, d, M.cer); b(.07, w - .07, .85, .86, .1, d - .06, M.whiteD);
+        tap(w / 2, .85, .03, .14); if (full) b(.03, w - .03, 1.1, 1.8, 0, .02, M.mirror);
+        break;
+      case 'wardrobe': {
+        const n = Math.max(1, Math.round(w / .5));
+        b(0, w, 0, .08, 0, d - .05, M.black); b(0, w, .08, h, 0, d - .02, M.white);
+        for (let k = 0; k < n; k++) { if (k) vline(k * w / n, .08, h, d - .02); const hu = (k + (k % 2 ? .12 : .88)) * w / n; b(hu - .01, hu + .01, .95, 1.2, d - .02, d + .005, M.steelD); }
+        break; }
+      case 'shelf': {                                                                           // otvorene police sa sadržajem
+        const n = Math.max(2, Math.round(h / .36)), st = (h - .02) / n;
+        b(0, .02, 0, h, 0, d, M.wood); b(w - .02, w, 0, h, 0, d, M.wood); b(.02, w - .02, 0, h, 0, .012, M.woodD);
+        for (let k = 0; k <= n; k++) {
+          const y = k * st; b(.02, w - .02, y, y + .02, .012, d, M.wood);
+          if (k === n) break;
+          for (let u = .05, q = k * 7 + 3; u < w - .2;) {
+            q = (q * 13 + 5) % 17; const bw = .1 + (q % 4) * .04, bh = Math.min(st - .05, .16 + (q % 5) * .03);
+            if (q % 6) b(u, u + bw, y + .02, y + .02 + bh, .03, d - .03, PAL[q % PAL.length]);
+            u += bw + .01 + (q % 3 ? 0 : .08);
+          }
+        }
+        break; }
+      case 'desk':
+        b(0, w, .72, .75, 0, d, M.wood); b(0, .03, 0, .72, .03, d - .03, M.wood); b(w - .03, w, 0, .72, .03, d - .03, M.wood); b(.03, w - .03, .4, .72, .03, .05, M.woodD);
+        b(w - .45, w - .03, .1, .72, .06, d - .04, M.white); for (const y of [.3, .5]) hline(w - .45, w - .03, y, d - .04);
+        break;
+      case 'pellet':
+        b(.05, w - .05, 0, .1, .05, d - .05, M.black); b(0, w, .1, h - .08, 0, d, M.grey); b(-.02, w + .02, h - .08, h, -.02, d + .02, M.steelD);
+        b(w / 2 - .15, w / 2 + .15, .2, .45, d, d + .01, M.steelD);
+        break;
+      case 'boiler':
+        b(0, w, 0, h, 0, d - .03, M.dgrey); b(.08, w - .08, .2, .95, d - .03, d - .01, M.red); b(.08, w - .08, 1.05, 1.28, d - .03, d - .015, M.black);
+        b(w - .16, w - .13, .45, .7, d - .01, d + .015, M.steelD); b(w / 2 - .08, w / 2 + .08, h, h + .35, .1, .26, M.steelD);
+        break;
+      case 'bed':
+        b(.06, w - .06, 0, .1, .06, d - .06, M.black); b(0, w, .1, .3, 0, d, M.wood); b(.03, w - .03, .3, .5, .08, d - .02, M.mat); b(0, w, 0, 1, 0, .06, M.wood);
+        b(.12, w / 2 - .06, .5, .6, .14, .52, M.pil); b(w / 2 + .06, w - .12, .5, .6, .14, .52, M.pil); b(0, w, .38, .57, .65, d, M.duv3);
+        break;
+      case 'night':
+        b(.03, w - .03, 0, .05, .03, d - .05, M.black); b(0, w, .05, .5, 0, d - .02, M.wood); hline(0, w, .28, d - .02);
+        for (const y of [.15, .37]) b(w / 2 - .03, w / 2 + .03, y, y + .02, d - .02, d, M.steelD);
+        break;
+      case 'bunk': {                                                                            // dir = otvorena strana; ljestve na početku (flag: na kraju)
+        const U = (u0, u1, ...r) => flag ? b(w - u1, w - u0, ...r) : b(u0, u1, ...r), col = dir === 'E' ? M.duv : M.duv2;
+        for (const u of [0, w - .05]) for (const q of [0, d - .05]) U(u, u + .05, 0, 1.75, q, q + .05, M.wood);
+        for (const y of [.25, 1.25]) {
+          U(0, w, y, y + .06, 0, d, M.wood); U(.05, w - .05, y + .06, y + .2, .04, d - .04, M.mat);
+          U(w - .5, w - .1, y + .2, y + .28, .15, d - .15, M.pil); U(.05, w - .65, y + .18, y + .26, .03, d - .03, col);
+          for (const u of [0, w - .03]) U(u, u + .03, y + .3, y + .5, .05, d - .05, M.wood);        // uzglavlje i podnožje
+        }
+        U(0, w, 1.55, 1.61, 0, .03, M.wood); U(.55, w, 1.55, 1.61, d - .03, d, M.wood);             // ograda gornjeg ležaja
+        for (const u of [.06, .47]) U(u, u + .03, 0, 1.61, d, d + .03, M.wood);                      // ljestve
+        for (const y of [.3, .6, .9, 1.2]) U(.09, .47, y, y + .03, d, d + .03, M.wood);
+        break; }
+      case 'washer':
+        b(0, w, 0, .85, 0, d - .02, M.white); b(w / 2 - .19, w / 2 + .19, .2, .58, d - .02, d - .008, M.steelD); b(w / 2 - .14, w / 2 + .14, .25, .53, d - .02, d, M.black);
+        b(.03, w - .03, .7, .8, d - .02, d - .01, M.steel);
+        break;
+      case 'tub': {
+        const t = .07, th = h + .01;
+        b(0, w, 0, th, 0, t, M.cer); b(0, w, 0, th, d - t, d, M.cer); b(0, t, 0, th, t, d - t, M.cer); b(w - t, w, 0, th, t, d - t, M.cer); b(t, w - t, 0, .14, t, d - t, M.whiteD);
+        b(w - .05, w - .02, th, th + .16, d / 2 - .015, d / 2 + .015, M.steel); b(w - .2, w - .02, th + .13, th + .16, d / 2 - .015, d / 2 + .015, M.steel);
+        break; }
+      default: box(v, fx, fx + fw, 0, h, fz, fz + fd, C.furn, C.furnTop);
+    }
+  }
+
   function build() {
     const H = wallH = full ? 2.6 : 1.2, v = [], g = [], st = P.stairs, T = P.terrace, doorR = P.doors.map(d => d.r);
     const rects = [...P.rooms, ...P.walls, ...P.glass, ...doorR, st, ...(T ? [T] : [])];
@@ -545,7 +685,7 @@ function view3d(P, id, opt) {
       box(v, Math.min(a[0], b[0]), Math.max(a[2], b[2]), 2.2, H, Math.min(a[1], b[1]), Math.max(a[3], b[3]), C.wall, C.cut);
     }
     // namještaj
-    P.furn.forEach((f, i) => box(v, f[0], f[0] + f[2], 0, (P.fh || [])[i] || .6, f[1], f[1] + f[3], C.furn, C.furnTop));
+    P.furn.forEach((f, i) => furnish(v, g, f, (P.fk || [])[i] || '', (P.fh || [])[i] || .6));
     nOpaque = v.length / 10; nAll = nOpaque + g.length / 10;
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(v.concat(g)), gl.STATIC_DRAW);
@@ -583,7 +723,7 @@ function view3d(P, id, opt) {
     if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
     const t = [P.W / 2, .4, P.H / 2], ce = Math.cos(cam.el), d = cam.dist * Math.max(1, 1.3 * h / w);   // uži ekran → dalja kamera
     const e = [t[0] + d * ce * Math.sin(cam.az), t[1] + d * Math.sin(cam.el), t[2] + d * ce * Math.cos(cam.az)];
-    const m = mul(persp(.6, w / h, .1, 100), look(e, t));
+    const m = mul(persp(.6, w / h, .5, 100), look(e, t));
     gl.viewport(0, 0, cv.width, cv.height);
     gl.clearColor(.933, .945, .957, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST); gl.uniformMatrix4fv(uM, false, m);
