@@ -45,6 +45,7 @@
   .v3d:fullscreen canvas { aspect-ratio: auto; width: 100%; height: 100%; }
   .v3d:-webkit-full-screen { border: 0; border-radius: 0; }
   .v3d:-webkit-full-screen canvas { aspect-ratio: auto; width: 100%; height: 100%; }
+  .tools3d button.zoom { min-width: 36px; font-weight: 600; }
   .tools3d button { font: inherit; font-size: .9rem; padding: 5px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); cursor: pointer; }
   .tablewrap { overflow-x: auto; }
   table { border-collapse: collapse; width: 100%; font-size: .95rem; }
@@ -122,11 +123,13 @@
 
   <div class="plan"><svg id="svg-ground" viewBox="-110 -150 1330 1250" role="img" aria-label="Tlocrt suterena"></svg></div>
 
-  <h2>Suteren – 3D <small>prevucite za okretanje · štipanje ili točkić (nakon klika) za zum</small></h2>
+  <h2>Suteren – 3D <small>prevucite za okretanje · štipanje, točkić (nakon klika) ili tipke + / − za zum</small></h2>
   <div class="plan v3d" id="v3d-ground">
     <div class="tools3d">
       <button id="b3d-walls-ground" type="button">Zidovi: presjek na 1,20 m</button>
       <button id="b3d-reset-ground" type="button">Reset pogleda</button>
+      <button id="b3d-zin-ground" type="button" class="zoom" aria-label="Približi" title="Približi">+</button>
+      <button id="b3d-zout-ground" type="button" class="zoom" aria-label="Udalji" title="Udalji">−</button>
       <button id="b3d-full-ground" type="button">Cijeli ekran</button>
     </div>
     <canvas id="gl3d-ground" role="img" aria-label="3D prikaz suterena"></canvas><div class="lab3d" id="lab3d-ground"></div></div>
@@ -134,11 +137,13 @@
   <h2>Prizemlje <small>prilagođeno suterenu · bruto 99 m², neto 73 m²</small></h2>
   <div class="plan"><svg id="svg-upper" viewBox="-110 -150 1330 1250" role="img" aria-label="Tlocrt prizemlja"></svg></div>
 
-  <h2>Prizemlje – 3D <small>prevucite za okretanje · štipanje ili točkić (nakon klika) za zum</small></h2>
+  <h2>Prizemlje – 3D <small>prevucite za okretanje · štipanje, točkić (nakon klika) ili tipke + / − za zum</small></h2>
   <div class="plan v3d" id="v3d-upper">
     <div class="tools3d">
       <button id="b3d-walls-upper" type="button">Zidovi: presjek na 1,20 m</button>
       <button id="b3d-reset-upper" type="button">Reset pogleda</button>
+      <button id="b3d-zin-upper" type="button" class="zoom" aria-label="Približi" title="Približi">+</button>
+      <button id="b3d-zout-upper" type="button" class="zoom" aria-label="Udalji" title="Udalji">−</button>
       <button id="b3d-full-upper" type="button">Cijeli ekran</button>
     </div>
     <canvas id="gl3d-upper" role="img" aria-label="3D prikaz prizemlja"></canvas><div class="lab3d" id="lab3d-upper"></div></div>
@@ -617,6 +622,9 @@ function view3d(P, id, opt) {
   const bw = document.getElementById('b3d-walls-' + id);
   bw.onclick = () => { full = !full; bw.textContent = full ? 'Zidovi: puni' : 'Zidovi: presjek na 1,20 m'; build(); redraw(); };
   document.getElementById('b3d-reset-' + id).onclick = () => { cam = { ...HOME }; redraw(); };
+  const zoom = f => () => { cam.dist = clamp(cam.dist * f, 7, 45); redraw(); };
+  document.getElementById('b3d-zin-' + id).onclick = zoom(1 / 1.2);
+  document.getElementById('b3d-zout-' + id).onclick = zoom(1.2);
   // cijeli ekran: pravi fullscreen preglednika, a gdje ga nema (iPhone Safari) prikaz preko cijelog prozora
   const bf = document.getElementById('b3d-full-' + id);
   const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement;
