@@ -35,8 +35,8 @@
   .v3d { position: relative; padding: 0; overflow: hidden; background: #eef1f4; }
   .v3d canvas { display: block; width: 100%; aspect-ratio: 16 / 10; touch-action: none; cursor: grab; }
   .v3d canvas:active { cursor: grabbing; }
-  @media (max-width: 600px) { .v3d canvas { aspect-ratio: 1 / 1; } #lab3d span { font-size: 10px; padding: 0 4px; } }
-  #lab3d span { position: absolute; transform: translate(-50%, -50%); font-size: 12px; font-weight: 600; color: var(--ink);
+  @media (max-width: 600px) { .v3d canvas { aspect-ratio: 1 / 1; } .lab3d span { font-size: 10px; padding: 0 4px; } }
+  .lab3d span { position: absolute; transform: translate(-50%, -50%); font-size: 12px; font-weight: 600; color: var(--ink);
     background: rgba(255, 255, 255, .82); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; pointer-events: none; white-space: nowrap; }
   .tools3d { display: flex; flex-wrap: wrap; gap: 8px; }
   .tools3d button { font: inherit; padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); cursor: pointer; }
@@ -116,17 +116,26 @@
 
   <div class="plan"><svg id="svg-ground" viewBox="-110 -150 1330 1250" role="img" aria-label="Tlocrt suterena"></svg></div>
 
+  <h2>Suteren – 3D <small>prevucite za okretanje · štipanje ili točkić (nakon klika) za zum</small></h2>
+  <div class="bar">
+    <div class="tools3d">
+      <button id="b3d-walls-ground" type="button">Zidovi: puni</button>
+      <button id="b3d-reset-ground" type="button">Reset pogleda</button>
+    </div>
+  </div>
+  <div class="plan v3d" id="v3d-ground"><canvas id="gl3d-ground" role="img" aria-label="3D prikaz suterena"></canvas><div class="lab3d" id="lab3d-ground"></div></div>
+
   <h2>Prizemlje <small>prilagođeno suterenu · bruto 99 m², neto 73 m²</small></h2>
   <div class="plan"><svg id="svg-upper" viewBox="-110 -150 1330 1250" role="img" aria-label="Tlocrt prizemlja"></svg></div>
 
   <h2>Prizemlje – 3D <small>prevucite za okretanje · štipanje ili točkić (nakon klika) za zum</small></h2>
   <div class="bar">
     <div class="tools3d">
-      <button id="b3d-walls" type="button">Zidovi: puni</button>
-      <button id="b3d-reset" type="button">Reset pogleda</button>
+      <button id="b3d-walls-upper" type="button">Zidovi: puni</button>
+      <button id="b3d-reset-upper" type="button">Reset pogleda</button>
     </div>
   </div>
-  <div class="plan v3d" id="v3d"><canvas id="gl3d" role="img" aria-label="3D prikaz prizemlja"></canvas><div id="lab3d"></div></div>
+  <div class="plan v3d" id="v3d-upper"><canvas id="gl3d-upper" role="img" aria-label="3D prikaz prizemlja"></canvas><div class="lab3d" id="lab3d-upper"></div></div>
 </main>
 
 <script>
@@ -256,6 +265,7 @@ const plans = {
       [6.65, 6.25, .30, 2.45], [8.90, 5.35, 1.80, .60],                                        // mesdžid: police, radni sto
       [1.40, .45, 1.00, 1.00], [3.20, .45, .80, .90],                                          // pelet, kotao
     ],
+    fh: [.9, .9, .9,  .75, .45, .45, .45, .45, .45, .45,  .7, .7,  .4, .5,  .1, .4, .85,  2.1,  2.0, .75,  1.5, 1.4],
     labels: [
       [2.05, 1.90, 'Kotlovnica', '3,80 × 2,40', '8,92 m²'], [5.37, 1.40, 'Ostava', '2,15 × 2,40', '5,16 m²'],
       [4.40, 4.10, 'Dnevni boravak', 's kuhinjom i trpezarijom', '36,61 m²'],
@@ -439,9 +449,10 @@ document.getElementById('svg-site').innerHTML = SITE;
 document.getElementById('svg-ground').innerHTML = render(plans.ground);
 document.getElementById('svg-upper').innerHTML = render(plans.upper);
 
-// ---------- 3D prikaz prizemlja (WebGL, bez biblioteka); model se gradi iz plans.upper ----------
-(() => {
-  const P = plans.upper, cv = document.getElementById('gl3d'), wrap = document.getElementById('v3d'), labBox = document.getElementById('lab3d');
+// ---------- 3D prikaz etaže (WebGL, bez biblioteka); model se gradi iz istih podataka kao 2D crtež ----------
+// opt.down: stepenište se s ove etaže spušta (prizemlje); inače se penje (suteren). opt.labels: dodatni natpisi.
+function view3d(P, id, opt) {
+  const cv = document.getElementById('gl3d-' + id), wrap = document.getElementById('v3d-' + id), labBox = document.getElementById('lab3d-' + id);
   const gl = cv.getContext('webgl', { antialias: true });
   if (!gl) { wrap.innerHTML = '<p style="padding:16px;margin:0">Ovaj preglednik ne podržava WebGL, pa 3D prikaz nije dostupan.</p>'; return; }
   const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255);
@@ -491,19 +502,28 @@ document.getElementById('svg-upper').innerHTML = render(plans.upper);
       const rim = T && cx < T[0] + T[2] && cy > T[1];                              // rub terase = ograda 1,00 m
       box(v, x0, x1, -.25, rim ? Math.min(1, H) : H, z0, z1, C.wall, rim ? C.wall : C.cut);
     }
-    // stepenište: lijevi krak se penje od podesta (−1,50) do poda, desni od suterena (−3,00) do podesta
+    // stepenište (visine od poda suterena): desni krak 0 → podest 1,50, lijevi krak podest → 3,00
     const [sx, sy, sw, sl] = st, sp = .2, fw = (sw - sp) / 2, n = 8, td = .3, top = sy + sl - n * td, rise = 3 / 18;
-    box(v, sx, sx + sw, -3.05, -3, sy, sy + sl, C.shaft);
-    box(v, sx - .2, sx, -3, -.25, sy - .3, sy + sl, C.shaft); box(v, sx + sw, sx + sw + .2, -3, -.25, sy - .3, sy + sl, C.shaft);
-    box(v, sx, sx + sw, -3, -.25, sy - .3, sy, C.shaft); box(v, sx, sx + sw, -3, -.25, sy + sl, sy + sl + .05, C.shaft);
-    box(v, sx, sx + sw, -1.65, -1.5, sy, top, C.stair);
+    const zb = opt.down ? -3 : 0, lim = opt.down ? 9 : H + .35;                    // u suterenu presjek reže gornji krak
+    if (opt.down) {                                                               // okno ispod ploče
+      box(v, sx, sx + sw, -3.05, -3, sy, sy + sl, C.shaft);
+      box(v, sx - .2, sx, -3, -.25, sy - .3, sy + sl, C.shaft); box(v, sx + sw, sx + sw + .2, -3, -.25, sy - .3, sy + sl, C.shaft);
+      box(v, sx, sx + sw, -3, -.25, sy - .3, sy, C.shaft); box(v, sx, sx + sw, -3, -.25, sy + sl, sy + sl + .05, C.shaft);
+    } else box(v, sx, sx + sw, -.25, 0, sy, sy + sl, C.slab, C.floor);
+    if (zb + 1.5 <= lim) box(v, sx, sx + sw, zb + 1.35, zb + 1.5, sy, top, C.stair);
     for (let k = 0; k < n; k++) {
-      const z0 = top + k * td, hl = -1.5 + (k + 1) * rise, hr = -3 + (n - k) * rise;
-      box(v, sx, sx + fw, hl - .3, hl, z0, z0 + td, C.stair);
-      box(v, sx + fw + sp, sx + sw, hr - .3, hr, z0, z0 + td, C.stair);
+      const z0 = top + k * td, hl = zb + 1.5 + (k + 1) * rise, hr = zb + (n - k) * rise;
+      if (hl <= lim) box(v, sx, sx + fw, hl - .3, hl, z0, z0 + td, C.stair);
+      if (hr <= lim) box(v, sx + fw + sp, sx + sw, hr - .3, hr, z0, z0 + td, C.stair);
     }
-    box(v, sx + fw, sx + fw + sp, -3, Math.min(1, H), top, sy + sl, C.wall, C.cut);  // zid između krakova, gore kao ograda
+    box(v, sx + fw, sx + fw + sp, zb, opt.down ? Math.min(1, H) : H, top, sy + sl, C.wall, C.cut);   // zid između krakova
     if (P.rail) box(v, P.rail[0], P.rail[2], 0, Math.min(1, H), P.rail[1] - .03, P.rail[1] + .03, C.cut);
+    (P.over || []).forEach(w => box(v, w[0], w[0] + w[2], 0, H, w[1], w[1] + w[3], C.wall, C.cut));    // zid ispod gornjeg kraka
+    // grede pod stropom (u tlocrtu po dvije isprekidane linije), samo uz pune zidove
+    if (full) for (let i = 0; i + 1 < (P.beams || []).length; i += 2) {
+      const a = P.beams[i], b = P.beams[i + 1];
+      box(v, Math.min(a[0], b[0]), Math.max(a[2], b[2]), 2.2, H, Math.min(a[1], b[1]), Math.max(a[3], b[3]), C.wall, C.cut);
+    }
     // namještaj
     P.furn.forEach((f, i) => box(v, f[0], f[0] + f[2], 0, (P.fh || [])[i] || .6, f[1], f[1] + f[3], C.furn, C.furnTop));
     nOpaque = v.length / 10; nAll = nOpaque + g.length / 10;
@@ -534,7 +554,7 @@ document.getElementById('svg-upper').innerHTML = render(plans.upper);
 
   const HOME = { az: -.55, el: .85, dist: 22.5 };
   let cam = { ...HOME };
-  const labs = [...P.labels.map(l => [l[0], l[1], l[2]]), [5.55, 1.9, 'Vešeraj'], [9.8, 2.2, 'Kupatilo'], [7.7, .9, 'Stepenište']];
+  const labs = [...P.labels.map(l => [l[0], l[1], l[2]]), ...(opt.labels || [])];
   const spans = labs.map(l => { const e = document.createElement('span'); e.textContent = l[2]; labBox.appendChild(e); return e; });
 
   function draw() {
@@ -579,12 +599,14 @@ document.getElementById('svg-upper').innerHTML = render(plans.upper);
   cv.addEventListener('mouseleave', () => { active = false; });
   cv.addEventListener('wheel', ev => { if (!active) return; ev.preventDefault(); cam.dist = clamp(cam.dist * Math.exp(ev.deltaY * .0012), 7, 45); redraw(); }, { passive: false });
 
-  const bw = document.getElementById('b3d-walls');
+  const bw = document.getElementById('b3d-walls-' + id);
   bw.onclick = () => { full = !full; bw.textContent = full ? 'Zidovi: puni' : 'Zidovi: presjek na 1,20 m'; build(); redraw(); };
-  document.getElementById('b3d-reset').onclick = () => { cam = { ...HOME }; redraw(); };
+  document.getElementById('b3d-reset-' + id).onclick = () => { cam = { ...HOME }; redraw(); };
   new ResizeObserver(redraw).observe(cv);
   build(); draw();
-})();
+}
+view3d(plans.ground, 'ground', { labels: [[9.85, 1.6, 'Kupatilo 1'], [7.7, 1.0, 'Stepenište']] });
+view3d(plans.upper, 'upper', { down: true, labels: [[5.55, 1.9, 'Vešeraj'], [9.8, 2.2, 'Kupatilo'], [7.7, .9, 'Stepenište']] });
 </script>
 </body>
 </html>
