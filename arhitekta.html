@@ -125,7 +125,7 @@
   <h2>Suteren – 3D <small>prevucite za okretanje · štipanje ili točkić (nakon klika) za zum</small></h2>
   <div class="plan v3d" id="v3d-ground">
     <div class="tools3d">
-      <button id="b3d-walls-ground" type="button">Zidovi: puni</button>
+      <button id="b3d-walls-ground" type="button">Zidovi: presjek na 1,20 m</button>
       <button id="b3d-reset-ground" type="button">Reset pogleda</button>
       <button id="b3d-full-ground" type="button">Cijeli ekran</button>
     </div>
@@ -137,7 +137,7 @@
   <h2>Prizemlje – 3D <small>prevucite za okretanje · štipanje ili točkić (nakon klika) za zum</small></h2>
   <div class="plan v3d" id="v3d-upper">
     <div class="tools3d">
-      <button id="b3d-walls-upper" type="button">Zidovi: puni</button>
+      <button id="b3d-walls-upper" type="button">Zidovi: presjek na 1,20 m</button>
       <button id="b3d-reset-upper" type="button">Reset pogleda</button>
       <button id="b3d-full-upper" type="button">Cijeli ekran</button>
     </div>
@@ -467,7 +467,7 @@ function view3d(P, id, opt) {
   const C = { wall: hex('#efe9dc'), cut: hex('#2a2724'), floor: hex('#f1d9b0'), terr: hex('#cfe0bd'), furn: hex('#a58c74'), furnTop: hex('#bda58c'),
               stair: hex('#d6d4cf'), glass: hex('#7fb4d6'), slab: hex('#b9b2a4'), shaft: hex('#8f8a80') };
   const inR = (r, x, y) => x > r[0] && x < r[0] + r[2] && y > r[1] && y < r[1] + r[3];
-  let full = true, nOpaque = 0, nAll = 0, wallH = 2.6;
+  let full = false, nOpaque = 0, nAll = 0, wallH = 2.6;
   const buf = gl.createBuffer();
 
   // kutija: x istok, y visina, z jug; c boja stranica, ct boja gornje plohe, a prozirnost
