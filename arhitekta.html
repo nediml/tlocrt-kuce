@@ -115,7 +115,7 @@
       <span><i style="background:var(--terrace)"></i>terasa</span>
       <span><i style="background:var(--furn);opacity:.6"></i>namještaj</span>
       <span><i style="background:#fff;border:2px solid var(--wall)"></i>AB stub</span>
-      <span><i style="background:none;border-top:3px dashed var(--wall);border-radius:0;height:0;vertical-align:4px"></i>greda iznad</span>
+      <span><i style="background:none;border-top:3px dashed var(--wall);border-radius:0;height:0;vertical-align:4px"></i>greda / zid iznad</span>
       <span>mjere: prostorije u m, vrata i namještaj u cm</span>
     </div>
   </div>
@@ -223,6 +223,7 @@ const plans = {
     ],
     walls: [[8.75, 3.00, .20, .80]],
     over: [[6.65, 3.60, .95, .20]],                                               // zid ispod gornjeg kraka
+    hiwall: [[6.45, .40, .20, 2.40]],                                             // zid samo iznad stepenica, ispod otvoreno prema ostavi
     beams: [
       [.30, 5.15, 7.60, 5.15], [.30, 5.35, 7.60, 5.35],                           // greda preko dnevnog
       [7.60, 3.80, 7.60, 5.15], [7.80, 3.80, 7.80, 5.15],                         // iznad prolaza dnevni–hol
@@ -368,6 +369,7 @@ function render(p) {
   p.doors.forEach(d => { s += rect(...d.r, 'open'); d.s.forEach(a => s += swing(a)); if (d.l) s += line(...d.l, 'slide'); s += ddim(d.r); });
   p.furn.forEach(f => s += rect(...f, 'furn') + fdim(f));
   (p.beams || []).forEach(b => s += line(...b, 'beam'));
+  (p.hiwall || []).forEach(w => s += rect(...w, 'beam'));
   (p.cols || []).forEach(c => s += col(...c));
   if (p.extra) s += p.extra;
   p.labels.forEach(l => s += label(...l));
@@ -525,6 +527,13 @@ function view3d(P, id, opt) {
     box(v, sx + fw, sx + fw + sp, zb, opt.down ? Math.min(1, H) : H, top, sy + sl, C.wall, C.cut);   // zid između krakova
     if (P.rail) box(v, P.rail[0], P.rail[2], 0, Math.min(1, H), P.rail[1] - .03, P.rail[1] + .03, C.cut);
     (P.over || []).forEach(w => box(v, w[0], w[0] + w[2], 0, H, w[1], w[1] + w[3], C.wall, C.cut));    // zid ispod gornjeg kraka
+    // zid samo iznad stepenica: od donje ivice podesta i kraka do stropa, ispod otvoreno
+    if (!opt.down) (P.hiwall || []).forEach(([wx, wy, ww, wh]) => {
+      const left = wx + ww / 2 < sx + sw / 2;
+      const seg = (a, b, bot) => { const z0 = Math.max(a, wy), z1 = Math.min(b, wy + wh); if (z1 > z0 && bot < H) box(v, wx, wx + ww, bot, H, z0, z1, C.wall, C.cut); };
+      seg(sy - 9, top, 1.35);
+      for (let k = 0; k < n; k++) seg(top + k * td, top + (k + 1) * td, (left ? 1.5 + (k + 1) * rise : (n - k) * rise) - .3);
+    });
     // grede pod stropom (u tlocrtu po dvije isprekidane linije), samo uz pune zidove
     if (full) for (let i = 0; i + 1 < (P.beams || []).length; i += 2) {
       const a = P.beams[i], b = P.beams[i + 1];
