@@ -38,8 +38,14 @@
   @media (max-width: 600px) { .v3d canvas { aspect-ratio: 1 / 1; } .lab3d span { font-size: 10px; padding: 0 4px; } }
   .lab3d span { position: absolute; transform: translate(-50%, -50%); font-size: 12px; font-weight: 600; color: var(--ink);
     background: rgba(255, 255, 255, .82); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; pointer-events: none; white-space: nowrap; }
-  .tools3d { display: flex; flex-wrap: wrap; gap: 8px; }
-  .tools3d button { font: inherit; padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); cursor: pointer; }
+  .tools3d { display: flex; flex-wrap: wrap; gap: 8px; position: absolute; top: 8px; left: 8px; right: 8px; z-index: 2; }
+  .v3d.fs { position: fixed; inset: 0; z-index: 1000; border: 0; border-radius: 0; }
+  .v3d.fs canvas { aspect-ratio: auto; width: 100%; height: 100%; }
+  .v3d:fullscreen { border: 0; border-radius: 0; }
+  .v3d:fullscreen canvas { aspect-ratio: auto; width: 100%; height: 100%; }
+  .v3d:-webkit-full-screen { border: 0; border-radius: 0; }
+  .v3d:-webkit-full-screen canvas { aspect-ratio: auto; width: 100%; height: 100%; }
+  .tools3d button { font: inherit; font-size: .9rem; padding: 5px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); cursor: pointer; }
   .tablewrap { overflow-x: auto; }
   table { border-collapse: collapse; width: 100%; font-size: .95rem; }
   th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
@@ -117,25 +123,25 @@
   <div class="plan"><svg id="svg-ground" viewBox="-110 -150 1330 1250" role="img" aria-label="Tlocrt suterena"></svg></div>
 
   <h2>Suteren – 3D <small>prevucite za okretanje · štipanje ili točkić (nakon klika) za zum</small></h2>
-  <div class="bar">
+  <div class="plan v3d" id="v3d-ground">
     <div class="tools3d">
       <button id="b3d-walls-ground" type="button">Zidovi: puni</button>
       <button id="b3d-reset-ground" type="button">Reset pogleda</button>
+      <button id="b3d-full-ground" type="button">Cijeli ekran</button>
     </div>
-  </div>
-  <div class="plan v3d" id="v3d-ground"><canvas id="gl3d-ground" role="img" aria-label="3D prikaz suterena"></canvas><div class="lab3d" id="lab3d-ground"></div></div>
+    <canvas id="gl3d-ground" role="img" aria-label="3D prikaz suterena"></canvas><div class="lab3d" id="lab3d-ground"></div></div>
 
   <h2>Prizemlje <small>prilagođeno suterenu · bruto 99 m², neto 73 m²</small></h2>
   <div class="plan"><svg id="svg-upper" viewBox="-110 -150 1330 1250" role="img" aria-label="Tlocrt prizemlja"></svg></div>
 
   <h2>Prizemlje – 3D <small>prevucite za okretanje · štipanje ili točkić (nakon klika) za zum</small></h2>
-  <div class="bar">
+  <div class="plan v3d" id="v3d-upper">
     <div class="tools3d">
       <button id="b3d-walls-upper" type="button">Zidovi: puni</button>
       <button id="b3d-reset-upper" type="button">Reset pogleda</button>
+      <button id="b3d-full-upper" type="button">Cijeli ekran</button>
     </div>
-  </div>
-  <div class="plan v3d" id="v3d-upper"><canvas id="gl3d-upper" role="img" aria-label="3D prikaz prizemlja"></canvas><div class="lab3d" id="lab3d-upper"></div></div>
+    <canvas id="gl3d-upper" role="img" aria-label="3D prikaz prizemlja"></canvas><div class="lab3d" id="lab3d-upper"></div></div>
 </main>
 
 <script>
@@ -602,6 +608,22 @@ function view3d(P, id, opt) {
   const bw = document.getElementById('b3d-walls-' + id);
   bw.onclick = () => { full = !full; bw.textContent = full ? 'Zidovi: puni' : 'Zidovi: presjek na 1,20 m'; build(); redraw(); };
   document.getElementById('b3d-reset-' + id).onclick = () => { cam = { ...HOME }; redraw(); };
+  // cijeli ekran: pravi fullscreen preglednika, a gdje ga nema (iPhone Safari) prikaz preko cijelog prozora
+  const bf = document.getElementById('b3d-full-' + id);
+  const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement;
+  const isFs = () => fsEl() === wrap || wrap.classList.contains('fs');
+  const syncFs = () => { bf.textContent = isFs() ? 'Izađi iz cijelog ekrana' : 'Cijeli ekran'; redraw(); };
+  const setFake = on => { wrap.classList.toggle('fs', on); document.body.style.overflow = on ? 'hidden' : ''; syncFs(); };
+  bf.onclick = () => {
+    if (wrap.classList.contains('fs')) return setFake(false);
+    if (fsEl() === wrap) return (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    const req = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
+    if (!req) return setFake(true);
+    try { const r = req.call(wrap); if (r && r.catch) r.catch(() => setFake(true)); } catch (e) { setFake(true); }
+    setTimeout(() => { if (!isFs()) setFake(true); }, 500);                     // preglednik je zahtjev prešutno odbio
+  };
+  document.addEventListener('fullscreenchange', syncFs); document.addEventListener('webkitfullscreenchange', syncFs);
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && wrap.classList.contains('fs')) setFake(false); });
   new ResizeObserver(redraw).observe(cv);
   build(); draw();
 }
