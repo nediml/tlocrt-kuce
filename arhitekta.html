@@ -717,6 +717,22 @@ function view3d(P, id, opt) {
     if (P.rail) box(v, P.rail[0], P.rail[2], 0, Math.min(1, H), P.rail[1] - .03, P.rail[1] + .03, C.cut);
     (P.over || []).forEach(w => box(v, w[0], w[0] + w[2], 0, H, w[1], w[1] + w[3], C.wall, C.cut));    // zid ispod gornjeg kraka
     (P.chim || []).forEach(([x, y, w, h]) => box(v, x - .004, x + w + .004, 0, H + .12, y - .004, y + h + .004, M.red, C.cut));   // dimnjak
+    // krila vrata, uvijek otvorena: stoje gdje je u tlocrtu nacrtano otvoreno krilo (šarka → kraj luka)
+    P.doors.forEach(d => d.s.forEach(([hx, hy, lx, ly]) => {
+      const r = d.r, e = .01, ext = r[0] < e || r[1] < e || r[0] + r[2] > P.W - e || r[1] + r[3] > P.H - e;
+      const onT = T && r[0] <= T[0] + T[2] + e && r[0] + r[2] >= T[0] - e && r[1] <= T[1] + T[3] + e && r[1] + r[3] >= T[1] - e;
+      const glazed = onT || r[1] + r[3] > P.H - e;                                  // južni izlazi i vrata na terasu
+      const hz = Math.abs(hy - ly) < 1e-6, a0 = hz ? Math.min(hx, lx) : Math.min(hy, ly), a1 = hz ? Math.max(hx, lx) : Math.max(hy, ly), c = hz ? hy : hx;
+      const leaf = (out, u0, u1, y0, y1, t, col, al = 1) => hz ? box(out, u0, u1, y0, y1, c - t, c + t, col, col, al) : box(out, c - t, c + t, y0, y1, u0, u1, col, col, al);
+      if (glazed) {
+        leaf(v, a0, a0 + .07, 0, 2.05, .025, M.dgrey); leaf(v, a1 - .07, a1, 0, 2.05, .025, M.dgrey);
+        leaf(v, a0 + .07, a1 - .07, 0, .1, .025, M.dgrey); leaf(v, a0 + .07, a1 - .07, 1.97, 2.05, .025, M.dgrey);
+        leaf(g, a0 + .07, a1 - .07, .1, 1.97, .008, C.glass, .45);
+      } else {
+        const free = hz ? lx : ly, k = Math.abs(free - a0) < e ? a0 + .08 : a1 - .08;   // kvaka uz slobodni kraj krila
+        leaf(v, a0, a1, 0, 2.05, .02, ext ? M.dgrey : M.white); leaf(v, k - .05, k + .05, 1, 1.03, .05, M.steelD);
+      }
+    }));
     // zid samo iznad stepenica: od donje ivice podesta i kraka do stropa, ispod otvoreno
     if (!opt.down) (P.hiwall || []).forEach(([wx, wy, ww, wh]) => {
       const left = wx + ww / 2 < sx + sw / 2;
