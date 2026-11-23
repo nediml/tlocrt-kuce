@@ -94,6 +94,8 @@
   .colx { stroke: var(--wall); stroke-width: 1.5; }
   .kota { font-size: 13px; fill: #1d4f91; }
   .fn { font-size: 12px; fill: var(--ink); text-anchor: middle; }
+  .gap { stroke: #a8a196; stroke-width: 1.2; stroke-dasharray: 4 3; }
+  .gapt { font-size: 10px; fill: #9c958a; text-anchor: middle; paint-order: stroke; stroke: var(--floor); stroke-width: 3px; stroke-linejoin: round; }
   .fd { font-size: 9px; fill: var(--ink); text-anchor: middle; }
   .dim { stroke: var(--muted); stroke-width: 1.5; }
   .dimt { font-size: 17px; fill: var(--muted); text-anchor: middle; }
@@ -117,6 +119,7 @@
       <span><i style="background:var(--furn);opacity:.6"></i>namještaj</span>
       <span><i style="background:#fff;border:2px solid var(--wall)"></i>AB stub</span>
       <span><i style="background:none;border-top:3px dashed var(--wall);border-radius:0;height:0;vertical-align:4px"></i>greda / zid iznad</span>
+      <span><i style="background:none;border-top:2px dashed #a8a196;border-radius:0;height:0;vertical-align:4px"></i>razmak između namještaja (cm)</span>
       <span>mjere: prostorije u m, vrata i namještaj u cm</span>
     </div>
   </div>
@@ -180,6 +183,31 @@ function wdims([x, y, w, h]) {
   const v = (px) => `<text class="wd" transform="translate(${px*U} ${(y + h / 2)*U}) rotate(-90)">${fmt(h)}</text>`;
   return text(x + w / 2, y + .17, fmt(w), 'wd') + text(x + w / 2, y + h - .07, fmt(w), 'wd') + v(x + .17) + v(x + w - .06);
 }
+// razmaci u cm: [a, b] između dva komada (indeksi u furn) ili [a, 'N'|'S'|'E'|'W'] od komada do zida prostorije;
+// treći član po potrebi zadaje položaj linije. Računa se iz položaja namještaja, pa prati svako pomjeranje.
+function gaps(p) {
+  let s = '';
+  (p.gaps || []).forEach(([a, b, at]) => {
+    const A = p.furn[a], ax1 = A[0] + A[2], ay1 = A[1] + A[3];
+    let x1, y1, x2, y2;
+    if (typeof b === 'number') {
+      const B = p.furn[b], bx1 = B[0] + B[2], by1 = B[1] + B[3];
+      if (Math.min(ax1, bx1) > Math.max(A[0], B[0])) { x1 = x2 = at ?? (Math.max(A[0], B[0]) + Math.min(ax1, bx1)) / 2; y1 = Math.min(ay1, by1); y2 = Math.max(A[1], B[1]); }
+      else { y1 = y2 = at ?? (Math.max(A[1], B[1]) + Math.min(ay1, by1)) / 2; x1 = Math.min(ax1, bx1); x2 = Math.max(A[0], B[0]); }
+    } else {
+      const cx = A[0] + A[2] / 2, cy = A[1] + A[3] / 2, R = p.rooms.find(r => cx > r[0] && cx < r[0] + r[2] && cy > r[1] && cy < r[1] + r[3]);
+      if (!R) return;
+      if (b === 'N' || b === 'S') { x1 = x2 = at ?? cx; y1 = b === 'N' ? R[1] : ay1; y2 = b === 'N' ? A[1] : R[1] + R[3]; }
+      else { y1 = y2 = at ?? cy; x1 = b === 'W' ? R[0] : ax1; x2 = b === 'W' ? A[0] : R[0] + R[2]; }
+    }
+    const d = Math.round((x2 - x1 + y2 - y1) * 100);
+    if (d < 5) return;
+    s += line(x1, y1, x2, y2, 'gap') + (x1 === x2
+      ? `<text x="${(x1 + .04) * U}" y="${((y1 + y2) / 2 + .035) * U}" class="gapt" style="text-anchor:start">${d}</text>`
+      : text((x1 + x2) / 2, y1 - .04, d, 'gapt'));
+  });
+  return s;
+}
 // mjere namještaja u cm (širina × dubina), uz donji ili desni rub komada
 function fdim([x, y, w, h]) {
   const t = `${Math.round(w * 100)}×${Math.round(h * 100)}`;
@@ -242,7 +270,7 @@ const plans = {
     skipDims: [0, 3, 4, 6],
     xdims: [
       [2.55, .57, '4,50'], [1.55, 2.73, '4,50'], [.47, 1.60, '2,40', 1], [4.74, .75, '2,40', 1],          // kotlovnica
-      [3.32, 3.17, '6,05'], [.47, 5.85, '5,70', 1], [3.12, 8.63, '7,20'], [6.92, 3.97, '1,15'], [7.44, 8.30, '4,90', 1],   // dnevni
+      [3.32, 3.17, '6,05'], [.47, 5.85, '5,70', 1], [2.50, 8.63, '7,20'], [6.92, 3.97, '1,15'], [7.44, 8.30, '4,90', 1],   // dnevni
       [10.25, 3.17, '1,85'], [9.02, 3.63, '0,80', 1], [8.27, 3.97, '1,15'],                             // ulazni hol
       [9.20, 5.08, '3,00'], [10.64, 3.35, '2,15', 1],
     ],
@@ -250,9 +278,11 @@ const plans = {
       + kota(.75, 1.35) + kota(8.50, 8.25),
     stairs: [6.55, .40, 2.10, 3.40, '7,14 m²'],
     chim: [[4.10, 2.40, .70, .40]],                                               // dvokanalni dimnjak: kotao + šporet
+    gaps: [[0, 2, 2.20], [2, 8], [6, 10], [4, 'W'], [9, 'S'], [10, 'S'], [10, 12], [11, 12], [12, 13], [11, 13],     // dnevni
+           [17, 'S', 9.55], [21, 'N', 3.80], [20, 21], [15, 14]],                                                   // hol, kotlovnica, kupatilo
     glass: [
       [0, 5.35, .30, 3.35],                                                        // zapad, dnevni
-      [.30, 8.70, 1.60, .30], [3.10, 8.70, 1.60, .30],                             // jug, dnevni
+      [.30, 8.70, 1.60, .30], [4.70, 8.70, 1.60, .30],                             // jug, dnevni
       [10.70, 1.70, .30, .60], [10.70, 6.73, .30, .60],                            // istok: kupatilo, mesdžid
     ],
     doors: [
@@ -263,7 +293,7 @@ const plans = {
       { r: [7.50, 3.80, .20, .90], s: [[7.50, 3.80, 6.60, 3.80, 7.50, 4.70]] },                                                   // dnevni – hol
       { r: [10.70, 3.70, .30, 1.40], s: [[10.70, 3.70, 10.30, 3.70, 10.70, 4.10], [10.70, 5.10, 9.70, 5.10, 10.70, 4.10]] }, // ulaz 40 + 100, unutra
       { r: [7.85, 5.15, .80, .20], s: [[7.85, 5.35, 7.85, 6.15, 8.65, 5.35]] },                // mesdžid iz hola
-      { r: [4.70, 8.70, 1.60, .30], s: [[4.70, 9.00, 4.70, 9.80, 5.50, 9.00], [6.30, 9.00, 6.30, 9.80, 5.50, 9.00]] },   // dnevni → jug
+      { r: [3.10, 8.70, 1.60, .30], s: [[3.10, 9.00, 3.10, 9.80, 3.90, 9.00], [4.70, 9.00, 4.70, 9.80, 3.90, 9.00]] },   // dnevni → jug
       { r: [8.10, 8.70, 1.60, .30], s: [[8.10, 9.00, 8.10, 9.80, 8.90, 9.00], [9.70, 9.00, 9.70, 9.80, 8.90, 9.00]] },   // mesdžid → jug
     ],
     furn: [
@@ -288,7 +318,7 @@ const plans = {
       [8.75, 4.35, 'Ulazni hol', '5,53 m²'], [9.30, 6.85, 'Mesdžid', '+ radna soba', '10,05 m²'],
     ],
     tiny: [
-      [2.25, 3.30, 'kuhinja'], [5.50, 9.40, 'izlaz'], [8.90, 9.40, 'izlaz'], [1.75, 4.98, 'poluotok'], [1.70, 7.10, 'sto'], [4.17, 7.10, 'garnitura'],
+      [2.25, 3.30, 'kuhinja'], [3.90, 9.40, 'izlaz'], [8.90, 9.40, 'izlaz'], [1.75, 4.98, 'poluotok'], [1.70, 7.10, 'sto'], [4.17, 7.10, 'garnitura'],
       [7.30, 6.70, 'TV'], [8.35, 7.60, 'police'], [9.80, 5.62, 'radni sto'], [10.22, 7.65, 'kibla'], [9.30, 3.28, 'ormar'],
       [7.02, 2.35, 'ostava ispod'], [7.02, 2.55, 'stepeništa'],
       [2.55, 2.20, 'pelet'], [3.60, 2.25, 'kotao'], [4.45, 2.33, 'dimnjak'], [4.60, 3.28, 'šporet'], [11.28, 3.58, 'ulaz'],
@@ -302,7 +332,7 @@ const plans = {
   },
 
   upper: {
-    W: 11.0, H: 9.0, hill: '▲ sjever – prizemlje je iznad terena: prozori i izlaz iz vešeraja',
+    W: 11.0, H: 9.0, hill: '▲ sjever – prizemlje je iznad terena: izlaz iz vešeraja',
     rooms: [
       [.30, .30, 4.20, 3.00], [.30, 3.30, 1.80, 1.30],                            // roditelji + proširenje prema terasi
       [4.70, .30, 1.65, 3.00], [8.85, .30, 1.85, 3.00],                           // vešeraj, kupatilo
@@ -318,11 +348,12 @@ const plans = {
     ],
     stairs: [6.55, .30, 2.10, 3.50, '7,35 m²'],
     chim: [[4.10, 2.40, .70, .40]],
+    gaps: [[0, 3], [0, 'S', 1.15], [0, 'W'], [6, 'E', 2.38], [11, 10],                       // roditelji, vešeraj, kupatilo
+           [15, 12], [16, 14], [12, 13], [21, 17], [20, 18, 7.80], [19, 17]],                // dječije sobe
     rail: [7.70, 3.80, 8.65, 3.80],
     glass: [
       [0, 1.20, .30, 1.40], [0, 3.65, .30, .60], [10.70, 2.10, .30, .60], [10.70, 3.70, .30, .70],
       [3.35, 8.70, 2.00, .30], [7.65, 8.70, 2.00, .30],
-      [1.10, 0, 1.60, .30], [7.10, 0, 1.00, .30], [9.40, 0, .80, .30],                         // sjever: roditelji, stepenište, kupatilo
     ],
     doors: [
       { r: [5.45, 0, .80, .30], s: [[6.25, .30, 6.25, 1.10, 5.45, .30]] },                     // izlaz iz vešeraja na sjever
@@ -380,6 +411,7 @@ function render(p) {
   p.glass.forEach(g => s += rect(...g, 'glass'));
   p.doors.forEach(d => { s += rect(...d.r, 'open'); d.s.forEach(a => s += swing(a)); if (d.l) s += line(...d.l, 'slide'); s += ddim(d.r); });
   p.furn.forEach(f => s += rect(...f, 'furn') + fdim(f));
+  s += gaps(p);
   (p.beams || []).forEach(b => s += line(...b, 'beam'));
   (p.hiwall || []).forEach(w => s += rect(...w, 'beam'));
   (p.cols || []).forEach(c => s += col(...c));
