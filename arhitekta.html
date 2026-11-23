@@ -94,6 +94,7 @@
   .colx { stroke: var(--wall); stroke-width: 1.5; }
   .kota { font-size: 13px; fill: #1d4f91; }
   .fn { font-size: 12px; fill: var(--ink); text-anchor: middle; }
+  .arch { fill: none; stroke: #d32f2f; stroke-width: 2.5; stroke-dasharray: 9 6; stroke-linejoin: round; }
   .gap { stroke: #a8a196; stroke-width: 1.2; stroke-dasharray: 4 3; }
   .gapt { font-size: 10px; fill: #9c958a; text-anchor: middle; paint-order: stroke; stroke: var(--floor); stroke-width: 3px; stroke-linejoin: round; }
   .fd { font-size: 9px; fill: var(--ink); text-anchor: middle; }
@@ -120,6 +121,7 @@
       <span><i style="background:#fff;border:2px solid var(--wall)"></i>AB stub</span>
       <span><i style="background:none;border-top:3px dashed var(--wall);border-radius:0;height:0;vertical-align:4px"></i>greda / zid iznad</span>
       <span><i style="background:none;border-top:2px dashed #a8a196;border-radius:0;height:0;vertical-align:4px"></i>razmak između namještaja (cm)</span>
+      <span><i style="background:none;border-top:2px dashed #d32f2f;border-radius:0;height:0;vertical-align:4px"></i>zid po tlocrtu arhitekte (gdje je pomjeren)</span>
       <span>mjere: prostorije u m, vrata i namještaj u cm</span>
     </div>
   </div>
@@ -256,7 +258,13 @@ const plans = {
     ],
     walls: [[8.65, 3.00, .20, .80]],
     over: [[6.55, 3.60, .95, .20]],                                               // zid ispod gornjeg kraka
-    hiwall: [[6.35, .40, .20, 2.40]],                                             // zid samo iznad stepenica, ispod otvoreno prema ostavi
+    arch: [                                                                       // zidovi po tlocrtu arhitekte, samo oni koje smo pomjerili
+      [4.10, .40, 4.30, .40, 4.30, 2.80, 4.10, 2.80],                             // kotlovnica – ostava
+      [6.45, .40, 6.65, .40, 6.65, 3.60, 7.80, 3.60, 7.80, 3.80, 6.45, 3.80],     // ostava – stepenište i zid ispod gornjeg kraka
+      [8.75, .40, 8.95, .40, 8.95, 3.80, 8.75, 3.80],                             // stepenište – kupatilo 1
+      [6.90, 5.15, 7.50, 5.15, 7.50, 5.35, 7.10, 5.35, 7.10, 8.70, 6.90, 8.70],   // dnevni – mesdžid, s nastavkom zida hol – mesdžid
+    ],
+    hiwall: [[6.35, .40, .20, 2.40]],                                            // zid samo iznad stepenica, ispod otvoreno prema ostavi
     beams: [
       [.30, 5.15, 7.50, 5.15], [.30, 5.35, 7.50, 5.35],                           // greda preko dnevnog
       [7.50, 3.80, 7.50, 5.15], [7.70, 3.80, 7.70, 5.15],                         // iznad prolaza dnevni–hol
@@ -420,6 +428,7 @@ function render(p) {
     (w > .5 ? [x + .2, x + w - .2] : [x + w / 2]).forEach(cx => s += `<circle cx="${cx * U}" cy="${(y + h / 2) * U}" r="9" class="col"/>`);
   });
   if (p.extra) s += p.extra;
+  (p.arch || []).forEach(a => s += `<polygon points="${a.map(v => v * U).join(' ')}" class="arch"/>`);
   p.labels.forEach(l => s += label(...l));
   p.tiny.forEach(t => s += text(...t, 'tiny'));
   [...p.rooms.filter((r, i) => !(p.skipDims || []).includes(i)), p.stairs, ...(p.terrace ? [p.terrace] : [])].forEach(r => s += wdims(r));
