@@ -1,0 +1,954 @@
+<!doctype html>
+<html lang="bs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tlocrt kuće – Su + P, 11 × 9 m – verzija 2</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f6f4ef; --card: #ffffff; --ink: #1f1d1a; --muted: #6b665e; --line: #ddd6c8;
+    --wall: #2a2724; --floor: #f1d9b0; --stairs: #d6d4cf; --terrace: #dfe8d2;
+    --furn: #8a7460; --glass: #7fb4d6; --accent: #c2410c;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  h2 { font-size: 1.1rem; margin: 28px 0 8px; }
+  p.lead { color: var(--muted); margin: 0 0 16px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 0 0 18px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .stat b { display: block; font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--muted); font-size: .85rem; }
+  .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 12px; }
+  h2 small { font-weight: 400; color: var(--muted); font-size: .9rem; margin-left: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; color: var(--muted); font-size: .875rem; }
+  .legend { align-items: center; }
+  .legend span { display: inline-flex; align-items: center; }
+  .legend svg.lg { display: inline-block; flex: none; width: 14px; height: 14px; margin-right: 5px; color: var(--ink); }
+  .legend i { flex: none; }
+  .legend i { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 5px; }
+  .plan { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 8px; }
+  svg { display: block; width: 100%; height: auto; }
+  .v3d { position: relative; padding: 0; overflow: hidden; background: #eef1f4; }
+  .v3d canvas { display: block; width: 100%; aspect-ratio: 16 / 10; touch-action: none; cursor: grab; }
+  .v3d canvas:active { cursor: grabbing; }
+  @media (max-width: 600px) { .v3d canvas { aspect-ratio: 1 / 1; } .lab3d span { font-size: 10px; padding: 0 4px; } }
+  .lab3d span { position: absolute; transform: translate(-50%, -50%); font-size: 12px; font-weight: 600; color: var(--ink);
+    background: rgba(255, 255, 255, .82); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; pointer-events: none; white-space: nowrap; }
+  .tools3d { display: flex; flex-wrap: wrap; gap: 8px; position: absolute; top: 8px; left: 8px; right: 8px; z-index: 2; }
+  .v3d.fs { position: fixed; inset: 0; z-index: 1000; border: 0; border-radius: 0; }
+  .v3d.fs canvas { aspect-ratio: auto; width: 100%; height: 100%; }
+  .v3d:fullscreen { border: 0; border-radius: 0; }
+  .v3d:fullscreen canvas { aspect-ratio: auto; width: 100%; height: 100%; }
+  .v3d:-webkit-full-screen { border: 0; border-radius: 0; }
+  .v3d:-webkit-full-screen canvas { aspect-ratio: auto; width: 100%; height: 100%; }
+  .tools3d button.zoom { min-width: 36px; font-weight: 600; }
+  .tools3d button { font: inherit; font-size: .9rem; padding: 5px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); cursor: pointer; }
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  td.num { white-space: nowrap; font-variant-numeric: tabular-nums; }
+  tr.sum td { font-weight: 600; }
+  ul { padding-left: 20px; margin: 0; }
+  li { margin: 4px 0; }
+
+  .wall { fill: var(--wall); }
+  .room { fill: var(--floor); }
+  .terrace { fill: var(--terrace); }
+  .balc { fill: var(--terrace); stroke: var(--wall); stroke-width: 4; }
+  td a { font-weight: 600; color: var(--accent); }
+  .stairs { fill: var(--stairs); }
+  .tread { stroke: var(--muted); stroke-width: 1.5; }
+  .open { fill: var(--floor); }
+  .glass { fill: var(--glass); }
+  .swing { fill: none; stroke: var(--ink); stroke-width: 2; }
+  .furn { fill: var(--furn); fill-opacity: .55; stroke: var(--furn); stroke-width: 2; }
+  .hill { font-size: 17px; fill: var(--muted); text-anchor: middle; font-style: italic; }
+  .name { font-size: 24px; font-weight: 600; fill: var(--ink); text-anchor: middle; }
+  .sub { font-size: 17px; fill: var(--ink); text-anchor: middle; }
+  .tiny { font-size: 14px; fill: var(--ink); text-anchor: middle; }
+  .wd { font-size: 12px; fill: var(--ink); text-anchor: middle; paint-order: stroke; stroke: var(--floor); stroke-width: 4px; stroke-linejoin: round; }
+  .rug { fill: var(--accent); fill-opacity: .18; stroke: var(--accent); stroke-width: 2; }
+  .kibla { fill: none; stroke: var(--accent); stroke-width: 4; stroke-linecap: round; }
+  i.key { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 8px; }
+  .slide { stroke: var(--ink); stroke-width: 5; }
+  .s-parcel { fill: #fbf8f1; stroke: var(--ink); stroke-width: 1.6; stroke-linejoin: round; }
+  .s-road { fill: var(--stairs); stroke: var(--muted); stroke-width: 1.2; }
+  .s-access { fill: #b9b6b0; stroke: #2f6fb0; stroke-width: 2.5; stroke-linejoin: round; }
+  .s-rwall { fill: none; stroke: #2f6fb0; stroke-width: 5; stroke-linejoin: round; }
+  .s-bl { fill: none; stroke: #2a3fd0; stroke-width: 2; stroke-dasharray: 14 9; }
+  .s-contour { fill: none; stroke: #c9a56a; stroke-width: 1.3; }
+  .s-old { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-dasharray: 10 7; }
+  .s-house { fill: #f6c56b; stroke: var(--wall); stroke-width: 5; }
+  .s-terr { fill: var(--terrace); stroke: var(--wall); stroke-width: 1.5; }
+  .s-found { fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 5 4; }
+  .s-t { font-size: 15px; fill: var(--ink); text-anchor: middle; }
+  .s-tm { font-size: 13px; fill: var(--muted); text-anchor: middle; }
+  .s-pn { font-size: 26px; fill: var(--muted); text-anchor: middle; }
+  .s-b { font-size: 18px; font-weight: 600; fill: var(--ink); text-anchor: middle; }
+  .s-l { font-size: 14px; fill: var(--ink); }
+  .beam { fill: none; stroke: var(--wall); stroke-width: 4; stroke-dasharray: 16 10; }
+  .col { fill: #fff; stroke: var(--wall); stroke-width: 2; }
+  .colx { stroke: var(--wall); stroke-width: 1.5; }
+  .kota { font-size: 13px; fill: #1d4f91; }
+  .fn { font-size: 12px; fill: var(--ink); text-anchor: middle; }
+  .arch { fill: none; stroke: #d32f2f; stroke-width: 2.5; stroke-dasharray: 9 6; stroke-linejoin: round; }
+  .archt { font-size: 13px; fill: #d32f2f; paint-order: stroke; stroke: var(--floor); stroke-width: 3px; stroke-linejoin: round; }
+  .gap { stroke: #a8a196; stroke-width: 1.2; stroke-dasharray: 4 3; }
+  .gapt { font-size: 10px; fill: #9c958a; text-anchor: middle; paint-order: stroke; stroke: var(--floor); stroke-width: 3px; stroke-linejoin: round; }
+  .fd { font-size: 9px; fill: var(--ink); text-anchor: middle; }
+  .dim { stroke: var(--muted); stroke-width: 1.5; }
+  .dimt { font-size: 17px; fill: var(--muted); text-anchor: middle; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Tlocrt kuće – Su + P, 11,00 × 9,00 m · verzija 2</h1>
+  <p class="lead">Su + P, gabarit 11,00 × 9,00 m. Suteren je isti kao u <a href="arhitekta.html">prethodnoj verziji</a>. Prizemlje (sprat) je nacrtano u 7 varijanti po prijedlozima arhitekte od 25. 11. 2026. Namještaj je naš prijedlog, arhitekta ga nije crtao.</p>
+
+  <h2>Pozicija na parceli</h2>
+  <div class="plan"><svg id="svg-site" viewBox="95 10 1100 1220" role="img" aria-label="Pozicija kuće na parceli"></svg></div>
+
+  <h2>Suteren <small>po tlocrtu arhitekte, izmijenjeni mesdžid i vrata u dnevni · bruto 99 m², neto 82 m²</small></h2>
+  <div class="bar">
+    <div class="legend">
+      <span><i style="background:var(--wall)"></i>zid (vanjski 30 cm, pregradni 20 cm)</span>
+      <span><i style="background:var(--glass)"></i>prozor / staklo</span>
+      <span><i style="background:var(--stairs)"></i>stepenište</span>
+      <span><i style="background:var(--terrace)"></i>terasa / balkon</span>
+      <span><i style="background:var(--furn);opacity:.6"></i>namještaj</span>
+      <span><i style="background:#fff;border:2px solid var(--wall)"></i>AB stub</span>
+      <span><i style="background:none;border-top:3px dashed var(--wall);border-radius:0;height:0;vertical-align:4px"></i>greda / zid iznad</span>
+      <span><i style="background:none;border-top:2px dashed #a8a196;border-radius:0;height:0;vertical-align:4px"></i>razmak između namještaja (cm)</span>
+      <span><i style="background:none;border-top:2px dashed #d32f2f;border-radius:0;height:0;vertical-align:4px"></i>zid i dimnjak po tlocrtu arhitekte (gdje su pomjereni)</span>
+      <span>mjere: prostorije u m, vrata i namještaj u cm</span>
+    </div>
+  </div>
+
+  <div class="plan"><svg id="svg-ground" viewBox="-110 -150 1330 1250" role="img" aria-label="Tlocrt suterena"></svg></div>
+
+  <h2>Suteren – 3D <small>prevucite za okretanje · štipanje, točkić (nakon klika) ili tipke + / − za zum</small></h2>
+  <div class="plan v3d" id="v3d-ground">
+    <div class="tools3d">
+      <button id="b3d-walls-ground" type="button">Zidovi: presjek na 1,20 m</button>
+      <button id="b3d-reset-ground" type="button">Reset pogleda</button>
+      <button id="b3d-zin-ground" type="button" class="zoom" aria-label="Približi" title="Približi">+</button>
+      <button id="b3d-zout-ground" type="button" class="zoom" aria-label="Udalji" title="Udalji">−</button>
+      <button id="b3d-full-ground" type="button">Cijeli ekran</button>
+    </div>
+    <canvas id="gl3d-ground" role="img" aria-label="3D prikaz suterena"></canvas><div class="lab3d" id="lab3d-ground"></div></div>
+
+  <h2 id="varijante">Prizemlje (sprat) – varijante <small>po prijedlozima arhitekte od 25. 11. 2026.</small></h2>
+  <p class="lead">U svim varijantama: sjeverne sobe duboke 3,30 m, zid prema hodniku u liniji s krajem stepeništa, hodnik 1,35 m, zid prema dječijim sobama tačno iznad grede u suterenu, dječije sobe duboke 3,35 m. Balkoni su konzolni, 1,20 m izvan gabarita, vrata se otvaraju unutra.</p>
+  <div class="plan tablewrap"><table>
+    <thead><tr><th>Varijanta</th><th>Terasa</th><th>Vešeraj</th><th>Balkon</th><th>Roditelji</th><th>Dječije sobe</th><th>Vešeraj, mjere</th></tr></thead>
+    <tbody id="var-rows"></tbody>
+  </table></div>
+  <div id="variants"></div>
+</main>
+
+<script>
+const U = 100;
+const fmt = n => n.toFixed(2).replace('.', ',');
+const rect = (x, y, w, h, cls) => `<rect x="${x*U}" y="${y*U}" width="${w*U}" height="${h*U}" class="${cls}"/>`;
+const text = (x, y, s, cls) => `<text x="${x*U}" y="${y*U}" class="${cls}">${s}</text>`;
+const line = (x1, y1, x2, y2, cls) => `<line x1="${x1*U}" y1="${y1*U}" x2="${x2*U}" y2="${y2*U}" class="${cls}"/>`;
+// krilo vrata: šarka, kraj otvorenog krila, kraj zatvorenog krila
+function swing([hx, hy, lx, ly, cx, cy]) {
+  const r = Math.hypot(lx - hx, ly - hy) * U;
+  const cross = (lx - hx) * (cy - hy) - (ly - hy) * (cx - hx);
+  return `<path class="swing" d="M${hx*U} ${hy*U}L${lx*U} ${ly*U}A${r} ${r} 0 0 ${cross > 0 ? 1 : 0} ${cx*U} ${cy*U}"/>`;
+}
+function label(cx, cy, name, ...subs) {
+  let s = text(cx, cy, name, 'name');
+  subs.forEach((t, i) => s += text(cx, cy + 0.27 * (i + 1), t, 'sub'));
+  return s;
+}
+function hdim(x1, x2, y, t) {
+  return line(x1, y, x2, y, 'dim') + line(x1, y - .07, x1, y + .07, 'dim') + line(x2, y - .07, x2, y + .07, 'dim')
+    + text((x1 + x2) / 2, y - .1, t, 'dimt');
+}
+function vdim(y1, y2, x, t) {
+  const cx = (x - .1) * U, cy = (y1 + y2) / 2 * U;
+  return line(x, y1, x, y2, 'dim') + line(x - .07, y1, x + .07, y1, 'dim') + line(x - .07, y2, x + .07, y2, 'dim')
+    + `<text class="dimt" transform="translate(${cx} ${cy}) rotate(-90)">${t}</text>`;
+}
+// mjere zidova: širina uz gornji i donji zid, dužina uz lijevi i desni
+function wdims([x, y, w, h]) {
+  const v = (px) => `<text class="wd" transform="translate(${px*U} ${(y + h / 2)*U}) rotate(-90)">${fmt(h)}</text>`;
+  return text(x + w / 2, y + .17, fmt(w), 'wd') + text(x + w / 2, y + h - .07, fmt(w), 'wd') + v(x + .17) + v(x + w - .06);
+}
+// razmaci u cm: [a, b] između dva komada (indeksi u furn) ili [a, 'N'|'S'|'E'|'W'] od komada do zida prostorije;
+// treći član po potrebi zadaje položaj linije. Računa se iz položaja namještaja, pa prati svako pomjeranje.
+function gaps(p) {
+  let s = '';
+  (p.gaps || []).forEach(([a, b, at]) => {
+    const A = p.furn[a], ax1 = A[0] + A[2], ay1 = A[1] + A[3];
+    let x1, y1, x2, y2;
+    if (typeof b === 'number') {
+      const B = p.furn[b], bx1 = B[0] + B[2], by1 = B[1] + B[3];
+      if (Math.min(ax1, bx1) > Math.max(A[0], B[0])) { x1 = x2 = at ?? (Math.max(A[0], B[0]) + Math.min(ax1, bx1)) / 2; y1 = Math.min(ay1, by1); y2 = Math.max(A[1], B[1]); }
+      else { y1 = y2 = at ?? (Math.max(A[1], B[1]) + Math.min(ay1, by1)) / 2; x1 = Math.min(ax1, bx1); x2 = Math.max(A[0], B[0]); }
+    } else {
+      const cx = A[0] + A[2] / 2, cy = A[1] + A[3] / 2, R = p.rooms.find(r => cx > r[0] && cx < r[0] + r[2] && cy > r[1] && cy < r[1] + r[3]);
+      if (!R) return;
+      if (b === 'N' || b === 'S') { x1 = x2 = at ?? cx; y1 = b === 'N' ? R[1] : ay1; y2 = b === 'N' ? A[1] : R[1] + R[3]; }
+      else { y1 = y2 = at ?? cy; x1 = b === 'W' ? R[0] : ax1; x2 = b === 'W' ? A[0] : R[0] + R[2]; }
+    }
+    const d = Math.round((x2 - x1 + y2 - y1) * 100);
+    if (d < 5) return;
+    s += line(x1, y1, x2, y2, 'gap') + (x1 === x2
+      ? `<text x="${(x1 + .04) * U}" y="${((y1 + y2) / 2 + .035) * U}" class="gapt" style="text-anchor:start">${d}</text>`
+      : text((x1 + x2) / 2, y1 - .04, d, 'gapt'));
+  });
+  return s;
+}
+// mjere namještaja u cm (širina × dubina), uz donji ili desni rub komada
+function fdim([x, y, w, h]) {
+  const t = `${Math.round(w * 100)}×${Math.round(h * 100)}`;
+  if (w < .55 && h > w)
+    return `<text class="fd" transform="translate(${(x + w - .04)*U} ${(y + h / 2)*U}) rotate(-90)">${t}</text>`;
+  return text(x + w / 2, y + h - .04, t, 'fd');
+}
+// širina vrata ili prolaza u cm, ispisana u samom otvoru
+function ddim([x, y, w, h]) {
+  if (w >= h) return text(x + w / 2, y + h / 2 + .035, Math.round(w * 100), 'fd');
+  return `<text class="fd" transform="translate(${(x + w / 2 + .035)*U} ${(y + h / 2)*U}) rotate(-90)">${Math.round(h * 100)}</text>`;
+}
+function stairs(x, y, w, len, area) {
+  let s = rect(x, y, w, len, 'stairs');
+  const sp = .2, fw = (w - sp) / 2, n = 8, td = .30, top = y + len - n * td;
+  for (let i = 0; i < n; i++) {
+    const ty = top + i * td;
+    s += line(x, ty, x + fw, ty, 'tread') + line(x + fw + sp, ty, x + w, ty, 'tread');
+  }
+  s += rect(x + fw, top, sp, n * td, 'wall');
+  s += text(x + w / 2, y + (top - y) / 2 + .02, 'Stepenište', 'tiny') + text(x + w / 2, y + (top - y) / 2 + .24, area, 'tiny');
+  s += `<text class="fn" transform="translate(${(x + fw + sp + fw / 2 + .05)*U} ${(top + n * td / 2)*U}) rotate(-90)">9 × 16,67 cm · 8 × 30 cm</text>`;
+  return s;
+}
+// AB stub (kvadrat s križem) i visinska kota
+function col(cx, cy) {
+  const a = 9, X = cx * U, Y = cy * U;
+  return `<rect x="${X - a}" y="${Y - a}" width="${2 * a}" height="${2 * a}" class="col"/>`
+    + `<path class="colx" d="M${X - a} ${Y - a}L${X + a} ${Y + a}M${X + a} ${Y - a}L${X - a} ${Y + a}"/>`;
+}
+function kota(x, y) {
+  const X = x * U, Y = y * U, r = 9, c = '#1d4f91';
+  return `<circle cx="${X}" cy="${Y}" r="${r}" fill="#fff" stroke="${c}" stroke-width="1.5"/>`
+    + `<path d="M${X} ${Y}L${X} ${Y - r}A${r} ${r} 0 0 1 ${X + r} ${Y}Z" fill="${c}"/><path d="M${X} ${Y}L${X} ${Y + r}A${r} ${r} 0 0 1 ${X - r} ${Y}Z" fill="${c}"/>`
+    + `<path d="M${X - 15} ${Y}L${X + 15} ${Y}M${X} ${Y - 15}L${X} ${Y + 15}" stroke="${c}" stroke-width="1"/>`
+    + `<text class="kota" x="${X + 16}" y="${Y - 3}">+0,10</text><text class="kota" x="${X + 16}" y="${Y + 12}">±0,00</text>`;
+}
+
+const plans = {
+  ground: {
+    W: 11.0, H: 9.0, hill: '▲ brdo – suteren je ukopan, sjeverni zid 40 cm, bez prozora',
+    hatch: [.06, .08, 10.88, .22],
+    rooms: [
+      [.30, .40, 4.50, 2.40], [5.00, .40, 1.55, 2.40], [8.85, .40, 1.85, 2.40],   // kotlovnica, ostava, kupatilo 1
+      [.30, 3.00, 6.05, 5.70], [7.70, 3.00, 3.00, 2.15], [7.70, 5.35, 3.00, 3.35], [6.33, 3.80, 1.17, 4.90], // dnevni, ulazni hol, mesdžid
+    ],
+    walls: [[8.65, 3.00, .20, .80]],
+    over: [[6.55, 3.60, .95, .20]],                                               // zid ispod gornjeg kraka
+    arch: [                                                                       // zidovi i dimnjak po tlocrtu arhitekte, samo ono što smo pomjerili
+      [2.50, .40, 3.10, .40, 3.10, .70, 2.50, .70],                               // dimnjak
+      [4.10, .40, 4.30, .40, 4.30, 2.80, 4.10, 2.80],                             // kotlovnica – ostava
+      [6.45, .40, 6.65, .40, 6.65, 3.60, 7.80, 3.60, 7.80, 3.80, 6.45, 3.80],     // ostava – stepenište i zid ispod gornjeg kraka
+      [8.75, .40, 8.95, .40, 8.95, 3.80, 8.75, 3.80],                             // stepenište – kupatilo 1
+      [6.90, 5.15, 7.50, 5.15, 7.50, 5.35, 7.10, 5.35, 7.10, 8.70, 6.90, 8.70],   // dnevni – mesdžid, s nastavkom zida hol – mesdžid
+    ],
+    archt: [[3.18, .61, 'dimnjak po arhitekti']],
+    hiwall: [[6.35, .40, .20, 2.40]],                                            // zid samo iznad stepenica, ispod otvoreno prema ostavi
+    beams: [
+      [.30, 5.15, 7.50, 5.15], [.30, 5.35, 7.50, 5.35],                           // greda preko dnevnog
+      [7.50, 3.80, 7.50, 5.15], [7.70, 3.80, 7.70, 5.15],                         // iznad prolaza dnevni–hol
+      [7.70, 3.60, 8.65, 3.60], [7.70, 3.80, 8.65, 3.80],                         // iznad ulaza na stepenište
+    ],
+    cols: [
+      [.15, 2.90], [.15, 5.25], [.15, 8.85], [10.85, 2.90], [10.85, 5.25], [10.85, 8.85],
+      [4.20, 2.90], [6.45, 2.90], [8.75, 2.90], [6.45, 3.70], [7.60, 3.70], [8.75, 3.70],
+      [7.60, 5.25], [7.60, 8.85],
+    ],
+    skipDims: [0, 3, 4, 6],
+    xdims: [
+      [1.40, .57, '4,50'], [1.55, 2.73, '4,50'], [.47, 1.60, '2,40', 1], [4.74, .75, '2,40', 1],          // kotlovnica
+      [3.32, 3.17, '6,05'], [.47, 5.85, '5,70', 1], [2.50, 8.63, '7,20'], [6.92, 3.97, '1,15'], [7.44, 8.30, '4,90', 1],   // dnevni
+      [10.25, 3.17, '1,85'], [9.02, 3.63, '0,80', 1], [8.27, 3.97, '1,15'],                             // ulazni hol
+      [9.20, 5.08, '3,00'], [10.64, 3.35, '2,15', 1],
+    ],
+    extra: `<path class="kibla" d="M970 770L1035 835M1035 835L1035 805M1035 835L1005 835"/>`
+      + kota(.75, 1.35) + kota(8.50, 8.25),
+    stairs: [6.55, .40, 2.10, 3.40, '7,14 m²'],
+    chim: [[4.10, 2.40, .70, .40]],                                               // dvokanalni dimnjak: kotao + šporet
+    gaps: [[0, 2, 2.20], [2, 8], [6, 10], [4, 'W'], [9, 'S'], [10, 'S'], [10, 12], [11, 12], [12, 13], [11, 13],     // dnevni
+           [17, 'S', 9.55], [21, 'N', 3.80], [20, 21], [15, 14]],                                                   // hol, kotlovnica, kupatilo
+    glass: [
+      [0, 5.35, .30, 3.35],                                                        // zapad, dnevni
+      [.30, 8.70, 1.60, .30], [4.70, 8.70, 1.60, .30],                             // jug, dnevni
+      [10.70, 1.70, .30, .60], [10.70, 6.73, .30, .60],                            // istok: kupatilo, mesdžid
+    ],
+    doors: [
+      { r: [0, 1.95, .30, .80], s: [[.30, 2.75, 1.10, 2.75, .30, 1.95]] },                    // kotlovnica vani
+      { r: [4.80, 1.20, .20, .80], s: [[4.80, 1.20, 4.00, 1.20, 4.80, 2.00]] },                // kotlovnica – ostava
+      { r: [5.10, 2.80, .80, .20], s: [[5.90, 3.00, 5.90, 3.80, 5.10, 3.00]] },                // ostava – dnevni
+      { r: [9.90, 2.80, .70, .20], s: [[10.60, 2.80, 10.60, 2.10, 9.90, 2.80]] },              // kupatilo 1
+      { r: [7.50, 3.80, .20, .90], s: [[7.50, 3.80, 6.60, 3.80, 7.50, 4.70]] },                                                   // dnevni – hol
+      { r: [10.70, 3.70, .30, 1.40], s: [[10.70, 3.70, 10.30, 3.70, 10.70, 4.10], [10.70, 5.10, 9.70, 5.10, 10.70, 4.10]] }, // ulaz 40 + 100, unutra
+      { r: [7.85, 5.15, .80, .20], s: [[7.85, 5.35, 7.85, 6.15, 8.65, 5.35]] },                // mesdžid iz hola
+      { r: [3.10, 8.70, 1.60, .30], s: [[3.10, 9.00, 3.10, 9.80, 3.90, 9.00], [4.70, 9.00, 4.70, 9.80, 3.90, 9.00]] },   // dnevni → jug
+      { r: [8.10, 8.70, 1.60, .30], s: [[8.10, 9.00, 8.10, 9.80, 8.90, 9.00], [9.70, 9.00, 9.70, 9.80, 8.90, 9.00]] },   // mesdžid → jug
+    ],
+    furn: [
+      [.30, 3.00, 3.95, .60], [.30, 3.60, .60, 1.70], [.90, 4.70, 1.70, .60],                  // kuhinja + poluotok
+      [1.25, 6.15, .90, 1.80],                                                                 // sto za 6
+      [.75, 6.375, .45, .45], [.75, 7.275, .45, .45], [2.20, 6.375, .45, .45], [2.20, 7.275, .45, .45],   // stolice uz strane
+      [1.475, 5.65, .45, .45], [1.475, 8.00, .45, .45],                                        // stolice na čelima
+      [3.70, 5.50, .95, 2.30], [4.65, 5.50, 1.35, .90],                                        // ugaona garnitura
+      [5.05, 6.80, 1.00, 1.00], [7.10, 5.40, .40, 2.50],                                       // klub sto, TV
+      [9.80, .40, .90, .90], [9.00, .40, .40, .65], [8.85, 1.55, .45, .55],                    // tuš, šolja, umivaonik
+      [8.85, 3.00, .90, .45],                                                                 // ormar
+      [7.70, 6.25, .30, 2.45], [8.90, 5.35, 1.80, .60],                                        // mesdžid: police, radni sto
+      [2.05, 1.75, 1.00, 1.00], [3.20, 1.85, .80, .90],                                        // pelet, kotao (uz južni zid, kotao do dimnjaka)
+      [4.30, 3.00, .60, .60],                                                                  // šporet na drva
+    ],
+    fh: [.9, .9, .9,  .75, .45, .45, .45, .45, .45, .45,  .7, .7,  .4, .5,  .1, .4, .85,  2.1,  2.0, .75,  1.5, 1.4,  .85],
+    fk: ['kitchen:S', 'counter:E', 'counter:S', 'table', 'chair:E', 'chair:E', 'chair:W', 'chair:W', 'chair:S', 'chair:N',
+         'sofa:E', 'sofa2:S', 'coffee', 'tv:W', 'shower:NE', 'wc:S', 'vanity:E', 'wardrobe:S', 'shelf:E', 'desk:S', 'pellet:N', 'boiler:N', 'cooker:S'],
+    labels: [
+      [2.55, 1.00, 'Kotlovnica', '4,50 × 2,40', '10,52 m²'], [5.77, 1.40, 'Ostava', '1,55 × 2,40', '3,72 m²'],
+      [4.40, 4.10, 'Dnevni boravak', 's kuhinjom i trpezarijom', '40,12 m²'],
+      [8.75, 4.35, 'Ulazni hol', '5,53 m²'], [9.30, 6.85, 'Mesdžid', '+ radna soba', '10,05 m²'],
+    ],
+    tiny: [
+      [2.25, 3.30, 'kuhinja'], [3.90, 9.40, 'izlaz'], [8.90, 9.40, 'izlaz'], [1.75, 4.98, 'poluotok'], [1.70, 7.10, 'sto'], [4.17, 7.10, 'garnitura'],
+      [7.30, 6.70, 'TV'], [8.35, 7.60, 'police'], [9.80, 5.62, 'radni sto'], [10.22, 7.65, 'kibla'], [9.30, 3.28, 'ormar'],
+      [7.02, 2.35, 'ostava ispod'], [7.02, 2.55, 'stepeništa'],
+      [2.55, 2.20, 'pelet'], [3.60, 2.25, 'kotao'], [4.45, 2.33, 'dimnjak'], [4.60, 3.28, 'šporet'], [11.28, 3.58, 'ulaz'],
+      [10.25, .90, 'tuš'], [10.05, 1.75, 'Kupatilo 1'], [10.05, 1.97, '4,44 m²'],
+    ],
+    top: [[.30, 4.80, '4,50'], [5.00, 6.55, '1,55'], [6.55, 8.65, '2,10'], [8.85, 10.70, '1,85']],
+    bottom: [[.30, 1.90, '1,60'], [1.90, 3.10, '1,20'], [3.10, 4.70, '1,60'], [4.70, 6.30, '1,60'],
+             [6.30, 7.50, '1,20'], [8.10, 9.70, '1,60'], [9.70, 11.00, '1,30']],
+    right: [[0, 1.70, '1,70'], [1.70, 2.30, '0,60'], [2.30, 3.70, '1,40'], [3.70, 5.10, '1,40'], [5.10, 6.73, '1,63'],
+            [6.73, 7.33, '0,60'], [7.33, 8.70, '1,38']],
+  },
+
+};
+
+// ---------- prizemlje (sprat): varijante po prijedlozima arhitekte od 25. 11. 2026. ----------
+// Zajedničko: sjeverne sobe 3,30, zid u liniji s krajem stepeništa, hodnik 1,35, zid iznad grede suterena, južne sobe 3,35.
+// o.terrace: terasa u JZ uglu ostaje · o.laundry: 'N' vešeraj na sjeveru, 'S' između dječijih soba
+// o.balc: 'kids' | 'parents' | 'shared' | 'laundry' (balkoni izvan gabarita, 1,20 m)
+function mkUpper(o) {
+  const T = !!o.terrace, LS = o.laundry === 'S', B = o.balc || '';
+  const m2 = (...rs) => rs.reduce((a, r) => a + r[2] * r[3], 0).toFixed(1).replace('.', ',') + ' m²';
+  const rooms = [], glass = [], doors = [], furn = [], fh = [], fk = [], labels = [], tiny = [], gaps = [], balc = [];
+  const lab3 = [[7.6, .9, 'Stepenište'], [9.8, 2.2, 'Kupatilo']], info = {};
+  const F = (r, h, k) => { furn.push(r); fh.push(h); fk.push(k); return furn.length - 1; };
+  const D = (r, ...s) => doors.push({ r, s });
+  const BK = (x, y, w, h) => { balc.push([x, y, w, h]); tiny.push([x + w / 2, y + h / 2, 'balkon'], [x + w / 2, y + h / 2 + .22, `${fmt(w)} × ${fmt(h)}`]); };
+
+  // sjever: roditelji s proširenjem, vešeraj ili garderoba, kupatilo; hodnik
+  const nS = T ? 5.05 : 5.15, par = [.30, .30, 4.20, 3.30], niche = [.30, 3.60, 1.80, +(nS - 3.60).toFixed(2)];
+  const nx = [4.70, .30, 1.65, 3.30], bath = [8.85, .30, 1.85, 3.30], hall = [2.30, 3.80, 8.40, 1.35];
+  rooms.push(par, niche, nx, bath, hall);
+  const bed = F([1.00, .30, 1.80, 2.00], .5, 'bed:S'); F([.50, .30, .45, .45], .5, 'night:S'); F([2.85, .30, .45, .45], .5, 'night:S');
+  F([1.50, 3.85, .60, T ? 1.15 : 1.30], 2.1, 'wardrobe:W');
+  D([3.40, 3.60, .80, .20], [3.40, 3.60, 3.40, 2.80, 4.20, 3.60]);                               // roditelji
+  glass.push(B === 'parents' ? [0, .90, .30, 1.20] : [0, 1.20, .30, 1.40], [0, T ? 3.95 : 4.05, .30, .60], [10.70, 2.10, .30, .60], [10.70, 4.10, .30, .70]);
+  labels.push([2.05, 2.78, 'Roditelji', m2(par, niche) + ' s proširenjem'], [4.30, 4.50, 'Hodnik', m2(hall)]);
+  tiny.push([1.90, 1.40, 'krevet'], [1.80, 4.50, 'ormar'], [3.55, 2.36, 'dimnjak'], [8.18, 4.02, 'ograda']);
+  gaps.push([bed, 'S', 1.15], [bed, 'W']);
+  info.par = m2(par, niche);
+  if (B === 'parents') { D([0, 2.40, .30, .90], [.30, 3.30, 1.20, 3.30, .30, 2.40]); BK(-1.20, 1.40, 1.20, 2.20); }   // bočni balkon
+  if (!LS) {                                                                                     // vešeraj na sjeveru, s izlazom
+    const wd = F([3.90, .30, .60, 2.10], 2.1, 'wardrobe:W'); gaps.push([bed, wd]);
+    F([4.70, 1.60, .60, .60], .85, 'washer:E'); const sm = F([4.80, 2.20, .60, .60], .85, 'washer:E');
+    F([4.70, .30, .60, .70], .9, 'sinkcab:E'); F([4.70, 1.00, .45, .60], 1.8, 'shelf:E');
+    gaps.push([sm, 'E', 2.50]);
+    D([5.45, 0, .80, .30], [6.25, .30, 6.25, 1.10, 5.45, .30]); D([5.45, 3.60, .80, .20], [6.25, 3.60, 6.25, 2.80, 5.45, 3.60]);
+    tiny.push([4.20, 1.40, 'ormar'], [5.85, 1.75, 'vešeraj'], [5.85, 1.97, m2(nx)], [5.00, 1.95, 'VM'], [5.10, 2.55, 'SM'], [5.85, .75, 'izlaz']);
+    lab3.push([5.85, 1.9, 'Vešeraj']); info.ves = '1,65 × 3,30 · ' + m2(nx);
+  } else {                                                                                       // garderoba roditelja umjesto vešeraja
+    F([5.75, .30, .60, 3.30], 2.1, 'wardrobe:W'); F([4.80, 3.00, .95, .60], 2.1, 'wardrobe:N');
+    D([4.50, 1.00, .20, .80], [4.50, 1.00, 3.70, 1.00, 4.50, 1.80]);
+    tiny.push([5.25, 1.75, 'garderoba'], [5.25, 1.97, m2(nx)]);
+    lab3.push([5.3, 1.6, 'Garderoba']);
+  }
+  F([8.85, .30, 1.80, .75], .55, 'tub:S'); const wc = F([10.05, 1.35, .65, .40], .4, 'wc:W'), van = F([8.85, 1.35, .45, .55], .85, 'vanity:E');
+  gaps.push([van, wc]);
+  D([9.15, 3.60, .70, .20], [9.15, 3.60, 9.15, 2.90, 9.85, 3.60]);                               // kupatilo
+  tiny.push([9.82, .72, 'kada'], [9.82, 2.45, 'kupatilo'], [9.82, 2.67, m2(bath)]);
+
+  // dječija soba: u = odmak od vanjskog bočnog zida (krevet na sprat), flip = zrcalno; k.sdoor = balkonska vrata na jugu
+  const kid = (name, x0, w, flip, k = {}) => {
+    const r = [x0, 5.35, w, 3.35]; rooms.push(r);
+    const X = (u, uw = 0) => +(flip ? x0 + w - u - uw : x0 + u).toFixed(2);
+    const [w1, w2] = k.ward || [1.50, 1.50], off = k.off || 0, e2 = off + w1 + .05 + w2;
+    const bunk = F([X(0, .95), 6.70, .95, 2.00], 1.7, flip ? 'bunk:W:f' : 'bunk:E');
+    const a1 = F([X(off, w1), 5.35, w1, .60], 2.1, 'wardrobe:S'), a2 = F([X(off + w1 + .05, w2), 5.35, w2, .60], 2.1, 'wardrobe:S');
+    const d1 = F([X(1.15, 1.30), 8.10, 1.30, .60], .75, 'desk:N');
+    tiny.push([X(off + w1 / 2), 5.70, 'ormar'], [X(e2 - w2 / 2), 5.70, 'ormar'], [X(1.80), 8.45, 'sto'], [X(.47), 7.65, 'krevet'], [X(.47), 7.87, 'na sprat']);
+    D([X(w - .90, .80), 5.15, .80, .20], [X(w - .10), 5.35, X(w - .10), 6.15, X(w - .90), 5.35]);   // iz hodnika
+    if (k.sdoor) {
+      glass.push([X(1.20, 1.20), 8.70, 1.20, .30]);
+      D([X(2.65, .90), 8.70, .90, .30], [X(3.55), 8.70, X(3.55), 7.80, X(2.65), 8.70]);            // na balkon, otvara se unutra
+      F([X(w - .60, .60), 6.35, .60, 1.30], .75, flip ? 'desk:E' : 'desk:W'); tiny.push([X(w - .30), 7.05, 'sto']);
+    } else {
+      const d2 = F([X(2.55, 1.30), 8.10, 1.30, .60], .75, 'desk:N'); tiny.push([X(3.20), 8.45, 'sto']);
+      glass.push([X(1.50, 2.00), 8.70, 2.00, .30]); gaps.push([a2, d2, X(Math.min(e2, 3.85) - .10)]);
+    }
+    if (off < .9) gaps.push([a1, bunk]);
+    gaps.push([bunk, d1]);
+    labels.push([X(w / 2 + .15), 6.70, name, `${fmt(w)} × 3,35`, m2(r)]);
+    info.kid = `${fmt(w)} × 3,35 · ${m2(r)}`;
+  };
+
+  let terrace, bottom;
+  if (T) {                                                                                       // terasa u JZ uglu ostaje
+    terrace = [.10, 5.35, 1.90, 3.55];
+    D([.45, 5.05, .90, .30], [.45, 5.35, .45, 6.25, 1.35, 5.35]); D([2.00, 5.55, .30, .90], [2.00, 6.45, 1.10, 6.45, 2.00, 5.55]);
+    kid('Dječaci', 2.30, 4.10, false, { ward: [1.05, 1.05], off: .95 }); kid('Djevojčice', 6.60, 4.10, true);
+    F([.55, 7.10, .90, .90], .75, 'table'); labels.push([1.05, 8.35, 'Terasa', m2(terrace)]);
+    bottom = [[0, 2.00, '2,00'], [2.30, 6.40, '4,10'], [6.60, 10.70, '4,10']];
+  } else if (!LS) {                                                                              // bez terase: dvije šire dječije sobe
+    const k = { ward: [1.80, 1.80], sdoor: B === 'kids' };
+    kid('Dječaci', .30, 5.10, false, k); kid('Djevojčice', 5.60, 5.10, true, k);
+    if (B === 'kids') { BK(1.40, 9.00, 2.90, 1.20); BK(6.70, 9.00, 2.90, 1.20); }
+    bottom = [[.30, 5.40, '5,10'], [5.60, 10.70, '5,10']];
+  } else {                                                                                       // bez terase: vešeraj između dječijih soba
+    const k = { sdoor: B === 'shared' }, lr = [4.60, 5.35, 1.80, 3.35], sd = B === 'shared' || B === 'laundry';
+    kid('Dječaci', .30, 4.10, false, k); rooms.push(lr); kid('Djevojčice', 6.60, 4.10, true, k);
+    F([4.60, 6.30, .60, .70], .9, 'sinkcab:E'); F([4.60, 7.05, .60, .60], .85, 'washer:E'); F([4.60, 7.65, .60, .60], .85, 'washer:E');
+    F([5.95, 6.30, .45, 1.20], 1.8, 'shelf:W');
+    D([5.10, 5.15, .80, .20], [5.90, 5.35, 5.90, 6.15, 5.10, 5.35]);
+    if (sd) D([5.25, 8.70, .90, .30], [6.15, 8.70, 6.15, 7.80, 5.25, 8.70]); else glass.push([5.00, 8.70, 1.00, .30]);
+    if (B === 'shared') BK(2.60, 9.00, 5.80, 1.20);
+    if (B === 'laundry') BK(4.30, 9.00, 2.40, 1.20);
+    tiny.push([5.57, 6.80, 'vešeraj'], [5.57, 7.02, m2(lr)], [4.90, 7.40, 'VM'], [4.90, 8.00, 'SM']);
+    lab3.push([5.5, 7.0, 'Vešeraj']); info.ves = '1,80 × 3,35 · ' + m2(lr);
+    bottom = [[.30, 4.40, '4,10'], [4.60, 6.40, '1,80'], [6.60, 10.70, '4,10']];
+  }
+
+  return {
+    W: 11.0, H: 9.0, hill: '▲ sjever – prizemlje je iznad terena' + (LS ? '' : ': izlaz iz vešeraja'),
+    rooms, terrace, walls: [], skipDims: [0, 1], balc, glass, doors, furn, fh, fk, labels, tiny, gaps, lab3, info,
+    padS: balc.some(b => b[1] >= 9) ? .9 : 0, padW: balc.some(b => b[0] < 0) ? 1.2 : 0,
+    xdims: [[3.60, .47, '4,20'], [4.44, LS ? 2.15 : 1.80, '3,30', 1], [2.75, 3.53, '2,40'], [.47, 4.00, fmt(nS - .30), 1],
+            [1.20, nS - .07, '1,80'], [2.04, 4.45, fmt(nS - 3.60), 1]],
+    stairs: [6.55, .30, 2.10, 3.50, '7,35 m²'], chim: [[4.10, 2.40, .70, .40]], rail: [7.70, 3.80, 8.65, 3.80],
+    arch: [                                                                       // iz arhitektinog suterena: dimnjak i zidovi stepenišnog okna
+      [2.50, .40, 3.10, .40, 3.10, .70, 2.50, .70],
+      [6.45, .30, 6.65, .30, 6.65, 3.80, 6.45, 3.80], [8.75, .30, 8.95, .30, 8.95, 3.80, 8.75, 3.80],
+    ],
+    archt: [[2.30, .90, 'dimnjak po arhitekti']],
+    top: [[.30, 4.50, '4,20'], [4.70, 6.35, '1,65'], [6.55, 8.65, '2,10'], [8.85, 10.70, '1,85']],
+    bottom, right: [[.30, 3.60, '3,30'], [3.80, 5.15, '1,35'], [5.35, 8.70, '3,35']],
+  };
+}
+
+function render(p) {
+  let s = '';
+  s += rect(0, 0, p.W, p.H, 'wall');
+  if (p.hatch) s += `<defs><pattern id="hatch" width="9" height="9" patternUnits="userSpaceOnUse"><path d="M0 0L9 9M9 0L0 9" stroke="#2a2724" stroke-width="1"/></pattern></defs>`
+    + rect(...p.hatch, 'col').replace('class="col"', 'fill="#fff"') + rect(...p.hatch, 'col').replace('class="col"', 'fill="url(#hatch)"');
+  p.rooms.forEach(r => s += rect(...r, 'room'));
+  if (p.terrace) s += rect(...p.terrace, 'terrace');
+  (p.balc || []).forEach(b => s += rect(...b, 'balc'));
+  p.walls.forEach(w => s += rect(...w, 'wall'));
+  s += stairs(...p.stairs);
+  (p.over || []).forEach(w => s += rect(...w, 'wall'));
+  if (p.rail) s += line(...p.rail, 'swing');
+  p.glass.forEach(g => s += rect(...g, 'glass'));
+  p.doors.forEach(d => { s += rect(...d.r, 'open'); d.s.forEach(a => s += swing(a)); if (d.l) s += line(...d.l, 'slide'); s += ddim(d.r); });
+  p.furn.forEach(f => s += rect(...f, 'furn') + fdim(f));
+  s += gaps(p);
+  (p.beams || []).forEach(b => s += line(...b, 'beam'));
+  (p.hiwall || []).forEach(w => s += rect(...w, 'beam'));
+  (p.cols || []).forEach(c => s += col(...c));
+  (p.chim || []).forEach(([x, y, w, h]) => {                                    // dimnjak: po jedan krug za svaki kanal
+    s += rect(x, y, w, h, 'col');
+    (w > .5 ? [x + .2, x + w - .2] : [x + w / 2]).forEach(cx => s += `<circle cx="${cx * U}" cy="${(y + h / 2) * U}" r="9" class="col"/>`);
+  });
+  if (p.extra) s += p.extra;
+  (p.arch || []).forEach(a => s += `<polygon points="${a.map(v => v * U).join(' ')}" class="arch"/>`);
+  (p.archt || []).forEach(t => s += text(...t, 'archt'));
+  p.labels.forEach(l => s += label(...l));
+  p.tiny.forEach(t => s += text(...t, 'tiny'));
+  [...p.rooms.filter((r, i) => !(p.skipDims || []).includes(i)), p.stairs, ...(p.terrace ? [p.terrace] : [])].forEach(r => s += wdims(r));
+  (p.xdims || []).forEach(([x, y, t, rot]) => s += rot ? `<text class="wd" transform="translate(${x*U} ${y*U}) rotate(-90)">${t}</text>` : text(x, y, t, 'wd'));
+  p.top.forEach(([a, b, t]) => s += hdim(a, b, -.45, t));
+  const oS = p.padS || 0, oW = p.padW || 0;                                     // pomak kota kad balkon izlazi iz gabarita
+  p.bottom.forEach(([a, b, t]) => s += hdim(a, b, p.H + 1.05 + oS, t));
+  (p.right || []).forEach(([a, b, t]) => s += vdim(a, b, p.W + .75, t));
+  if (p.hill) s += text(p.W / 2, -1.0, p.hill === true ? '▲ brdo – ukopani zid, bez prozora' : p.hill, 'hill');
+  s += hdim(0, p.W, p.H + 1.6 + oS, fmt(p.W) + ' m') + vdim(0, p.H, -.55 - oW, fmt(p.H) + ' m');
+  return s;
+}
+
+
+// ---------- situacija (pozicija kuće na parceli), precrtano pojednostavljeno iz situacije 1:250 ----------
+const SITE = (() => {
+  const P = pts => pts.map(q => q.join(',')).join(' ');
+  const K = 17.45, OX = 481, OY = 445, TH = 7.45;      // px po metru, sjeverozapadni ugao ranijeg objekta, zakret
+  const poly = (pts, cls) => `<polygon class="${cls}" points="${P(pts)}"/>`;
+  const pline = (pts, cls) => `<polyline class="${cls}" points="${P(pts)}"/>`;
+  const t = (x, y, str, cls, rot) => `<text x="${x}" y="${y}" class="${cls}"${rot ? ` transform="rotate(${rot} ${x} ${y})"` : ''}>${str}</text>`;
+  let s = '';
+  // javni put na jugu i put uz sjeverozapadnu među
+  s += poly([[300, 1160], [583, 1142], [1090, 1170], [1090, 1218], [583, 1190], [300, 1208]], 's-road');
+  s += poly([[275, 395], [480, 330], [540, 300], [660, 235], [700, 205], [755, 45], [748, 20],
+             [850, 20], [845, 150], [780, 250], [660, 335], [570, 375], [540, 395], [333, 425]], 's-road');
+  // parcele
+  s += poly([[653, 372], [660, 335], [780, 250], [845, 150], [850, 20], [1180, 20], [1183, 170], [1163, 538]], 's-parcel');              // 3522
+  s += poly([[275, 395], [333, 425], [540, 395], [653, 372], [1163, 538], [1143, 700], [1105, 695], [850, 670],
+             [846, 747], [770, 728], [383, 606], [350, 537]], 's-parcel');                                                              // 3523
+  s += poly([[383, 606], [770, 728], [846, 747], [848, 760], [810, 1138], [583, 1142], [585, 1070], [505, 860], [440, 720]], 's-parcel'); // 3524
+  s += poly([[850, 670], [1105, 695], [1083, 1170], [810, 1138], [848, 750]], 's-parcel');                                               // 3525
+  // izohipse (orijentaciono), teren raste prema sjeveroistoku
+  [[950, 270, '447'], [1005, 440, '445'], [755, 455, '442'], [865, 645, '440'], [580, 665, '438'], [750, 900, '436']].forEach(([px, py, lab]) => {
+    const y = x => py + (x - px) * .513;
+    s += pline([[300, y(300)], [1165, y(1165)]], 's-contour') + t(1178, y(1178) + 4, lab, 's-tm');
+  });
+  // građevinska linija
+  s += pline([[120, 558], [650, 385], [690, 330], [955, 45]], 's-bl');
+  // kolski pristup i raniji temelji uz put
+  s += poly([[467, 557], [530, 565], [523, 624], [518, 715], [540, 780], [585, 880], [650, 1020], [655, 1090], [625, 1142],
+             [590, 1142], [600, 1070], [580, 1020], [510, 840], [465, 740], [450, 670]], 's-access');
+  s += `<rect x="623" y="947" width="139" height="168" class="s-found"/>`;
+  // potporni zidovi (opciono, iz ranijeg projekta)
+  s += pline([[802, 487], [840, 492], [822, 628]], 's-rwall') + pline([[523, 650], [520, 725], [763, 760], [767, 725]], 's-rwall');
+  // raniji objekat (18,55 × 9,90 m) i nova kuća 11,00 × 9,00 m, gurnuta skroz desno, uz sjevernu ivicu
+  const m = v => v * K;
+  s += `<g transform="translate(${OX} ${OY}) rotate(${TH})">`;
+  s += poly([[0, 0], [m(18.55), 0], [m(18.55), m(9.9)], [m(3.75), m(9.9)], [m(3.75), m(6.4)], [0, m(6.4)]], 's-old');
+  s += `<rect x="${m(7.55)}" y="0" width="${m(11)}" height="${m(9)}" class="s-house"/>`;
+  s += `<rect x="${m(7.55)}" y="${m(4.9)}" width="${m(2.0)}" height="${m(4.1)}" class="s-terr"/>`;
+  s += t(m(14.0), m(4.2), 'Nova kuća', 's-b') + t(m(14.0), m(5.4), '11,00 × 9,00 m', 's-t') + t(m(14.0), m(6.5), 'Su + P', 's-tm');
+  s += t(m(8.55), m(7.2), 'terasa', 's-tm', -90);
+  s += t(m(13.05), -8, '11,00', 's-t') + t(m(3.78), -8, '7,55', 's-t') + t(m(18.55) + 16, m(4.5), '9,00', 's-t', 90);
+  s += t(m(3.9), m(3.4), 'slobodno', 's-tm') + t(m(3.9), m(4.3), 'plato / parking', 's-tm') + t(m(3.9), m(5.2), '≈ 7,5 × 9,9 m', 's-tm');
+  s += `<path d="M${m(18.55) + 34} ${m(4.0)}L${m(18.55) + 6} ${m(4.0)}M${m(18.55) + 6} ${m(4.0)}l9 -6M${m(18.55) + 6} ${m(4.0)}l9 6" class="kibla" style="stroke-width:2.5"/>`;
+  s += t(m(18.55) + 58, m(4.0) + 5, 'ulaz', 's-tm');
+  s += `</g>`;
+  // natpisi
+  s += t(1050, 125, '3522', 's-pn') + t(440, 255, '3529', 's-pn') + t(985, 610, '3523', 's-pn') + t(700, 860, '3524', 's-pn')
+     + t(965, 900, '3525', 's-pn') + t(190, 640, '3528/1', 's-pn');
+  s += t(700, 1186, 'javni put', 's-t', 3) + t(610, 290, 'put', 's-t', -28) + t(505, 930, 'kolski pristup', 's-t', 64)
+     + t(908, 560, 'potporni zid', 's-tm') + t(908, 577, '(opciono)', 's-tm') + t(650, 795, 'zid platoa (opciono)', 's-tm', 8)
+     + t(300, 478, 'građevinska linija', 's-tm', -18) + t(692, 1035, 'raniji temelji', 's-tm');
+  // legenda i razmjer
+  const L = (y, sw, label) => `${sw}<text x="168" y="${y + 5}" class="s-l">${label}</text>`;
+  s += `<rect x="108" y="742" width="330" height="236" rx="8" fill="var(--card)" stroke="var(--line)"/>`;
+  s += L(772, `<rect x="122" y="762" width="34" height="18" class="s-house" style="stroke-width:2.5"/>`, 'nova kuća 11,00 × 9,00 m');
+  s += L(802, `<rect x="122" y="792" width="34" height="18" class="s-old"/>`, 'raniji projekat 18,55 × 9,90 m');
+  s += L(832, `<rect x="122" y="822" width="34" height="18" class="s-access"/>`, 'kolski pristup');
+  s += L(862, `<line x1="122" y1="862" x2="156" y2="862" class="s-rwall"/>`, 'potporni zid (opciono)');
+  s += L(892, `<line x1="122" y1="892" x2="156" y2="892" class="s-bl"/>`, 'građevinska linija');
+  s += L(922, `<line x1="122" y1="922" x2="156" y2="922" stroke="var(--ink)" stroke-width="1.6"/>`, 'granica parcele');
+  s += L(952, `<line x1="122" y1="952" x2="156" y2="952" class="s-contour"/>`, 'izohipse (orijentaciono, m n.v.)');
+  s += `<line x1="122" y1="1030" x2="${122 + 10 * K}" y2="1030" stroke="var(--ink)" stroke-width="3"/>`
+     + `<line x1="122" y1="1023" x2="122" y2="1037" stroke="var(--ink)" stroke-width="2"/>`
+     + `<line x1="${122 + 10 * K}" y1="1023" x2="${122 + 10 * K}" y2="1037" stroke="var(--ink)" stroke-width="2"/>`
+     + `<text x="${122 + 5 * K}" y="1018" class="s-t">10 m</text>`;
+  s += `<text x="108" y="1075" class="s-l" style="fill:var(--muted)">Pojednostavljeno prema situaciji 1:250 iz idejnog projekta.</text>`;
+  return s;
+})();
+
+document.getElementById('svg-site').innerHTML = SITE;
+document.getElementById('svg-ground').innerHTML = render(plans.ground);
+
+// ---------- 3D prikaz etaže (WebGL, bez biblioteka); model se gradi iz istih podataka kao 2D crtež ----------
+// opt.down: stepenište se s ove etaže spušta (prizemlje); inače se penje (suteren). opt.labels: dodatni natpisi.
+function view3d(P, id, opt) {
+  const cv = document.getElementById('gl3d-' + id), wrap = document.getElementById('v3d-' + id), labBox = document.getElementById('lab3d-' + id);
+  const gl = cv.getContext('webgl', { antialias: true });
+  if (!gl) { wrap.innerHTML = '<p style="padding:16px;margin:0">Ovaj preglednik ne podržava WebGL, pa 3D prikaz nije dostupan.</p>'; return; }
+  const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255);
+  const C = { wall: hex('#efe9dc'), cut: hex('#2a2724'), floor: hex('#f1d9b0'), terr: hex('#cfe0bd'), furn: hex('#a58c74'), furnTop: hex('#bda58c'),
+              stair: hex('#d6d4cf'), glass: hex('#7fb4d6'), slab: hex('#b9b2a4'), shaft: hex('#8f8a80') };
+  const inR = (r, x, y) => x > r[0] && x < r[0] + r[2] && y > r[1] && y < r[1] + r[3];
+  let full = false, nOpaque = 0, nAll = 0, wallH = 2.6;
+  const buf = gl.createBuffer();
+
+  // kutija: x istok, y visina, z jug; c boja stranica, ct boja gornje plohe, a prozirnost
+  function box(out, x0, x1, y0, y1, z0, z1, c, ct = c, a = 1) {
+    const f = (n, col, ...q) => { for (const i of [0, 1, 2, 0, 2, 3]) out.push(q[i][0], q[i][1], q[i][2], n[0], n[1], n[2], col[0], col[1], col[2], a); };
+    f([0, 1, 0], ct, [x0, y1, z0], [x0, y1, z1], [x1, y1, z1], [x1, y1, z0]);
+    f([0, -1, 0], c, [x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1]);
+    f([0, 0, 1], c, [x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1]);
+    f([0, 0, -1], c, [x1, y0, z0], [x0, y0, z0], [x0, y1, z0], [x1, y1, z0]);
+    f([1, 0, 0], c, [x1, y0, z1], [x1, y0, z0], [x1, y1, z0], [x1, y1, z1]);
+    f([-1, 0, 0], c, [x0, y0, z0], [x0, y0, z1], [x0, y1, z1], [x0, y1, z0]);
+  }
+
+  // ---------- namještaj: modeli složeni od kutija; u ide po širini, v od leđa (zid) prema frontu ----------
+  const M = { wood: hex('#b58d62'), woodD: hex('#8c6a49'), white: hex('#f3f1ec'), whiteD: hex('#d6d3cc'), top: hex('#55524e'), steel: hex('#b9bec3'),
+              steelD: hex('#8a9096'), black: hex('#26262a'), screen: hex('#3b4652'), fab: hex('#7f8d9b'), fabL: hex('#9eabb8'), mat: hex('#f2eee6'),
+              pil: hex('#ffffff'), duv: hex('#9fb6c9'), duv2: hex('#e3b9a4'), duv3: hex('#b5cfa8'), cer: hex('#fbfbf9'), gap: hex('#5a5148'),
+              red: hex('#b5533c'), grey: hex('#a3a6a8'), dgrey: hex('#6e7377'), mirror: hex('#cfe2ec') };
+  const PAL = [M.duv, M.duv2, M.duv3, M.whiteD, M.woodD, M.fab, M.red];
+  function furnish(v, g, f, kind, h) {
+    const [type, dir = 'S', flag] = kind.split(':'), [fx, fz, fw, fd] = f, ew = dir === 'E' || dir === 'W';
+    const w = ew ? fd : fw, d = ew ? fw : fd;
+    const b = (u0, u1, y0, y1, v0, v1, c, ct) => {
+      const [x0, x1] = dir === 'S' ? [fx + u0, fx + u1] : dir === 'N' ? [fx + fw - u1, fx + fw - u0] : dir === 'E' ? [fx + v0, fx + v1] : [fx + fw - v1, fx + fw - v0];
+      const [z0, z1] = dir === 'S' ? [fz + v0, fz + v1] : dir === 'N' ? [fz + fd - v1, fz + fd - v0] : dir === 'E' ? [fz + u0, fz + u1] : [fz + fd - u1, fz + fd - u0];
+      box(v, x0, x1, y0, y1, z0, z1, c, ct);
+    };
+    const vline = (u, y0, y1, vf) => b(u - .004, u + .004, y0, y1, vf, vf + .01, M.gap);          // fuga između fronti
+    const hline = (u0, u1, y, vf) => b(u0, u1, y - .004, y + .004, vf, vf + .01, M.gap);
+    const legs = (u0, u1, v0, v1, y1, t, c) => { for (const u of [u0, u1 - t]) for (const q of [v0, v1 - t]) b(u, u + t, 0, y1, q, q + t, c); };
+    const tap = (u, y, vb, reach) => { b(u - .015, u + .015, y, y + .22, vb, vb + .03, M.steel); b(u - .015, u + .015, y + .19, y + .22, vb, vb + reach, M.steel); };
+    const counter = (u0, u1) => {                                                               // donji kuhinjski elementi s radnom pločom
+      b(u0, u1, 0, .1, 0, d - .06, M.black); b(u0, u1, .1, .86, 0, d - .02, M.white);
+      const n = Math.max(1, Math.round((u1 - u0) / .6)), cw = (u1 - u0) / n;
+      for (let k = 0; k < n; k++) { const a = u0 + k * cw; if (k) vline(a, .1, .86, d - .02); b(a + cw / 2 - .07, a + cw / 2 + .07, .78, .795, d - .02, d - .002, M.steelD); }
+      b(u0, u1, .86, .9, 0, d, M.top);
+    };
+    const tbl = (ht, c, t) => { b(0, w, ht - .04, ht, 0, d, c); legs(.04, w - .04, .04, d - .04, ht - .04, t, c); };
+    switch (type) {
+      case 'kitchen': {                                                                         // niz: sudoper, ploča za kuhanje, frižider, element do šporeta
+        const fu = w - 1.2, fe = fu + .6; counter(0, fu); counter(fe, w);
+        b(fu, fe, 0, 2, 0, d - .02, M.steel); hline(fu, fe, 1.25, d - .02);
+        b(fu + .05, fu + .07, .7, 1.15, d - .02, d + .01, M.steelD); b(fu + .05, fu + .07, 1.35, 1.75, d - .02, d + .01, M.steelD);
+        b(.7, 1.5, .9, .908, .08, d - .08, M.steel); b(.75, 1.2, .9, .916, .12, d - .12, M.steelD); tap(.98, .9, .03, .2);
+        b(1.75, 2.35, .9, .91, .05, d - .05, M.black); for (const u of [1.85, 2.11]) for (const q of [.1, .32]) b(u, u + .15, .91, .918, q, q + .15, M.gap);
+        if (full) { b(0, fu, 1.45, 2.15, 0, .35, M.white); for (let u = .6; u < fu - .1; u += .6) vline(u, 1.45, 2.15, .35); }
+        break; }
+      case 'counter': counter(0, w); break;
+      case 'sinkcab': counter(0, w); b(.08, w - .08, .9, .908, .08, d - .08, M.steel); b(.13, w - .13, .9, .916, .14, d - .12, M.steelD); tap(w / 2, .9, .03, .2); break;
+      case 'table': tbl(.75, M.wood, .06); break;
+      case 'coffee': tbl(.4, M.woodD, .04); b(.06, w - .06, .12, .14, .06, d - .06, M.woodD); break;
+      case 'chair':
+        legs(0, w, 0, d, .43, .035, M.woodD); b(0, w, .43, .47, 0, d, M.fabL);
+        b(0, .035, .47, .9, 0, .035, M.woodD); b(w - .035, w, .47, .9, 0, .035, M.woodD); b(.035, w - .035, .6, .9, .005, .03, M.fabL);
+        break;
+      case 'sofa': case 'sofa2': {                                                              // ugaona garnitura: sofa = glavni dio s uglom, sofa2 = krak
+        const aL = type === 'sofa' ? .22 : 0, aR = .2;
+        b(0, w, .04, .25, 0, d, M.fab); b(0, w, .25, .85, 0, .22, M.fab);
+        if (aL) b(0, aL, .25, .85, .22, d, M.fab);
+        b(w - aR, w, .25, .62, .22, d, M.fab);
+        const n = Math.max(1, Math.round((w - aL - aR) / .75)), cw = (w - aL - aR) / n;
+        for (let k = 0; k < n; k++) { const u = aL + k * cw; b(u + .01, u + cw - .01, .25, .44, .36, d, M.fabL); b(u + .01, u + cw - .01, .44, .8, .22, .36, M.fabL); }
+        break; }
+      case 'tv': {                                                                              // komoda + ekran 65"
+        const c = w / 2;
+        b(.05, w - .05, 0, .08, .03, d - .05, M.black); b(0, w, .08, .45, 0, d - .02, M.wood);
+        for (let k = 1; k < 4; k++) vline(k * w / 4, .08, .45, d - .02);
+        b(c - .2, c + .2, .45, .47, .08, .3, M.black); b(c - .03, c + .03, .47, .6, .16, .2, M.black);
+        b(c - .72, c + .72, .58, 1.41, .16, .2, M.black); b(c - .7, c + .7, .6, 1.39, .2, .21, M.screen);
+        break; }
+      case 'shower': {                                                                          // dir = zidovi uz koje stoji (npr. NE); staklo na ostalim stranama
+        const x1 = fx + fw, z1 = fz + fd, pane = (a, c, e, q) => box(g, a, c, .08, 2, e, q, C.glass, C.glass, .3);
+        box(v, fx, x1, 0, .08, fz, z1, M.cer); box(v, fx + fw / 2 - .05, fx + fw / 2 + .05, .08, .09, fz + fd / 2 - .05, fz + fd / 2 + .05, M.steelD);
+        if (!dir.includes('W')) pane(fx, fx + .015, fz, z1); if (!dir.includes('E')) pane(x1 - .015, x1, fz, z1);
+        if (!dir.includes('N')) pane(fx, x1, fz, fz + .015); if (!dir.includes('S')) pane(fx, x1, z1 - .015, z1);
+        const n = dir.includes('N'), zc = n ? fz : z1 - .04, xc = fx + fw / 2;
+        box(v, xc - .015, xc + .015, .9, 2.1, zc, zc + .04, M.steel); box(v, xc - .11, xc + .11, 2.08, 2.1, n ? zc : zc - .26, n ? zc + .3 : zc + .04, M.steel);
+        break; }
+      case 'wc':
+        b(0, w, .38, .8, 0, .17, M.cer); b(.06, w - .06, 0, .36, .12, d - .08, M.cer); b(.01, w - .01, .36, .41, .17, d, M.cer, M.whiteD);
+        b(w / 2 - .03, w / 2 + .03, .8, .81, .06, .11, M.steel);
+        break;
+      case 'vanity':
+        b(0, w, .3, .78, 0, d - .03, M.wood); hline(0, w, .54, d - .03); b(0, w, .78, .85, 0, d, M.cer); b(.07, w - .07, .85, .86, .1, d - .06, M.whiteD);
+        tap(w / 2, .85, .03, .14); if (full) b(.03, w - .03, 1.1, 1.8, 0, .02, M.mirror);
+        break;
+      case 'wardrobe': {
+        const n = Math.max(1, Math.round(w / .5));
+        b(0, w, 0, .08, 0, d - .05, M.black); b(0, w, .08, h, 0, d - .02, M.white);
+        for (let k = 0; k < n; k++) { if (k) vline(k * w / n, .08, h, d - .02); const hu = (k + (k % 2 ? .12 : .88)) * w / n; b(hu - .01, hu + .01, .95, 1.2, d - .02, d + .005, M.steelD); }
+        break; }
+      case 'shelf': {                                                                           // otvorene police sa sadržajem
+        const n = Math.max(2, Math.round(h / .36)), st = (h - .02) / n;
+        b(0, .02, 0, h, 0, d, M.wood); b(w - .02, w, 0, h, 0, d, M.wood); b(.02, w - .02, 0, h, 0, .012, M.woodD);
+        for (let k = 0; k <= n; k++) {
+          const y = k * st; b(.02, w - .02, y, y + .02, .012, d, M.wood);
+          if (k === n) break;
+          for (let u = .05, q = k * 7 + 3; u < w - .2;) {
+            q = (q * 13 + 5) % 17; const bw = .1 + (q % 4) * .04, bh = Math.min(st - .05, .16 + (q % 5) * .03);
+            if (q % 6) b(u, u + bw, y + .02, y + .02 + bh, .03, d - .03, PAL[q % PAL.length]);
+            u += bw + .01 + (q % 3 ? 0 : .08);
+          }
+        }
+        break; }
+      case 'desk':
+        b(0, w, .72, .75, 0, d, M.wood); b(0, .03, 0, .72, .03, d - .03, M.wood); b(w - .03, w, 0, .72, .03, d - .03, M.wood); b(.03, w - .03, .4, .72, .03, .05, M.woodD);
+        b(w - .45, w - .03, .1, .72, .06, d - .04, M.white); for (const y of [.3, .5]) hline(w - .45, w - .03, y, d - .04);
+        break;
+      case 'pellet':
+        b(.05, w - .05, 0, .1, .05, d - .05, M.black); b(0, w, .1, h - .08, 0, d, M.grey); b(-.02, w + .02, h - .08, h, -.02, d + .02, M.steelD);
+        b(w / 2 - .15, w / 2 + .15, .2, .45, d, d + .01, M.steelD);
+        break;
+      case 'boiler':
+        b(0, w, 0, h, 0, d - .03, M.dgrey); b(.08, w - .08, .2, .95, d - .03, d - .01, M.red); b(.08, w - .08, 1.05, 1.28, d - .03, d - .015, M.black);
+        b(w - .16, w - .13, .45, .7, d - .01, d + .015, M.steelD); b(w / 2 - .08, w / 2 + .08, h, h + .35, .1, .26, M.steelD);
+        break;
+      case 'bed':
+        b(.06, w - .06, 0, .1, .06, d - .06, M.black); b(0, w, .1, .3, 0, d, M.wood); b(.03, w - .03, .3, .5, .08, d - .02, M.mat); b(0, w, 0, 1, 0, .06, M.wood);
+        b(.12, w / 2 - .06, .5, .6, .14, .52, M.pil); b(w / 2 + .06, w - .12, .5, .6, .14, .52, M.pil); b(0, w, .38, .57, .65, d, M.duv3);
+        break;
+      case 'night':
+        b(.03, w - .03, 0, .05, .03, d - .05, M.black); b(0, w, .05, .5, 0, d - .02, M.wood); hline(0, w, .28, d - .02);
+        for (const y of [.15, .37]) b(w / 2 - .03, w / 2 + .03, y, y + .02, d - .02, d, M.steelD);
+        break;
+      case 'bunk': {                                                                            // dir = otvorena strana; ljestve na početku (flag: na kraju)
+        const U = (u0, u1, ...r) => flag ? b(w - u1, w - u0, ...r) : b(u0, u1, ...r), col = dir === 'E' ? M.duv : M.duv2;
+        for (const u of [0, w - .05]) for (const q of [0, d - .05]) U(u, u + .05, 0, 1.75, q, q + .05, M.wood);
+        for (const y of [.25, 1.25]) {
+          U(0, w, y, y + .06, 0, d, M.wood); U(.05, w - .05, y + .06, y + .2, .04, d - .04, M.mat);
+          U(w - .5, w - .1, y + .2, y + .28, .15, d - .15, M.pil); U(.05, w - .65, y + .18, y + .26, .03, d - .03, col);
+          for (const u of [0, w - .03]) U(u, u + .03, y + .3, y + .5, .05, d - .05, M.wood);        // uzglavlje i podnožje
+        }
+        U(0, w, 1.55, 1.61, 0, .03, M.wood); U(.55, w, 1.55, 1.61, d - .03, d, M.wood);             // ograda gornjeg ležaja
+        for (const u of [.06, .47]) U(u, u + .03, 0, 1.61, d, d + .03, M.wood);                      // ljestve
+        for (const y of [.3, .6, .9, 1.2]) U(.09, .47, y, y + .03, d, d + .03, M.wood);
+        break; }
+      case 'cooker':                                                                            // šporet na drva, cijev kroz zid u dimnjak
+        b(0, w, 0, .08, .03, d - .05, M.black); b(0, w, .08, .82, 0, d - .02, M.white); b(0, w, .82, .85, 0, d, M.black);
+        b(.06, w - .06, .2, .55, d - .02, d - .008, M.steelD); b(.06, w / 2, .6, .78, d - .02, d - .008, M.black);
+        b(.24, .36, .85, 1.6, .04, .16, M.steelD); b(.24, .36, 1.48, 1.6, -.3, .04, M.steelD);
+        break;
+      case 'washer':
+        b(0, w, 0, .85, 0, d - .02, M.white); b(w / 2 - .19, w / 2 + .19, .2, .58, d - .02, d - .008, M.steelD); b(w / 2 - .14, w / 2 + .14, .25, .53, d - .02, d, M.black);
+        b(.03, w - .03, .7, .8, d - .02, d - .01, M.steel);
+        break;
+      case 'tub': {
+        const t = .07, th = h + .01;
+        b(0, w, 0, th, 0, t, M.cer); b(0, w, 0, th, d - t, d, M.cer); b(0, t, 0, th, t, d - t, M.cer); b(w - t, w, 0, th, t, d - t, M.cer); b(t, w - t, 0, .14, t, d - t, M.whiteD);
+        b(w - .05, w - .02, th, th + .16, d / 2 - .015, d / 2 + .015, M.steel); b(w - .2, w - .02, th + .13, th + .16, d / 2 - .015, d / 2 + .015, M.steel);
+        break; }
+      default: box(v, fx, fx + fw, 0, h, fz, fz + fd, C.furn, C.furnTop);
+    }
+  }
+
+  function build() {
+    const H = wallH = full ? 2.6 : 1.2, v = [], g = [], st = P.stairs, T = P.terrace, doorR = P.doors.map(d => d.r), BL = P.balc || [];
+    const rects = [...P.rooms, ...P.walls, ...P.glass, ...doorR, st, ...(T ? [T] : [])];
+    const uniq = a => [...new Set(a.map(n => +n.toFixed(3)))].sort((a, b) => a - b);
+    const xs = uniq([0, P.W, ...rects.flatMap(r => [r[0], r[0] + r[2]])]), ys = uniq([0, P.H, ...rects.flatMap(r => [r[1], r[1] + r[3]])]);
+    for (let i = 0; i < xs.length - 1; i++) for (let j = 0; j < ys.length - 1; j++) {
+      const x0 = xs[i], x1 = xs[i + 1], z0 = ys[j], z1 = ys[j + 1], cx = (x0 + x1) / 2, cy = (z0 + z1) / 2;
+      const hit = list => list.find(r => inR(r, cx, cy));
+      if (inR(st, cx, cy)) continue;                                               // stepenišni otvor
+      if (hit(P.walls)) { box(v, x0, x1, -.25, H, z0, z1, C.wall, C.cut); continue; }
+      if (hit(doorR)) {                                                            // vrata: otvor do 2,10 m
+        box(v, x0, x1, -.25, 0, z0, z1, C.slab, C.floor);
+        if (H > 2.1) box(v, x0, x1, 2.1, H, z0, z1, C.wall, C.cut);
+        continue;
+      }
+      const gr = hit(P.glass);
+      if (gr) {                                                                    // prozor: parapet 0,90, staklo do 2,20
+        const gt = Math.min(2.2, H), mx = (x0 + x1) / 2, mz = (z0 + z1) / 2;
+        box(v, x0, x1, -.25, .9, z0, z1, C.wall, C.wall);
+        if (gr[2] > gr[3]) box(g, x0, x1, .9, gt, mz - .03, mz + .03, C.glass, C.glass, .45);
+        else box(g, mx - .03, mx + .03, .9, gt, z0, z1, C.glass, C.glass, .45);
+        if (H > 2.2) box(v, x0, x1, 2.2, H, z0, z1, C.wall, C.cut);
+        continue;
+      }
+      if (T && inR(T, cx, cy)) { box(v, x0, x1, -.25, 0, z0, z1, C.slab, C.terr); continue; }
+      if (hit(P.rooms)) { box(v, x0, x1, -.25, 0, z0, z1, C.slab, C.floor); continue; }
+      const rim = T && cx < T[0] + T[2] && cy > T[1];                              // rub terase = ograda 1,00 m
+      box(v, x0, x1, -.25, rim ? Math.min(1, H) : H, z0, z1, C.wall, rim ? C.wall : C.cut);
+    }
+    BL.forEach(([x, y, w, h]) => {                                                // balkon izvan gabarita: ploča i ograda 1,00 m na slobodnim stranama
+      const rh = Math.min(1, H), t = .06, e = .01;
+      box(v, x, x + w, -.25, 0, y, y + h, C.slab, C.terr);
+      if (Math.abs(x - P.W) > e) box(v, x, x + t, 0, rh, y, y + h, C.wall);
+      if (Math.abs(x + w) > e) box(v, x + w - t, x + w, 0, rh, y, y + h, C.wall);
+      if (Math.abs(y - P.H) > e) box(v, x, x + w, 0, rh, y, y + t, C.wall);
+      if (Math.abs(y + h) > e) box(v, x, x + w, 0, rh, y + h - t, y + h, C.wall);
+    });
+    // stepenište (visine od poda suterena): desni krak 0 → podest 1,50, lijevi krak podest → 3,00
+    const [sx, sy, sw, sl] = st, sp = .2, fw = (sw - sp) / 2, n = 8, td = .3, top = sy + sl - n * td, rise = 3 / 18;
+    const zb = opt.down ? -3 : 0, lim = opt.down ? 9 : H + .35;                    // u suterenu presjek reže gornji krak
+    if (opt.down) {                                                               // okno ispod ploče
+      box(v, sx, sx + sw, -3.05, -3, sy, sy + sl, C.shaft);
+      box(v, sx - .2, sx, -3, -.25, sy - .3, sy + sl, C.shaft); box(v, sx + sw, sx + sw + .2, -3, -.25, sy - .3, sy + sl, C.shaft);
+      box(v, sx, sx + sw, -3, -.25, sy - .3, sy, C.shaft); box(v, sx, sx + sw, -3, -.25, sy + sl, sy + sl + .05, C.shaft);
+    } else box(v, sx, sx + sw, -.25, 0, sy, sy + sl, C.slab, C.floor);
+    if (zb + 1.5 <= lim) box(v, sx, sx + sw, zb + 1.35, zb + 1.5, sy, top, C.stair);
+    for (let k = 0; k < n; k++) {
+      const z0 = top + k * td, hl = zb + 1.5 + (k + 1) * rise, hr = zb + (n - k) * rise;
+      if (hl <= lim) box(v, sx, sx + fw, hl - .3, hl, z0, z0 + td, C.stair);
+      if (hr <= lim) box(v, sx + fw + sp, sx + sw, hr - .3, hr, z0, z0 + td, C.stair);
+    }
+    box(v, sx + fw, sx + fw + sp, zb, opt.down ? Math.min(1, H) : H, top, sy + sl, C.wall, C.cut);   // zid između krakova
+    if (P.rail) box(v, P.rail[0], P.rail[2], 0, Math.min(1, H), P.rail[1] - .03, P.rail[1] + .03, C.cut);
+    (P.over || []).forEach(w => box(v, w[0], w[0] + w[2], 0, H, w[1], w[1] + w[3], C.wall, C.cut));    // zid ispod gornjeg kraka
+    (P.chim || []).forEach(([x, y, w, h]) => box(v, x - .004, x + w + .004, 0, H + .12, y - .004, y + h + .004, M.red, C.cut));   // dimnjak
+    // krila vrata, uvijek otvorena: stoje gdje je u tlocrtu nacrtano otvoreno krilo (šarka → kraj luka)
+    P.doors.forEach(d => d.s.forEach(([hx, hy, lx, ly]) => {
+      const r = d.r, e = .01, ext = r[0] < e || r[1] < e || r[0] + r[2] > P.W - e || r[1] + r[3] > P.H - e;
+      const near = R => R && r[0] <= R[0] + R[2] + e && r[0] + r[2] >= R[0] - e && r[1] <= R[1] + R[3] + e && r[1] + r[3] >= R[1] - e;
+      const onT = near(T) || BL.some(near);
+      const glazed = onT || r[1] + r[3] > P.H - e;                                  // južni izlazi i vrata na terasu ili balkon
+      const hz = Math.abs(hy - ly) < 1e-6, a0 = hz ? Math.min(hx, lx) : Math.min(hy, ly), a1 = hz ? Math.max(hx, lx) : Math.max(hy, ly), c = hz ? hy : hx;
+      const leaf = (out, u0, u1, y0, y1, t, col, al = 1) => hz ? box(out, u0, u1, y0, y1, c - t, c + t, col, col, al) : box(out, c - t, c + t, y0, y1, u0, u1, col, col, al);
+      if (glazed) {
+        leaf(v, a0, a0 + .07, 0, 2.05, .025, M.dgrey); leaf(v, a1 - .07, a1, 0, 2.05, .025, M.dgrey);
+        leaf(v, a0 + .07, a1 - .07, 0, .1, .025, M.dgrey); leaf(v, a0 + .07, a1 - .07, 1.97, 2.05, .025, M.dgrey);
+        leaf(g, a0 + .07, a1 - .07, .1, 1.97, .008, C.glass, .45);
+      } else {
+        const free = hz ? lx : ly, k = Math.abs(free - a0) < e ? a0 + .08 : a1 - .08;   // kvaka uz slobodni kraj krila
+        leaf(v, a0, a1, 0, 2.05, .02, ext ? M.dgrey : M.white); leaf(v, k - .05, k + .05, 1, 1.03, .05, M.steelD);
+      }
+    }));
+    // zid samo iznad stepenica: od donje ivice podesta i kraka do stropa, ispod otvoreno
+    if (!opt.down) (P.hiwall || []).forEach(([wx, wy, ww, wh]) => {
+      const left = wx + ww / 2 < sx + sw / 2;
+      const seg = (a, b, bot) => { const z0 = Math.max(a, wy), z1 = Math.min(b, wy + wh); if (z1 > z0 && bot < H) box(v, wx, wx + ww, bot, H, z0, z1, C.wall, C.cut); };
+      seg(sy - 9, top, 1.35);
+      for (let k = 0; k < n; k++) seg(top + k * td, top + (k + 1) * td, (left ? 1.5 + (k + 1) * rise : (n - k) * rise) - .3);
+    });
+    // grede pod stropom (u tlocrtu po dvije isprekidane linije), samo uz pune zidove
+    if (full) for (let i = 0; i + 1 < (P.beams || []).length; i += 2) {
+      const a = P.beams[i], b = P.beams[i + 1];
+      box(v, Math.min(a[0], b[0]), Math.max(a[2], b[2]), 2.2, H, Math.min(a[1], b[1]), Math.max(a[3], b[3]), C.wall, C.cut);
+    }
+    // namještaj
+    P.furn.forEach((f, i) => furnish(v, g, f, (P.fk || [])[i] || '', (P.fh || [])[i] || .6));
+    nOpaque = v.length / 10; nAll = nOpaque + g.length / 10;
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(v.concat(g)), gl.STATIC_DRAW);
+  }
+
+  const sh = (type, src) => { const o = gl.createShader(type); gl.shaderSource(o, src); gl.compileShader(o); return o; };
+  const prog = gl.createProgram();
+  gl.attachShader(prog, sh(gl.VERTEX_SHADER, `attribute vec3 p; attribute vec3 n; attribute vec4 c; uniform mat4 m; varying vec4 vc;
+    void main() { float l = .62 + .38 * max(dot(n, normalize(vec3(.35, .9, .5))), 0.); vc = vec4(c.rgb * l, c.a); gl_Position = m * vec4(p, 1.); }`));
+  gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, `precision mediump float; varying vec4 vc; void main() { gl_FragColor = vc; }`));
+  gl.linkProgram(prog); gl.useProgram(prog);
+  const uM = gl.getUniformLocation(prog, 'm');
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  [['p', 3, 0], ['n', 3, 12], ['c', 4, 24]].forEach(([name, size, off]) => {
+    const loc = gl.getAttribLocation(prog, name); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 40, off);
+  });
+
+  // matrice (po kolonama)
+  const mul = (a, b) => { const r = new Float32Array(16); for (let c = 0; c < 4; c++) for (let w = 0; w < 4; w++) { let t = 0; for (let k = 0; k < 4; k++) t += a[k * 4 + w] * b[c * 4 + k]; r[c * 4 + w] = t; } return r; };
+  const persp = (fov, asp, near, far) => { const f = 1 / Math.tan(fov / 2); return [f / asp, 0, 0, 0, 0, f, 0, 0, 0, 0, (far + near) / (near - far), -1, 0, 0, 2 * far * near / (near - far), 0]; };
+  const norm = a => { const l = Math.hypot(...a); return a.map(q => q / l); };
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const look = (e, t) => { const z = norm([e[0] - t[0], e[1] - t[1], e[2] - t[2]]), x = norm(cross([0, 1, 0], z)), y = cross(z, x);
+    return [x[0], y[0], z[0], 0, x[1], y[1], z[1], 0, x[2], y[2], z[2], 0, -dot(x, e), -dot(y, e), -dot(z, e), 1]; };
+
+  const HOME = { az: -.55, el: .85, dist: 22.5 };
+  let cam = { ...HOME };
+  const labs = [...P.labels.map(l => [l[0], l[1], l[2]]), ...(opt.labels || [])];
+  const spans = labs.map(l => { const e = document.createElement('span'); e.textContent = l[2]; labBox.appendChild(e); return e; });
+
+  function draw() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2), w = cv.clientWidth, h = cv.clientHeight;
+    if (!w || !h) return;
+    if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+    const t = [P.W / 2, .4, P.H / 2], ce = Math.cos(cam.el), d = cam.dist * Math.max(1, 1.3 * h / w);   // uži ekran → dalja kamera
+    const e = [t[0] + d * ce * Math.sin(cam.az), t[1] + d * Math.sin(cam.el), t[2] + d * ce * Math.cos(cam.az)];
+    const m = mul(persp(.6, w / h, .5, 100), look(e, t));
+    gl.viewport(0, 0, cv.width, cv.height);
+    gl.clearColor(.933, .945, .957, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.enable(gl.DEPTH_TEST); gl.uniformMatrix4fv(uM, false, m);
+    gl.disable(gl.BLEND); gl.depthMask(true); gl.drawArrays(gl.TRIANGLES, 0, nOpaque);
+    gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
+    gl.drawArrays(gl.TRIANGLES, nOpaque, nAll - nOpaque); gl.depthMask(true);
+    labs.forEach((l, i) => {
+      const q = [l[0], wallH * .5, l[1]], cw = m[3] * q[0] + m[7] * q[1] + m[11] * q[2] + m[15];
+      const px = (m[0] * q[0] + m[4] * q[1] + m[8] * q[2] + m[12]) / cw, py = (m[1] * q[0] + m[5] * q[1] + m[9] * q[2] + m[13]) / cw;
+      spans[i].style.left = (px + 1) / 2 * w + 'px'; spans[i].style.top = (1 - py) / 2 * h + 'px';
+    });
+  }
+  let queued = false;
+  const redraw = () => { if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; draw(); }); } };
+
+  // okretanje (jedan prst / miš), štipanje i točkić za zum
+  const pts = new Map(); let pinch = 0, active = false;
+  const clamp = (q, a, b) => Math.max(a, Math.min(b, q));
+  cv.addEventListener('pointerdown', ev => { cv.setPointerCapture(ev.pointerId); pts.set(ev.pointerId, [ev.clientX, ev.clientY]); active = true; pinch = 0; });
+  cv.addEventListener('pointermove', ev => {
+    const o = pts.get(ev.pointerId); if (!o) return;
+    pts.set(ev.pointerId, [ev.clientX, ev.clientY]);
+    if (pts.size === 1) { cam.az -= (ev.clientX - o[0]) * .006; cam.el = clamp(cam.el + (ev.clientY - o[1]) * .006, .12, 1.52); }
+    else if (pts.size === 2) {
+      const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+      if (pinch) cam.dist = clamp(cam.dist * pinch / d, 7, 45);
+      pinch = d;
+    }
+    redraw();
+  });
+  const up = ev => { pts.delete(ev.pointerId); pinch = 0; };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  cv.addEventListener('mouseleave', () => { active = false; });
+  cv.addEventListener('wheel', ev => { if (!active) return; ev.preventDefault(); cam.dist = clamp(cam.dist * Math.exp(ev.deltaY * .0012), 7, 45); redraw(); }, { passive: false });
+
+  const bw = document.getElementById('b3d-walls-' + id);
+  bw.onclick = () => { full = !full; bw.textContent = full ? 'Zidovi: puni' : 'Zidovi: presjek na 1,20 m'; build(); redraw(); };
+  document.getElementById('b3d-reset-' + id).onclick = () => { cam = { ...HOME }; redraw(); };
+  const zoom = f => () => { cam.dist = clamp(cam.dist * f, 7, 45); redraw(); };
+  document.getElementById('b3d-zin-' + id).onclick = zoom(1 / 1.2);
+  document.getElementById('b3d-zout-' + id).onclick = zoom(1.2);
+  // cijeli ekran: pravi fullscreen preglednika, a gdje ga nema (iPhone Safari) prikaz preko cijelog prozora
+  const bf = document.getElementById('b3d-full-' + id);
+  const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement;
+  const isFs = () => fsEl() === wrap || wrap.classList.contains('fs');
+  const syncFs = () => { bf.textContent = isFs() ? 'Izađi iz cijelog ekrana' : 'Cijeli ekran'; redraw(); };
+  const setFake = on => { wrap.classList.toggle('fs', on); document.body.style.overflow = on ? 'hidden' : ''; syncFs(); };
+  bf.onclick = () => {
+    if (wrap.classList.contains('fs')) return setFake(false);
+    if (fsEl() === wrap) return (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    const req = wrap.requestFullscreen || wrap.webkitRequestFullscreen;
+    if (!req) return setFake(true);
+    try { const r = req.call(wrap); if (r && r.catch) r.catch(() => setFake(true)); } catch (e) { setFake(true); }
+    setTimeout(() => { if (!isFs()) setFake(true); }, 500);                     // preglednik je zahtjev prešutno odbio
+  };
+  document.addEventListener('fullscreenchange', syncFs); document.addEventListener('webkitfullscreenchange', syncFs);
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && wrap.classList.contains('fs')) setFake(false); });
+  new ResizeObserver(redraw).observe(cv);
+  build(); draw();
+}
+view3d(plans.ground, 'ground', { labels: [[9.85, 1.6, 'Kupatilo 1'], [7.6, 1.0, 'Stepenište']] });
+
+// ---------- varijante sprata: tlocrt + 3D za svaku, jedna ispod druge ----------
+const VARS = [
+  { id: 'A', o: { terrace: true, laundry: 'N' }, ter: 'ostaje (JZ ugao)', ves: 'sjever', balk: '–', txt: 'terasa ostaje · vešeraj na sjeveru' },
+  { id: 'B', o: { laundry: 'N' }, ter: 'ukinuta', ves: 'sjever', balk: 'bez, izlaz na sjever', txt: 'bez terase i balkona · vešeraj na sjeveru, izlaz na sjever' },
+  { id: 'C', o: { laundry: 'N', balc: 'kids' }, ter: 'ukinuta', ves: 'sjever', balk: 'mali na svakoj dječijoj sobi', txt: 'bez terase · mali balkon na svakoj dječijoj sobi · vešeraj na sjeveru' },
+  { id: 'D', o: { laundry: 'N', balc: 'parents' }, ter: 'ukinuta', ves: 'sjever', balk: 'bočni, soba roditelja', txt: 'bez terase · bočni balkon iz sobe roditelja · vešeraj na sjeveru' },
+  { id: 'E', o: { laundry: 'S' }, ter: 'ukinuta', ves: 'između dječijih soba', balk: 'bez', txt: 'bez terase i balkona · vešeraj između dječijih soba · garderoba roditelja' },
+  { id: 'F', o: { laundry: 'S', balc: 'shared' }, ter: 'ukinuta', ves: 'između dječijih soba', balk: 'zajednički: obje sobe i vešeraj', txt: 'bez terase · zajednički balkon dječijih soba i vešeraja · garderoba roditelja' },
+  { id: 'G', o: { laundry: 'S', balc: 'laundry' }, ter: 'ukinuta', ves: 'između dječijih soba', balk: 'mali, samo kod vešeraja', txt: 'bez terase · mali balkon kod vešeraja · garderoba roditelja' },
+];
+const tools3d = id => `<div class="tools3d">
+      <button id="b3d-walls-${id}" type="button">Zidovi: presjek na 1,20 m</button>
+      <button id="b3d-reset-${id}" type="button">Reset pogleda</button>
+      <button id="b3d-zin-${id}" type="button" class="zoom" aria-label="Približi" title="Približi">+</button>
+      <button id="b3d-zout-${id}" type="button" class="zoom" aria-label="Udalji" title="Udalji">−</button>
+      <button id="b3d-full-${id}" type="button">Cijeli ekran</button>
+    </div>`;
+// 3D se pali tek kad sekcija dođe blizu ekrana, da se ne otvara 8 WebGL prikaza odjednom
+const lazy3d = 'IntersectionObserver' in window
+  ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { lazy3d.unobserve(e.target); e.target.init3d(); } }), { rootMargin: '600px' }) : null;
+VARS.forEach(v => {
+  const P = mkUpper(v.o), id = 'v' + v.id, sec = document.createElement('section');
+  sec.id = 'varijanta-' + v.id;
+  sec.innerHTML = `<h2>Varijanta ${v.id} <small>${v.txt}</small></h2>
+  <div class="plan"><svg id="svg-${id}" viewBox="${-110 - P.padW * 100} -150 ${1330 + P.padW * 100} ${1250 + P.padS * 100}" role="img" aria-label="Tlocrt prizemlja, varijanta ${v.id}">${render(P)}</svg></div>
+  <h2>Varijanta ${v.id} – 3D <small>prevucite za okretanje · štipanje, točkić (nakon klika) ili tipke + / − za zum</small></h2>
+  <div class="plan v3d" id="v3d-${id}">${tools3d(id)}
+    <canvas id="gl3d-${id}" role="img" aria-label="3D prikaz prizemlja, varijanta ${v.id}"></canvas><div class="lab3d" id="lab3d-${id}"></div></div>`;
+  document.getElementById('variants').appendChild(sec);
+  const wrap = sec.querySelector('.v3d');
+  wrap.init3d = () => view3d(P, id, { down: true, labels: P.lab3 });
+  if (lazy3d) lazy3d.observe(wrap); else wrap.init3d();
+  document.getElementById('var-rows').insertAdjacentHTML('beforeend',
+    `<tr><td><a href="#varijanta-${v.id}">${v.id}</a></td><td>${v.ter}</td><td>${v.ves}</td><td>${v.balk}</td><td class="num">${P.info.par}</td><td class="num">${P.info.kid}</td><td class="num">${P.info.ves}</td></tr>`);
+});
+</script>
+</body>
+</html>
