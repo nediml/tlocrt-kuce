@@ -1678,7 +1678,7 @@ function initReal() {
   const spans = [];
   for (const [fk, F, v] of [['ground', FLOORS.ground, null], ...Object.entries(UP).map(([k, F]) => ['upper', F, k])]) for (const l of F.labels) {
     const e = document.createElement('span'); e.textContent = l[2]; labBox.appendChild(e);
-    if (inR(F.P.stairs, l[0], l[1])) e.className = 'nogo'; else { e.title = 'Pogled iz sobe'; e.setAttribute('role', 'button'); e.onclick = () => enter(fk, l); }
+    e.title = 'Pogled iz sobe'; e.setAttribute('role', 'button'); e.onclick = () => enter(fk, l);
     spans.push({ e, fk, l, v });
   }
 
@@ -1736,8 +1736,8 @@ function initReal() {
     camera.lookAt(room.x + cp * Math.sin(room.yaw), y + Math.sin(room.pit), room.z + cp * Math.cos(room.yaw));
   };
   function enter(fk, l) {
-    const { P, y0 } = FLOORS[fk], [x, z] = l;
-    let yaw = 0;
+    const { P, y0 } = FLOORS[fk];
+    let [x, z] = l, yaw = 0, pit = -.08;
     const R = [...P.rooms, ...(P.terrace ? [P.terrace] : [])].find(r => inR(r, x, z));
     if (R) {                                                                      // početni pogled: najveći prozor ili vanjska vrata sobe
       const adj = q => q[2] > q[3] ? q[0] < R[0] + R[2] && q[0] + q[2] > R[0] && q[1] < R[1] + R[3] + .35 && q[1] + q[3] > R[1] - .35
@@ -1747,8 +1747,12 @@ function initReal() {
       const tx = g ? g[0] + g[2] / 2 : R[0] + R[2] / 2, tz = g ? g[1] + g[3] / 2 : R[1] + R[3] / 2;
       if (Math.hypot(tx - x, tz - z) > .3) yaw = Math.atan2(tx - x, tz - z);
     }
+    if (inR(P.stairs, l[0], l[1])) {                                              // stepenište: oko ispred kraka (hol / hodnik), pogled prema sjeveru
+      const [sx, sy, sw, sl] = P.stairs, fw = (sw - .2) / 2, up = fk === 'upper';
+      x = up ? sx + fw / 2 : sx + sw - fw / 2; z = sy + sl + .45; yaw = Math.PI; pit = up ? -.35 : .12;
+    }
     if (!room) saved = [camera.position.clone(), controls.target.clone()];
-    room = { fk, l, x, z, yaw, pit: -.08, fov: 62 };
+    room = { fk, l, x, z, yaw, pit, fov: 62 };
     controls.enabled = false; lamp.position.set(x, y0 + 2.35, z); lamp.intensity = 5;
     br.textContent = '← Izađi (' + l[2] + ')'; setVis(); lookRoom(); redraw();
   }
