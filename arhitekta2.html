@@ -843,11 +843,14 @@ function view3d(P, id, opt) {
 
   const sh = (type, src) => { const o = gl.createShader(type); gl.shaderSource(o, src); gl.compileShader(o); return o; };
   const prog = gl.createProgram();
-  gl.attachShader(prog, sh(gl.VERTEX_SHADER, `attribute vec3 p; attribute vec3 n; attribute vec4 c; uniform mat4 m; varying vec4 vc;
-    void main() { float l = .62 + .38 * max(dot(n, normalize(vec3(.35, .9, .5))), 0.); vc = vec4(c.rgb * l, c.a); gl_Position = m * vec4(p, 1.); }`));
-  gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, `precision mediump float; varying vec4 vc; void main() { gl_FragColor = vc; }`));
+  gl.attachShader(prog, sh(gl.VERTEX_SHADER, `attribute vec3 p; attribute vec3 n; attribute vec4 c; uniform mat4 m; uniform float rv; varying vec4 vc; varying float vw;
+    void main() { float l = .62 + .38 * max(dot(n, normalize(vec3(.35, .9, .5))), 0.) + rv * .22 * max(dot(n, normalize(vec3(-.8, -.25, -.55))), 0.);
+      vc = vec4(c.rgb * l, c.a); gl_Position = m * vec4(p, 1.); vw = gl_Position.w; }`));
+  gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, `precision mediump float; uniform float rf; varying vec4 vc; varying float vw;
+    void main() { float f = 1. - rf * .35 * (1. - exp(-max(vw, 0.) / 3.)); gl_FragColor = vec4(vc.rgb * f, vc.a); }`));
   gl.linkProgram(prog); gl.useProgram(prog);
-  const uM = gl.getUniformLocation(prog, 'm');
+  // rv / rf = 1 u pogledu iz sobe: dodatno svjetlo sa suprotne strane i zatamnjenje s udaljenošću, da se plohe u sjeni razlikuju
+  const uM = gl.getUniformLocation(prog, 'm'), uRv = gl.getUniformLocation(prog, 'rv'), uRf = gl.getUniformLocation(prog, 'rf');
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
   [['p', 3, 0], ['n', 3, 12], ['c', 4, 24]].forEach(([name, size, off]) => {
     const loc = gl.getAttribLocation(prog, name); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 40, off);
@@ -887,7 +890,7 @@ function view3d(P, id, opt) {
     }
     gl.viewport(0, 0, cv.width, cv.height);
     gl.clearColor(.933, .945, .957, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.enable(gl.DEPTH_TEST); gl.uniformMatrix4fv(uM, false, m);
+    gl.enable(gl.DEPTH_TEST); gl.uniformMatrix4fv(uM, false, m); gl.uniform1f(uRv, room ? 1 : 0); gl.uniform1f(uRf, room ? 1 : 0);
     gl.disable(gl.BLEND); gl.depthMask(true); gl.drawArrays(gl.TRIANGLES, 0, nOpaque);
     gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
     gl.drawArrays(gl.TRIANGLES, nOpaque, nAll - nOpaque); gl.depthMask(true);
