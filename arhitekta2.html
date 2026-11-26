@@ -98,6 +98,7 @@
   .colx { stroke: var(--wall); stroke-width: 1.5; }
   .kota { font-size: 13px; fill: #1d4f91; }
   .fn { font-size: 12px; fill: var(--ink); text-anchor: middle; }
+  .ubeam { fill: none; stroke: #808080; stroke-width: 3; stroke-dasharray: 11 7; }
   .arch { fill: none; stroke: #d32f2f; stroke-width: 2.5; stroke-dasharray: 9 6; stroke-linejoin: round; }
   .archt { font-size: 13px; fill: #d32f2f; paint-order: stroke; stroke: var(--floor); stroke-width: 3px; stroke-linejoin: round; }
   .gap { stroke: #a8a196; stroke-width: 1.2; stroke-dasharray: 4 3; }
@@ -125,6 +126,7 @@
       <span><i style="background:var(--furn);opacity:.6"></i>namještaj</span>
       <span><i style="background:#fff;border:2px solid var(--wall)"></i>AB stub</span>
       <span><i style="background:none;border-top:3px dashed var(--wall);border-radius:0;height:0;vertical-align:4px"></i>greda / zid iznad</span>
+      <span><i style="background:none;border-top:3px dashed #808080;border-radius:0;height:0;vertical-align:4px"></i>greda u suterenu (ispod), na tlocrtu sprata</span>
       <span><i style="background:none;border-top:2px dashed #a8a196;border-radius:0;height:0;vertical-align:4px"></i>razmak između namještaja (cm)</span>
       <span><i style="background:none;border-top:2px dashed #d32f2f;border-radius:0;height:0;vertical-align:4px"></i>zid i dimnjak po tlocrtu arhitekte (gdje su pomjereni)</span>
       <span>mjere: prostorije u m, vrata i namještaj u cm</span>
@@ -449,6 +451,7 @@ function mkUpper(o) {
 
   return {
     W: 11.0, H: 9.0, hill: '▲ sjever – prizemlje je iznad terena' + (LS ? '' : ': izlaz iz vešeraja'),
+    under: plans.ground.beams,                                                    // grede suterena, crtaju se sivo isprekidano
     rooms, terrace, walls: sh ? [[6.35, yC, .20, sh], [8.65, yC, .20, sh]] : [], skipDims: [0, 1],   // bočni zidovi stepeništa koji ulaze u hodnik
     balc, glass, doors, furn, fh, fk, labels, tiny, gaps, lab3, info,
     padS: balc.some(b => b[1] >= 9) ? .9 : 0, padW: balc.some(b => b[0] < 0) ? 1.2 : 0,
@@ -489,6 +492,7 @@ function render(p) {
     (w > .5 ? [x + .2, x + w - .2] : [x + w / 2]).forEach(cx => s += `<circle cx="${cx * U}" cy="${(y + h / 2) * U}" r="9" class="col"/>`);
   });
   if (p.extra) s += p.extra;
+  (p.under || []).forEach(b => s += line(...b, 'ubeam'));                          // grede etaže ispod
   (p.arch || []).forEach(a => s += `<polygon points="${a.map(v => v * U).join(' ')}" class="arch"/>`);
   (p.archt || []).forEach(t => s += text(...t, 'archt'));
   p.labels.forEach(l => s += label(...l));
