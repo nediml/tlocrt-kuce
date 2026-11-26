@@ -37,7 +37,9 @@
   .v3d canvas:active { cursor: grabbing; }
   @media (max-width: 600px) { .v3d canvas { aspect-ratio: 1 / 1; } .lab3d span { font-size: 10px; padding: 0 4px; } }
   .lab3d span { position: absolute; transform: translate(-50%, -50%); font-size: 12px; font-weight: 600; color: var(--ink);
-    background: rgba(255, 255, 255, .82); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; pointer-events: none; white-space: nowrap; }
+    background: rgba(255, 255, 255, .82); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; pointer-events: auto; cursor: pointer; white-space: nowrap; }
+  .lab3d span:hover { background: #fff; border-color: var(--accent); }
+  .lab3d span.nogo { pointer-events: none; cursor: default; }
   .tools3d { display: flex; flex-wrap: wrap; gap: 8px; position: absolute; top: 8px; left: 8px; right: 8px; z-index: 2; }
   .v3d.fs { position: fixed; inset: 0; z-index: 1000; border: 0; border-radius: 0; }
   .v3d.fs canvas { aspect-ratio: auto; width: 100%; height: 100%; }
@@ -131,7 +133,7 @@
 
   <div class="plan"><svg id="svg-ground" viewBox="-110 -150 1330 1250" role="img" aria-label="Tlocrt suterena"></svg></div>
 
-  <h2>Suteren – 3D <small>prevucite za okretanje · štipanje, točkić (nakon klika) ili tipke + / − za zum</small></h2>
+  <h2>Suteren – 3D <small>prevucite za okretanje · štipanje, točkić (nakon klika) ili tipke + / − za zum · klik na ime sobe: pogled iz sobe</small></h2>
   <div class="plan v3d" id="v3d-ground">
     <div class="tools3d">
       <button id="b3d-walls-ground" type="button">Zidovi: presjek na 1,20 m</button>
@@ -584,7 +586,7 @@ function view3d(P, id, opt) {
   const C = { wall: hex('#efe9dc'), cut: hex('#2a2724'), floor: hex('#f1d9b0'), terr: hex('#cfe0bd'), furn: hex('#a58c74'), furnTop: hex('#bda58c'),
               stair: hex('#d6d4cf'), glass: hex('#7fb4d6'), slab: hex('#b9b2a4'), shaft: hex('#8f8a80') };
   const inR = (r, x, y) => x > r[0] && x < r[0] + r[2] && y > r[1] && y < r[1] + r[3];
-  let full = false, nOpaque = 0, nAll = 0, wallH = 2.6;
+  let full = false, nOpaque = 0, nAll = 0, wallH = 2.6, room = null, prevFull = false;   // room: pogled iz sobe { i, x, z, yaw, pit, fov }
   const buf = gl.createBuffer();
 
   // kutija: x istok, y visina, z jug; c boja stranica, ct boja gornje plohe, a prozirnost
@@ -823,6 +825,11 @@ function view3d(P, id, opt) {
       const a = P.beams[i], b = P.beams[i + 1];
       box(v, Math.min(a[0], b[0]), Math.max(a[2], b[2]), 2.2, H, Math.min(a[1], b[1]), Math.max(a[3], b[3]), C.wall, C.cut);
     }
+    if (room) {                                                                   // pogled iz sobe: strop preko zatvorenog dijela etaže
+      const cz = T ? T[1] : P.H;
+      box(v, 0, P.W, H, H + .05, 0, cz, M.white);
+      if (T) box(v, T[0] + T[2], P.W, H, H + .05, cz, P.H, M.white);
+    }
     // namještaj
     P.furn.forEach((f, i) => furnish(v, g, f, (P.fk || [])[i] || '', (P.fh || [])[i] || .6));
     nOpaque = v.length / 10; nAll = nOpaque + g.length / 10;
@@ -854,15 +861,26 @@ function view3d(P, id, opt) {
   const HOME = { az: -.55, el: .85, dist: 22.5 };
   let cam = { ...HOME };
   const labs = [...P.labels.map(l => [l[0], l[1], l[2]]), ...(opt.labels || [])];
-  const spans = labs.map(l => { const e = document.createElement('span'); e.textContent = l[2]; labBox.appendChild(e); return e; });
+  const spans = labs.map((l, i) => {
+    const e = document.createElement('span'); e.textContent = l[2]; labBox.appendChild(e);
+    if (inR(P.stairs, l[0], l[1])) e.className = 'nogo';                           // podest je na pola visine, tu se ne ulazi
+    else { e.title = 'Pogled iz sobe'; e.setAttribute('role', 'button'); e.onclick = () => enter(i); }
+    return e;
+  });
 
   function draw() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2), w = cv.clientWidth, h = cv.clientHeight;
     if (!w || !h) return;
     if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
-    const t = [P.W / 2, .4, P.H / 2], ce = Math.cos(cam.el), d = cam.dist * Math.max(1, 1.3 * h / w);   // uži ekran → dalja kamera
-    const e = [t[0] + d * ce * Math.sin(cam.az), t[1] + d * Math.sin(cam.el), t[2] + d * ce * Math.cos(cam.az)];
-    const m = mul(persp(.6, w / h, .5, 100), look(e, t));
+    let m;
+    if (room) {                                                                   // pogled iz sobe: oči na 1,60 m, yaw 0 = prema jugu
+      const cp = Math.cos(room.pit), e = [room.x, 1.6, room.z];
+      m = mul(persp(room.fov, w / h, .05, 60), look(e, [e[0] + cp * Math.sin(room.yaw), e[1] + Math.sin(room.pit), e[2] + cp * Math.cos(room.yaw)]));
+    } else {
+      const t = [P.W / 2, .4, P.H / 2], ce = Math.cos(cam.el), d = cam.dist * Math.max(1, 1.3 * h / w);   // uži ekran → dalja kamera
+      const e = [t[0] + d * ce * Math.sin(cam.az), t[1] + d * Math.sin(cam.el), t[2] + d * ce * Math.cos(cam.az)];
+      m = mul(persp(.6, w / h, .5, 100), look(e, t));
+    }
     gl.viewport(0, 0, cv.width, cv.height);
     gl.clearColor(.933, .945, .957, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST); gl.uniformMatrix4fv(uM, false, m);
@@ -873,6 +891,7 @@ function view3d(P, id, opt) {
       const q = [l[0], wallH * .5, l[1]], cw = m[3] * q[0] + m[7] * q[1] + m[11] * q[2] + m[15];
       const px = (m[0] * q[0] + m[4] * q[1] + m[8] * q[2] + m[12]) / cw, py = (m[1] * q[0] + m[5] * q[1] + m[9] * q[2] + m[13]) / cw;
       spans[i].style.left = (px + 1) / 2 * w + 'px'; spans[i].style.top = (1 - py) / 2 * h + 'px';
+      spans[i].style.display = cw > .2 && !(room && room.i === i) ? '' : 'none';   // iza kamere i vlastita soba se ne prikazuju
     });
   }
   let queued = false;
@@ -881,14 +900,18 @@ function view3d(P, id, opt) {
   // okretanje (jedan prst / miš), štipanje i točkić za zum
   const pts = new Map(); let pinch = 0, active = false;
   const clamp = (q, a, b) => Math.max(a, Math.min(b, q));
+  const zoomBy = f => { if (room) room.fov = clamp(room.fov * f, .5, 1.6); else cam.dist = clamp(cam.dist * f, 7, 45); };   // u sobi zum mijenja ugao gledanja
   cv.addEventListener('pointerdown', ev => { cv.setPointerCapture(ev.pointerId); pts.set(ev.pointerId, [ev.clientX, ev.clientY]); active = true; pinch = 0; });
   cv.addEventListener('pointermove', ev => {
     const o = pts.get(ev.pointerId); if (!o) return;
     pts.set(ev.pointerId, [ev.clientX, ev.clientY]);
-    if (pts.size === 1) { cam.az -= (ev.clientX - o[0]) * .006; cam.el = clamp(cam.el + (ev.clientY - o[1]) * .006, .12, 1.52); }
+    if (pts.size === 1) {
+      if (room) { room.yaw += (ev.clientX - o[0]) * .005; room.pit = clamp(room.pit + (ev.clientY - o[1]) * .005, -1.2, 1.2); }
+      else { cam.az -= (ev.clientX - o[0]) * .006; cam.el = clamp(cam.el + (ev.clientY - o[1]) * .006, .12, 1.52); }
+    }
     else if (pts.size === 2) {
       const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
-      if (pinch) cam.dist = clamp(cam.dist * pinch / d, 7, 45);
+      if (pinch) zoomBy(pinch / d);
       pinch = d;
     }
     redraw();
@@ -896,12 +919,29 @@ function view3d(P, id, opt) {
   const up = ev => { pts.delete(ev.pointerId); pinch = 0; };
   cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
   cv.addEventListener('mouseleave', () => { active = false; });
-  cv.addEventListener('wheel', ev => { if (!active) return; ev.preventDefault(); cam.dist = clamp(cam.dist * Math.exp(ev.deltaY * .0012), 7, 45); redraw(); }, { passive: false });
+  cv.addEventListener('wheel', ev => { if (!active) return; ev.preventDefault(); zoomBy(Math.exp(ev.deltaY * .0012)); redraw(); }, { passive: false });
 
   const bw = document.getElementById('b3d-walls-' + id);
   bw.onclick = () => { full = !full; bw.textContent = full ? 'Zidovi: puni' : 'Zidovi: presjek na 1,20 m'; build(); redraw(); };
-  document.getElementById('b3d-reset-' + id).onclick = () => { cam = { ...HOME }; redraw(); };
-  const zoom = f => () => { cam.dist = clamp(cam.dist * f, 7, 45); redraw(); };
+  // pogled iz sobe: klik na natpis sobe; zidovi su tada pune visine, sa stropom
+  const br = document.getElementById('b3d-reset-' + id);
+  const syncRoom = () => { bw.style.display = room ? 'none' : ''; br.textContent = room ? '← Izađi (' + labs[room.i][2] + ')' : 'Reset pogleda'; build(); redraw(); };
+  function enter(i) {
+    const [x, z] = labs[i], R = [...P.rooms, ...(P.terrace ? [P.terrace] : [])].find(r => inR(r, x, z));
+    let yaw = 0;
+    if (R) {                                                                      // početni pogled: najveći prozor ili vanjska vrata sobe, inače sredina sobe
+      const adj = q => q[2] > q[3] ? q[0] < R[0] + R[2] && q[0] + q[2] > R[0] && q[1] < R[1] + R[3] + .35 && q[1] + q[3] > R[1] - .35
+                                   : q[1] < R[1] + R[3] && q[1] + q[3] > R[1] && q[0] < R[0] + R[2] + .35 && q[0] + q[2] > R[0] - .35;
+      const ext = r => r[0] < .01 || r[1] < .01 || r[0] + r[2] > P.W - .01 || r[1] + r[3] > P.H - .01;
+      const g = [...P.glass, ...P.doors.map(d => d.r).filter(ext)].filter(adj).sort((a, b) => b[2] * b[3] - a[2] * a[3])[0];
+      const tx = g ? g[0] + g[2] / 2 : R[0] + R[2] / 2, tz = g ? g[1] + g[3] / 2 : R[1] + R[3] / 2;
+      if (Math.hypot(tx - x, tz - z) > .3) yaw = Math.atan2(tx - x, tz - z);
+    }
+    if (!room) prevFull = full;
+    room = { i, x, z, yaw, pit: -.06, fov: 1.15 }; full = true; syncRoom();
+  }
+  br.onclick = () => { if (room) { room = null; full = prevFull; syncRoom(); } else { cam = { ...HOME }; redraw(); } };
+  const zoom = f => () => { zoomBy(f); redraw(); };
   document.getElementById('b3d-zin-' + id).onclick = zoom(1 / 1.2);
   document.getElementById('b3d-zout-' + id).onclick = zoom(1.2);
   // cijeli ekran: pravi fullscreen preglednika, a gdje ga nema (iPhone Safari) prikaz preko cijelog prozora
@@ -969,7 +1009,7 @@ VARS.forEach(v => {
   sec.innerHTML = `<h2>Varijanta ${v.id} <small>${v.txt}</small></h2>
   <p class="lead" style="margin-bottom:8px">Sprat: bruto ${f1(gross)} m²${open ? ` (zatvoreno ${f1(closed)} + ${what} ${f1(open)})` : ''} · neto ${f1(net)} m². Kuća: bruto ${f1(G0 + gross)} m² · neto ${f1(N0 + net)} m².</p>
   <div class="plan"><svg id="svg-${id}" viewBox="${-110 - P.padW * 100} -150 ${1330 + P.padW * 100} ${1250 + P.padS * 100}" role="img" aria-label="Tlocrt prizemlja, varijanta ${v.id}">${render(P)}</svg></div>
-  <h2>Varijanta ${v.id} – 3D <small>prevucite za okretanje · štipanje, točkić (nakon klika) ili tipke + / − za zum</small></h2>
+  <h2>Varijanta ${v.id} – 3D <small>prevucite za okretanje · štipanje, točkić (nakon klika) ili tipke + / − za zum · klik na ime sobe: pogled iz sobe</small></h2>
   <div class="plan v3d" id="v3d-${id}">${tools3d(id)}
     <canvas id="gl3d-${id}" role="img" aria-label="3D prikaz prizemlja, varijanta ${v.id}"></canvas><div class="lab3d" id="lab3d-${id}"></div></div>`;
   document.getElementById('variants').appendChild(sec);
