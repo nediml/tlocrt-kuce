@@ -113,7 +113,7 @@
   <h2>Pozicija na parceli</h2>
   <div class="plan"><svg id="svg-site" viewBox="95 10 1100 1220" role="img" aria-label="Pozicija kuće na parceli"></svg></div>
 
-  <h2>Suteren <small>po tlocrtu arhitekte, izmijenjeni mesdžid i vrata u dnevni · bruto 99 m², neto 82 m²</small></h2>
+  <h2>Suteren <small>po tlocrtu arhitekte, izmijenjeni mesdžid i vrata u dnevni · bruto 99,0 m², neto 82,8 m²</small></h2>
   <div class="bar">
     <div class="legend">
       <span><i style="background:var(--wall)"></i>zid (vanjski 30 cm, pregradni 20 cm)</span>
@@ -148,6 +148,12 @@
     <thead><tr><th>Varijanta</th><th>Terasa</th><th>Vešeraj</th><th>Balkon</th><th>Roditelji</th><th>Dječije sobe</th><th>Vešeraj, mjere</th></tr></thead>
     <tbody id="var-rows"></tbody>
   </table></div>
+  <h2>Ukupna kvadratura po varijanti</h2>
+  <div class="plan tablewrap"><table>
+    <thead><tr><th>Varijanta</th><th>Bruto sprat, zatvoreno</th><th>Terasa / balkoni</th><th>Bruto sprat, ukupno</th><th>Bruto kuća (Su + P)</th><th>Neto sprat</th><th>Neto kuća (Su + P)</th></tr></thead>
+    <tbody id="area-rows"></tbody>
+  </table></div>
+  <p class="lead" style="margin-top:8px">Bruto = površina po vanjskim ivicama zidova; terasa i balkoni su otvoreni i računati punom površinom, bez koeficijenta. Neto = zbir prostorija i stepeništa, bez zidova. Suteren: bruto 99,0 m², neto 82,8 m².</p>
   <div id="variants"></div>
 </main>
 
@@ -934,10 +940,17 @@ const tools3d = id => `<div class="tools3d">
 // 3D se pali tek kad sekcija dođe blizu ekrana, da se ne otvara 8 WebGL prikaza odjednom
 const lazy3d = 'IntersectionObserver' in window
   ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { lazy3d.unobserve(e.target); e.target.init3d(); } }), { rootMargin: '600px' }) : null;
+// kvadrature: bruto po vanjskim ivicama zidova (terasa u gabaritu je otvorena), neto = prostorije + stepenište
+const f1 = n => n.toFixed(1).replace('.', ',');
+const netOf = p => p.rooms.reduce((a, r) => a + r[2] * r[3], 0) + p.stairs[2] * p.stairs[3];
+const G0 = plans.ground.W * plans.ground.H, N0 = netOf(plans.ground);
 VARS.forEach(v => {
   const P = mkUpper(v.o), id = 'v' + v.id, sec = document.createElement('section');
+  const ter = P.terrace ? (P.terrace[0] + P.terrace[2]) * (P.H - P.terrace[1]) : 0, bal = P.balc.reduce((a, b) => a + b[2] * b[3], 0);
+  const closed = P.W * P.H - ter, open = ter + bal, gross = closed + open, net = netOf(P), what = ter ? 'terasa' : bal ? 'balkoni' : '';
   sec.id = 'varijanta-' + v.id;
   sec.innerHTML = `<h2>Varijanta ${v.id} <small>${v.txt}</small></h2>
+  <p class="lead" style="margin-bottom:8px">Sprat: bruto ${f1(gross)} m²${open ? ` (zatvoreno ${f1(closed)} + ${what} ${f1(open)})` : ''} · neto ${f1(net)} m². Kuća: bruto ${f1(G0 + gross)} m² · neto ${f1(N0 + net)} m².</p>
   <div class="plan"><svg id="svg-${id}" viewBox="${-110 - P.padW * 100} -150 ${1330 + P.padW * 100} ${1250 + P.padS * 100}" role="img" aria-label="Tlocrt prizemlja, varijanta ${v.id}">${render(P)}</svg></div>
   <h2>Varijanta ${v.id} – 3D <small>prevucite za okretanje · štipanje, točkić (nakon klika) ili tipke + / − za zum</small></h2>
   <div class="plan v3d" id="v3d-${id}">${tools3d(id)}
@@ -948,6 +961,8 @@ VARS.forEach(v => {
   if (lazy3d) lazy3d.observe(wrap); else wrap.init3d();
   document.getElementById('var-rows').insertAdjacentHTML('beforeend',
     `<tr><td><a href="#varijanta-${v.id}">${v.id}</a></td><td>${v.ter}</td><td>${v.ves}</td><td>${v.balk}</td><td class="num">${P.info.par}</td><td class="num">${P.info.kid}</td><td class="num">${P.info.ves}</td></tr>`);
+  document.getElementById('area-rows').insertAdjacentHTML('beforeend',
+    `<tr><td><a href="#varijanta-${v.id}">${v.id}</a></td><td class="num">${f1(closed)} m²</td><td class="num">${open ? f1(open) + ' m²' : '–'}</td><td class="num">${f1(gross)} m²</td><td class="num"><b>${f1(G0 + gross)} m²</b></td><td class="num">${f1(net)} m²</td><td class="num">${f1(N0 + net)} m²</td></tr>`);
 });
 </script>
 </body>
