@@ -124,6 +124,8 @@
       <button type="button" data-mode="ground">Suteren</button>
       <button type="button" data-var="H">Varijanta H</button>
       <button type="button" data-var="B">Varijanta B</button>
+      <button type="button" data-light="day">Dan</button>
+      <button type="button" data-light="eve">Veče</button>
       <button id="r3d-reset" type="button">Reset pogleda</button>
       <button id="r3d-zin" type="button" class="zoom" aria-label="Približi" title="Približi">+</button>
       <button id="r3d-zout" type="button" class="zoom" aria-label="Udalji" title="Udalji">−</button>
@@ -132,7 +134,7 @@
     <canvas id="r3d-canvas" role="img" aria-label="Realistični 3D prikaz kuće"></canvas><div class="lab3d" id="r3d-lab"></div>
     <p class="r3d-msg" id="r3d-msg">Učitavam realistični prikaz…</p>
   </div>
-  <p class="lead" style="margin-top:8px">Pretpostavke, nisu od arhitekte: četvorovodni krov 25° s prepustom 50 cm, materijali i boje (parket, keramika, tepih u mesdžidu, antracit prozori), teren (ravan plato na sjeveru u nivou prizemlja, ravno na jugu). Terasa iza kuće od kamenih ploča, 9,45 × 3 m uz sjever (od 3 m zapadno od kuće do izlaza iz vešeraja), leži na platou, bez nosača, odvojena od kuće fugom od 2 cm; u varijantama B i H na nju se izlazi i iz spavaće. Sunce: popodne, s jugozapada.</p>
+  <p class="lead" style="margin-top:8px">Pretpostavke, nisu od arhitekte: četvorovodni krov 25° s prepustom 50 cm; izgled po referentnoj slici (krem žbuka, kamena obloga na punim stubovima suterena i na dimnjaku, tamni crijep, antracit prozori, zavjese, žardinjere, bašta, rasvjeta uveče); unutra parket, keramika, tepih u mesdžidu; teren (ravan plato na sjeveru u nivou prizemlja, ravno na jugu). Terasa iza kuće od kamenih ploča, 9,45 × 4 m uz sjever, sa staklenom ogradom na sjevernoj i zapadnoj ivici (od 3 m zapadno od kuće do izlaza iz vešeraja), leži na platou, bez nosača, odvojena od kuće fugom od 2 cm; u varijantama B i H na nju se izlazi i iz spavaće. Dan: popodnevno sunce s jugozapada; Veče: zalazak na zapadu.</p>
 
   <h2>Pozicija na parceli</h2>
   <div class="plan"><svg id="svg-site" viewBox="95 10 1100 1220" role="img" aria-label="Pozicija kuće na parceli"></svg></div>
@@ -319,8 +321,7 @@ const plans = {
     gaps: [[0, 2, 2.20], [2, 8], [6, 10], [4, 'W'], [9, 'S'], [10, 'S'], [10, 12], [11, 12], [12, 13], [11, 13],     // dnevni
            [17, 'S', 9.55], [21, 'N', 3.80], [20, 21], [15, 14]],                                                   // hol, kotlovnica, kupatilo
     glass: [
-      [0, 5.35, .30, 3.35],                                                        // zapad, dnevni
-      [.30, 8.70, 1.60, .30], [4.70, 8.70, 1.60, .30],                             // jug, dnevni
+      [0, 5.35, .30, 3.65], [.30, 8.70, 1.60, .30],                                // ugaoni prozor dnevnog (JZ): staklo do ugla s obje strane
       [10.70, 1.70, .30, .60], [10.70, 6.73, .30, .60],                            // istok: kupatilo, mesdžid
     ],
     doors: [
@@ -331,7 +332,8 @@ const plans = {
       { r: [7.50, 3.80, .20, .90], s: [[7.50, 3.80, 6.60, 3.80, 7.50, 4.70]] },                                                   // dnevni – hol
       { r: [10.70, 3.70, .30, 1.40], s: [[10.70, 3.70, 10.30, 3.70, 10.70, 4.10], [10.70, 5.10, 9.70, 5.10, 10.70, 4.10]] }, // ulaz 40 + 100, unutra
       { r: [7.85, 5.15, .80, .20], s: [[7.85, 5.35, 7.85, 6.15, 8.65, 5.35]] },                // mesdžid iz hola
-      { r: [3.10, 8.70, 1.60, .30], s: [[3.10, 9.00, 3.10, 9.80, 3.90, 9.00], [4.70, 9.00, 4.70, 9.80, 3.90, 9.00]] },   // dnevni → jug
+      { r: [3.10, 8.70, 3.20, .30], s: [[3.10, 9.00, 3.10, 9.80, 3.90, 9.00], [4.70, 9.00, 4.70, 9.80, 3.90, 9.00],
+                                         [4.70, 9.00, 4.70, 9.80, 5.50, 9.00], [6.30, 9.00, 6.30, 9.80, 5.50, 9.00]] },   // dnevni → jug, niz od 4 staklena krila
       { r: [8.10, 8.70, 1.60, .30], s: [[8.10, 9.00, 8.10, 9.80, 8.90, 9.00], [9.70, 9.00, 9.70, 9.80, 8.90, 9.00]] },   // mesdžid → jug
     ],
     furn: [
@@ -832,12 +834,15 @@ function view3d(P, id, opt) {
     (P.over || []).forEach(w => box(v, w[0], w[0] + w[2], 0, H, w[1], w[1] + w[3], C.wall, C.cut));    // zid ispod gornjeg kraka
     (P.chim || []).forEach(([x, y, w, h]) => box(v, x - .004, x + w + .004, 0, H + .12, y - .004, y + h + .004, M.red, C.cut));   // dimnjak
     // krila vrata, uvijek otvorena: stoje gdje je u tlocrtu nacrtano otvoreno krilo (šarka → kraj luka)
-    P.doors.forEach(d => d.s.forEach(([hx, hy, lx, ly]) => {
+    P.doors.forEach(d => d.s.forEach(([hx, hy, lx, ly, qx, qy]) => {
       const r = d.r, e = .01, ext = r[0] < e || r[1] < e || r[0] + r[2] > P.W - e || r[1] + r[3] > P.H - e;
+      const shut = opt.closedExt && ext;                                            // realistični prikaz: vanjska vrata zatvorena, krilo u ravni zida
+      if (shut) { lx = qx; ly = qy; }
       const near = R => R && r[0] <= R[0] + R[2] + e && r[0] + r[2] >= R[0] - e && r[1] <= R[1] + R[3] + e && r[1] + r[3] >= R[1] - e;
       const onT = near(T) || BL.some(near);
       const glazed = onT || r[1] + r[3] > P.H - e;                                  // južni izlazi i vrata na terasu ili balkon
-      const hz = Math.abs(hy - ly) < 1e-6, a0 = hz ? Math.min(hx, lx) : Math.min(hy, ly), a1 = hz ? Math.max(hx, lx) : Math.max(hy, ly), c = hz ? hy : hx;
+      const hz = Math.abs(hy - ly) < 1e-6, a0 = hz ? Math.min(hx, lx) : Math.min(hy, ly), a1 = hz ? Math.max(hx, lx) : Math.max(hy, ly);
+      const c = shut ? (hz ? r[1] + r[3] / 2 : r[0] + r[2] / 2) : hz ? hy : hx;
       const leaf = (out, u0, u1, y0, y1, t, col, al = 1) => hz ? box(out, u0, u1, y0, y1, c - t, c + t, col, col, al) : box(out, c - t, c + t, y0, y1, u0, u1, col, col, al);
       if (glazed) {
         leaf(v, a0, a0 + .07, 0, 2.05, .025, M.dgrey); leaf(v, a1 - .07, a1, 0, 2.05, .025, M.dgrey);
@@ -1091,12 +1096,12 @@ function initReal() {
   const inR = (r, x, z) => x > r[0] && x < r[0] + r[2] && z > r[1] && z < r[1] + r[3];
   const PG = plans.ground;
   const mkU = id => { const P = mkUpper(VARS.find(v => v.id === id).o);                // prizemlje po varijanti
-    return { P, y0: FH, labels: [...P.labels.map(l => l.slice(0, 3)), ...P.lab3], res: view3d(P, 'real-u' + id, { headless: true, full: true, down: true, stairs: 'hole' }) }; };
+    return { P, y0: FH, labels: [...P.labels.map(l => l.slice(0, 3)), ...P.lab3], res: view3d(P, 'real-u' + id, { headless: true, full: true, down: true, stairs: 'hole', closedExt: true }) }; };
   const UP = { H: mkU('H'), B: mkU('B') }, PU = UP.H.P;
   let vr = 'H';
   const FLOORS = {
     ground: { P: PG, y0: 0, labels: [...PG.labels.map(l => l.slice(0, 3)), [9.85, 1.6, 'Kupatilo 1'], [7.6, 1.0, 'Stepenište']],
-              res: view3d(PG, 'real-g', { headless: true, full: true, wallH: FH - .25, allSteps: true }) },
+              res: view3d(PG, 'real-g', { headless: true, full: true, wallH: FH - .25, allSteps: true, closedExt: true }) },
     upper: UP.H,
   };
 
@@ -1163,6 +1168,20 @@ function initReal() {
     for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) { g.fillStyle = shade(base, (rnd() - .5) * vari); g.fillRect(i * tw + gw / 2, j * th + gw / 2, tw - gw, th - gw); }
     blotch(g, px, 20, px * .05, px * .2, 'rgba(0,0,0,.025)'); grainNoise(g, px, 5);
   };
+  const ledge = (g, px) => {                                                      // kamena obloga u trakama (bež lomljeni kamen)
+    const rows = 16, rh = px / rows, cols = ['#d8c6a4', '#cfbb97', '#e2d3b5', '#c7b28d', '#dccbaa', '#bda784'];
+    g.fillStyle = '#6d6556'; g.fillRect(0, 0, px, px);
+    for (let r = 0; r < rows; r++) {
+      let x = -rnd() * px * .2; const y = r * rh;
+      while (x < px) { const w = px * (.08 + rnd() * .22); g.fillStyle = shade(cols[Math.floor(rnd() * cols.length)], (rnd() - .5) * .14); g.fillRect(x + 1.5, y + 1.2, w - 3, rh - 2.4); x += w; }
+    }
+    blotch(g, px, 40, px * .02, px * .08, 'rgba(80,60,30,.07)'); grainNoise(g, px, 16);
+  };
+  const gravel = (g, px) => {                                                     // bijeli šljunak
+    g.fillStyle = '#b9b5ad'; g.fillRect(0, 0, px, px);
+    for (let i = 0; i < 2600; i++) { const x = rnd() * px, y = rnd() * px, r = 1.5 + rnd() * 3.5; g.fillStyle = shade('#ecebe6', (rnd() - .5) * .25); g.beginPath(); g.ellipse(x, y, r, r * (.6 + rnd() * .4), rnd() * 3, 0, 7); g.fill(); }
+    grainNoise(g, px, 10);
+  };
   const pavers = (g, px) => {                                                     // betonski opločnici 20 × 40, na vez
     const rows = 10, th = px / rows, tw = th * 2; g.fillStyle = '#6f6c66'; g.fillRect(0, 0, px, px);
     for (let r = 0; r < rows; r++) for (let x = (r % 2) * -th; x < px; x += tw) { g.fillStyle = shade('#a29e96', (rnd() - .5) * .12); g.fillRect(x + 1.5, r * th + 1.5, tw - 3, th - 3); }
@@ -1188,8 +1207,8 @@ function initReal() {
   const roofTiles = (g, px) => {                                                  // crijep: redovi 33 cm, spojevi 30 cm
     const rows = 6, th = px / rows, tw = px / 7; g.fillStyle = '#2d2f31'; g.fillRect(0, 0, px, px);
     for (let r = 0; r < rows; r++) for (let i = -1; i < 8; i++) {
-      const x = i * tw + (r % 2) * tw / 2, y = r * th, gr = g.createLinearGradient(0, y, 0, y + th), c = shade('#4b4e52', (rnd() - .5) * .12);
-      gr.addColorStop(0, c); gr.addColorStop(.85, shade('#4b4e52', -.25)); gr.addColorStop(1, '#1e1f21');
+      const x = i * tw + (r % 2) * tw / 2, y = r * th, gr = g.createLinearGradient(0, y, 0, y + th), c = shade('#3a3c40', (rnd() - .5) * .12);
+      gr.addColorStop(0, c); gr.addColorStop(.85, shade('#3a3c40', -.25)); gr.addColorStop(1, '#1e1f21');
       g.fillStyle = gr; g.fillRect(x + 1, y, tw - 2, th);
     }
     grainNoise(g, px, 10);
@@ -1200,7 +1219,21 @@ function initReal() {
   const MAT = {
     plaster: S({ map: tex(256, 2, plain('#f1ede6', 5, .025)), roughness: .95 }),
     ceiling: S({ color: '#f6f4f0', roughness: .97 }),
-    facade: S({ map: tex(512, 3, plain('#e6ddca', 8, .025)), roughness: .95 }),
+    facade: S({ map: tex(512, 3, plain('#ecdcc0', 8, .03)), roughness: .95 }),            // topla krem žbuka
+    stoneClad: S({ map: tex(1024, 1.6, ledge), roughness: .85 }),                          // kamena obloga suterena i dimnjaka
+    gravel: S({ map: tex(512, 1.5, gravel), roughness: 1 }),
+    sheer: S({ color: '#fbf7ef', roughness: 1, transparent: true, opacity: .55, side: THREE.DoubleSide, depthWrite: false }),   // tanke zavjese
+    glow: S({ color: '#fff4e0', emissive: '#ffcf8a', emissiveIntensity: 0, roughness: .4 }),  // lampe: svijetle samo uveče
+    pot: S({ map: tex(256, 1, plain('#e4dccd', 8, .04)), roughness: .8 }),
+    trunk: S({ color: '#5d4a38', roughness: 1 }),
+    olive: S({ color: '#7e8d5e', roughness: .9, flatShading: true }),
+    cypress: S({ color: '#2e4a2b', roughness: .95, flatShading: true }),
+    leaves: S({ color: '#54702f', roughness: .9, flatShading: true }),
+    leavesD: S({ color: '#43602a', roughness: .9, flatShading: true }),
+    bush: S({ color: '#3f5a2d', roughness: .9, flatShading: true }),
+    hydr: S({ color: '#f4f1e6', roughness: .8, flatShading: true }),
+    laven: S({ color: '#8b7bbb', roughness: .9, flatShading: true }),
+    flower: S({ color: '#fbfaf5', roughness: .8 }),
     cut: S({ color: '#3b3835', roughness: .9 }),
     concrete: S({ map: tex(256, 2, plain('#a7a299', 14, .08)), roughness: .9 }),
     parquet: S({ map: tex(1024, 2.4, parquet), roughness: .5 }),
@@ -1238,7 +1271,7 @@ function initReal() {
     grass: S({ map: tex(512, 5, grass), roughness: 1 }),
     paving: S({ map: tex(512, 2, pavers), roughness: .85 }),
     roof: S({ map: tex(512, 2, roofTiles), roughness: .6 }),
-    chimney: S({ map: tex(256, 2, plain('#8f8881', 12, .06)), roughness: .9 }),
+    chimney: S({ map: tex(1024, 1.6, ledge), roughness: .85 }),
   };
   const BYKEY = { 'C.cut': 'cut', 'C.stair': 'stone', 'C.shaft': 'concrete', 'C.glass': 'glass', 'C.furn': 'oak', 'C.furnTop': 'oak',
     'M.wood': 'oak', 'M.woodD': 'walnut', 'M.white': 'lacquer', 'M.whiteD': 'lacquerD', 'M.top': 'counter', 'M.steel': 'steel', 'M.steelD': 'steelD',
@@ -1274,11 +1307,24 @@ function initReal() {
       const geo = new THREE.BufferGeometry();
       geo.setAttribute('position', new THREE.Float32BufferAttribute(o.p, 3)); geo.setAttribute('normal', new THREE.Float32BufferAttribute(o.n, 3));
       geo.setAttribute('uv', new THREE.Float32BufferAttribute(o.uv, 2));
-      const mesh = new THREE.Mesh(geo, MAT[mk]); mesh.receiveShadow = true; mesh.castShadow = mk !== 'glass';
-      if (mk === 'glass') { mesh.userData.noAO = true; mesh.renderOrder = 2; }
+      const tr = mk === 'glass' || mk === 'sheer', mesh = new THREE.Mesh(geo, MAT[mk]); mesh.receiveShadow = true; mesh.castShadow = !tr;
+      if (tr) { mesh.userData.noAO = true; mesh.renderOrder = 2; }
       group.add(mesh);
     }
   };
+
+  // ---------- biljke: nepravilne kugle (instancirane) ----------
+  const blobGeo = (() => { const g = new THREE.IcosahedronGeometry(1, 1), a = g.attributes.position, m = new Map();
+    for (let i = 0; i < a.count; i++) { const k = [a.getX(i), a.getY(i), a.getZ(i)].map(v => v.toFixed(3)).join(); if (!m.has(k)) m.set(k, .82 + rnd() * .3); const f = m.get(k); a.setXYZ(i, a.getX(i) * f, a.getY(i) * f, a.getZ(i) * f); }
+    g.computeVertexNormals(); return g; })();
+  const coneGeo = new THREE.ConeGeometry(1, 1, 9, 3); coneGeo.translate(0, .5, 0);
+  const cylGeo = new THREE.CylinderGeometry(1, 1, 1, 12); cylGeo.translate(0, .5, 0);
+  const inst = (geo, mat, list) => {                                              // list: [x, y, z, sx, sy?, sz?]
+    const m = new THREE.InstancedMesh(geo, mat, list.length), d = new THREE.Object3D();
+    list.forEach((q, i) => { d.position.set(q[0], q[1], q[2]); d.scale.set(q[3], q[4] ?? q[3], q[5] ?? q[3]); d.rotation.set(0, rnd() * 6.28, 0); d.updateMatrix(); m.setMatrixAt(i, d.matrix); });
+    m.castShadow = m.receiveShadow = true; return m;
+  };
+  const blobs = (list, mat, sq = 1) => inst(blobGeo, mat, list.map(q => [q[0], q[1], q[2], q[3], q[3] * (q[4] ?? sq), q[3]]));
 
   // ---------- sprat: kutije iz view3d + okviri prozora i vanjske klupčice ----------
   function buildFloor(F) {
@@ -1305,7 +1351,7 @@ function initReal() {
         if (ck === 'M.red') return area > 1 ? (outside(px, pz) ? 'facade' : 'plaster') : 'redPaint';
         if (down) return 'ceiling';
         if (up) return ck === 'C.wall' ? 'sill' : 'concrete';
-        if (outside(px, pz)) return 'facade';
+        if (outside(px, pz)) return y0 === 0 && r.b[3] - r.b[2] > 2.4 ? 'stoneClad' : 'facade';   // puni stubovi suterena: kamen
         const rn = roomAt(px, pz); return rn && /kupatilo/i.test(rn) ? 'wallTile' : 'plaster';
       });
     }
@@ -1323,7 +1369,23 @@ function initReal() {
       if (!along && gx < e) add('sill', [-.05, 0, bot - .04, bot, gz - .03, gz + gd + .03]);
       if (!along && gx + gw > P.W - e) add('sill', [P.W, P.W + .05, bot - .04, bot, gz - .03, gz + gd + .03]);
     }
-    const group = new THREE.Group(); toGroup(B, group); scene.add(group); return group;
+    // zavjese uz ivice vanjskih otvora (iznutra), žardinjere ispod prozora sprata na jugu, stub ugaonog prozora
+    const e = .01, perim = q => q[0] < e || q[1] < e || q[0] + q[2] > P.W - e || q[1] + q[3] > P.H - e;
+    const openings = [...P.glass, ...P.doors.map(d => d.r).filter(q => q[1] + q[3] > P.H - e)].filter(perim);
+    const flowers = [];
+    for (const [gx, gz, gw, gd] of openings) {
+      const along = gw > gd, len = along ? gw : gd, a0 = along ? gx : gz, pw = Math.min(.32, len / 4);
+      const inner = along ? (gz < e ? gz + gd + .06 : gz - .06) : (gx < e ? gx + gw + .06 : gx - .06);
+      for (const u of [a0 + .02, a0 + len - pw - .02]) add('sheer', along ? [u, u + pw, .02, 2.45, inner - .01, inner + .01] : [inner - .01, inner + .01, .02, 2.45, u, u + pw]);
+      if (y0 > 0 && along && gz + gd > P.H - e && P.glass.some(q => q[0] === gx && q[1] === gz)) {
+        add('frame', [gx + .08, gx + gw - .08, .66, .85, P.H + .05, P.H + .27]);
+        for (let u = gx + .16; u < gx + gw - .12; u += .11) flowers.push([u, y0 + .9 + rnd() * .06, P.H + .1 + rnd() * .1, .07 + rnd() * .03]);
+      }
+    }
+    if (y0 === 0) add('frame', [.11, .19, .9, 2.2, 8.81, 8.89]);                      // stub ugaonog prozora (JZ)
+    const group = new THREE.Group(); toGroup(B, group); scene.add(group);
+    if (flowers.length) group.add(blobs(flowers, MAT.flower, .8), blobs(flowers.map(f => [f[0] + .04, f[1] - .05, f[2] - .03, f[3] * .9]), MAT.bush, .8));
+    return group;
   }
   const groups = { ground: buildFloor(FLOORS.ground) };
   for (const k in UP) UP[k].group = buildFloor(UP[k]);
@@ -1338,6 +1400,13 @@ function initReal() {
     boxInto(B, [-o, -o + .04, ye, ye + .18, -o, H + o], 0, () => 'facade'); boxInto(B, [W + o - .04, W + o, ye, ye + .18, -o, H + o], 0, () => 'facade');
     boxInto(B, [-o, W + o, ye - .01, ye, -o, 0], 0, () => 'facade'); boxInto(B, [-o, W + o, ye - .01, ye, H, H + o], 0, () => 'facade');   // podgled
     boxInto(B, [-o, 0, ye - .01, ye, 0, H], 0, () => 'facade'); boxInto(B, [W, W + o, ye - .01, ye, 0, H], 0, () => 'facade');
+    const gq = .13, ga = -o - gq, gb = W + o + gq, gc = H + o + gq;                // oluci oko strehe
+    for (const b of [[ga, gb, H + o, gc], [ga, gb, -o - gq, -o], [ga, -o, -o - gq, gc], [W + o, gb, -o - gq, gc]])
+      boxInto(B, [b[0], b[1], ye + .03, ye + .15, b[2], b[3]], 0, () => 'lacquer');
+    const dl = [];                                                                // lampe u podgledu strehe, 25 cm od fasade
+    for (let x = .8; x < W; x += 1.9) dl.push([x, H + .25], [x, -.25]);
+    for (let z = 1.2; z < H; z += 2.2) dl.push([-.25, z], [W + .25, z]);
+    for (const [x, z] of dl) boxInto(B, [x - .05, x + .05, ye - .025, ye - .01, z - .05, z + .05], 0, () => 'glow');
     const [cx, cz, cw, cd] = PU.chim[0];
     boxInto(B, [cx, cx + cw, ye - .3, ry + .45, cz, cz + cd], 0, () => 'chimney'); boxInto(B, [cx - .05, cx + cw + .05, ry + .45, ry + .51, cz - .05, cz + cd + .05], 0, () => 'concrete');
     toGroup(B, roof);
@@ -1354,12 +1423,13 @@ function initReal() {
   }
 
   // ---------- teren: brdo na sjeveru do nivoa prizemlja, ravno na jugu; trava i opločnik ----------
+  const smooth = (a, b, t) => { t = Math.min(1, Math.max(0, (t - a) / (b - a))); return t * t * (3 - 2 * t); };
+  const hTer = (x, z) => {
+    if (x > .1 && x < W - .1 && z > .1 && z < H - .1) return -.6;                  // ispod kuće
+    return -.12 + FH * smooth(2.0, -.3, z) + Math.max(0, -z - 6.5) * .05;       // ravan plato na sjeveru (2,88), dalje blago raste
+  };
+  const lights = [];                                                              // svjetla koja gore samo uveče
   {
-    const smooth = (a, b, t) => { t = Math.min(1, Math.max(0, (t - a) / (b - a))); return t * t * (3 - 2 * t); };
-    const hTer = (x, z) => {
-      if (x > .1 && x < W - .1 && z > .1 && z < H - .1) return -.6;                // ispod kuće
-      return -.12 + FH * smooth(2.0, -.3, z) + Math.max(0, -z - 6.5) * .05;     // ravan plato na sjeveru (2,88), dalje blago raste
-    };
     const axis = (a, b, extra) => { const s = new Set(extra); for (let v = a; v <= b + 1e-6; v += .5) s.add(+v.toFixed(2)); return [...s].sort((p, q) => p - q); };
     const xs = axis(-50, 61, [.2, W - .2]), zs = axis(-50, 59, [.2, H - .2]);
     const pos = [], uv = [], idx = [];
@@ -1370,26 +1440,96 @@ function initReal() {
     geo.setIndex(idx); geo.computeVertexNormals();
     const m = new THREE.Mesh(geo, MAT.grass); m.receiveShadow = true; scene.add(m);
     const B = makeBufs();
-    boxInto(B, [-.8, W + .8, -.12, -.02, H, H + 2.4], 0, n => n[1] > .5 ? 'paving' : 'concrete');      // uz južnu fasadu
-    boxInto(B, [W, W + 2, -.12, -.02, 3.0, H + 2.4], 0, n => n[1] > .5 ? 'paving' : 'concrete');       // ulaz s istoka
+    const TS = 3.5;                                                                // južna terasa: velike kamene ploče
+    boxInto(B, [-.8, W + .8, -.12, -.02, H, H + TS], 0, n => n[1] > .5 ? 'slabs' : 'stone');
+    boxInto(B, [W, W + 2, -.12, -.02, 3.0, H], 0, n => n[1] > .5 ? 'slabs' : 'stone');                   // ulaz s istoka
+    boxInto(B, [-2.4, -.8, -.12, -.07, 3.2, H + TS], 0, n => n[1] > .5 ? 'gravel' : 'stone');           // šljunčana gredica uz zapad
+    boxInto(B, [-2.45, -2.4, -.12, -.03, 3.2, H + TS], 0, () => 'frame'); boxInto(B, [-2.45, -.8, -.12, -.03, H + TS, H + TS + .05], 0, () => 'frame');
     // terasa iza kuće: kamene ploče, vrh 2 cm ispod poda prizemlja; leži na platou, bez nosača, odvojena od kuće fugom 2 cm
     const tt = FH - .02, fg = .02, slab = n => n[1] > .5 ? 'slabs' : n[1] < -.5 ? 'concrete' : 'stone';
-    boxInto(B, [-3, 6.45, tt - .35, tt, -3, -fg], 0, slab);                                            // 9,45 × 3 m
+    boxInto(B, [-3, 6.45, tt - .35, tt, -4, -fg], 0, slab);                                            // 9,45 × 4 m
+    const rail = (x0, x1, z0, z1) => {                                                                  // staklena ograda 1,0 m, antracit rukohvat i stubići
+      const alongX = x1 - x0 > z1 - z0, L = alongX ? x1 - x0 : z1 - z0, n = Math.max(1, Math.round(L / 1.5));
+      const at = (a, b, ya, yb) => alongX ? [x0 + a, x0 + b, ya, yb, z0, z1] : [x0, x1, ya, yb, z0 + a, z0 + b];
+      boxInto(B, at(0, L, tt + .96, tt + 1.0), 0, () => 'frame');
+      for (let i = 0; i <= n; i++) { const a = Math.min(L - .05, i * L / n); boxInto(B, at(a, a + .05, tt, tt + .96), 0, () => 'frame'); }
+      const m = alongX ? (z0 + z1) / 2 : (x0 + x1) / 2;
+      boxInto(B, alongX ? [x0, x1, tt + .1, tt + .94, m - .005, m + .005] : [m - .005, m + .005, tt + .1, tt + .94, z0, z1], 0, n => (alongX ? n[2] : n[0]) ? 'glass' : null);
+    };
+    rail(-3, 6.45, -4, -3.95); rail(-3, -2.95, -3.95, -fg);
+    // stubići-lampe uz ivicu južne terase
+    for (const x of [-.6, 3.6, 7.6, W + .6]) {
+      const z = H + TS + .25;
+      boxInto(B, [x - .06, x + .06, -.05, .55, z - .06, z + .06], 0, () => 'black'); boxInto(B, [x - .055, x + .055, .45, .53, z - .055, z + .055], 0, () => 'glow');
+      lights.push({ l: new THREE.PointLight('#ffc98a', 0, 4, 2), at: [x, .5, z], i: 1.6 });
+    }
+    // zidne lampe (gore-dolje) na kamenim stubovima južne fasade suterena
+    const op = [...PG.glass, ...PG.doors.map(d => d.r)].filter(q => q[1] + q[3] > H - .01).map(q => [q[0], q[0] + q[2]]).sort((a, b) => a[0] - b[0]);
+    const piers = []; let px0 = 0; for (const [a, b] of op) { if (a - px0 > .6) piers.push((px0 + a) / 2); px0 = Math.max(px0, b); } if (W - px0 > .6) piers.push((px0 + W) / 2);
+    for (const x of piers) {
+      boxInto(B, [x - .06, x + .06, 1.85, 2.15, H, H + .1], 0, () => 'black');
+      boxInto(B, [x - .05, x + .05, 1.84, 1.85, H + .01, H + .09], 0, () => 'glow'); boxInto(B, [x - .05, x + .05, 2.15, 2.16, H + .01, H + .09], 0, () => 'glow');
+      for (const dy of [1, -1]) { const l = new THREE.SpotLight('#ffc27a', 0, 3.2, .55, .9, 2); lights.push({ l, at: [x, 2 + dy * .2, H + .14], to: [x, 2 + dy * 2, H + .02], i: 9 }); }
+    }
     const g = new THREE.Group(); toGroup(B, g); scene.add(g);
+    for (const L of lights) { L.l.position.set(...L.at); scene.add(L.l); if (L.to) { L.l.target.position.set(...L.to); scene.add(L.l.target); } }
+
+    // bašta: hortenzije i lavanda u gredici, masline u saksijama, čempresi i stabla u pozadini
+    const hyd = [], hydF = [], lav = [], spk = [];
+    for (let z = 3.6; z < H + TS - .3; z += .95) {
+      const x = -1.95 + rnd() * .25; hyd.push([x, .25, z, .42, .75]);
+      for (let k = 0; k < 7; k++) hydF.push([x + (rnd() - .5) * .55, .45 + rnd() * .25, z + (rnd() - .5) * .55, .11 + rnd() * .04]);
+      for (let k = 0; k < 2; k++) {                                                // lavanda: sivozeleni busen + ljubičasti klasovi
+        const lx = -1.15 + (rnd() - .5) * .25, lz = z + (k - .5) * .45 + (rnd() - .5) * .1; lav.push([lx, .02, lz, .2, .55]);
+        for (let q = 0; q < 9; q++) spk.push([lx + (rnd() - .5) * .3, .08, lz + (rnd() - .5) * .3, .025, .3 + rnd() * .15]);
+      }
+    }
+    scene.add(blobs(hyd, MAT.bush), blobs(hydF, MAT.hydr, .85), blobs(lav, MAT.olive), inst(coneGeo, MAT.laven, spk));
+    const potXs = [...piers.slice(0, 3), -.55];
+    const pots = potXs.map(x => [x, -.02, H + .55, .26, .55]), stems = potXs.map(x => [x, .5, H + .55, .025, .7]);
+    const crown = potXs.flatMap(x => Array.from({ length: 6 }, () => [x + (rnd() - .5) * .45, 1.35 + rnd() * .45, H + .55 + (rnd() - .5) * .45, .2 + rnd() * .07, .8]));
+    scene.add(inst(cylGeo, MAT.pot, pots), inst(cylGeo, MAT.trunk, stems), blobs(crown, MAT.olive));
+    const cyp = [];
+    for (let z = 3; z < 17; z += 1.1) { cyp.push([-8 + rnd() * .3, -.15, z, .55, 3.4 + rnd() * .8]); cyp.push([W + 7.5 + rnd() * .3, -.15, z, .55, 3.4 + rnd() * .8]); }
+    scene.add(inst(coneGeo, MAT.cypress, cyp));
+    const trees = [[-12, 18], [24, 14], [-9, -12], [17, -11], [-16, 4], [27, 2]], tr = [], cr = [], crD = [];
+    for (const [x, z] of trees) {
+      const y = hTer(x, z), h = 3.2 + rnd() * 1.2; tr.push([x, y - .1, z, .16, h]);
+      for (let k = 0; k < 9; k++) (k % 2 ? cr : crD).push([x + (rnd() - .5) * 2.6, y + h + (rnd() - .2) * 1.8, z + (rnd() - .5) * 2.6, 1.1 + rnd() * .6, .85]);
+    }
+    scene.add(inst(cylGeo, MAT.trunk, tr), blobs(cr, MAT.leaves), blobs(crD, MAT.leavesD));
   }
 
-  // ---------- nebo, sunce (popodne, jugozapad), ambijent ----------
-  const sunDir = new THREE.Vector3().setFromSphericalCoords(1, THREE.MathUtils.degToRad(90 - 34), THREE.MathUtils.degToRad(-40));
-  const mkSky = sc => { const s = new Sky(); s.scale.setScalar(sc); const u = s.material.uniforms;
-    u.turbidity.value = 5; u.rayleigh.value = 1.2; u.mieCoefficient.value = .004; u.mieDirectionalG.value = .8; u.sunPosition.value.copy(sunDir); return s; };
-  const sky = mkSky(180); sky.userData.noAO = true; scene.add(sky);
-  const pmrem = new THREE.PMREMGenerator(renderer), envScene = new THREE.Scene(); envScene.add(mkSky(60));
-  scene.environment = pmrem.fromScene(envScene, 0, .1, 200).texture; scene.environmentIntensity = .45;
+  // ---------- nebo, sunce, ambijent: Dan (popodne, jugozapad) ili Veče (zalazak na zapadu, upaljena svjetla) ----------
+  const LIGHT = {
+    day: { el: 34, az: -40, sky: [5, 1.2, .004, .8], sun: ['#fff0d8', 3.2], hemi: ['#d5e6ff', '#7a6a55', .35], env: .45, fog: '#d9e1e8', exp: .95, glow: 0, inside: 0 },
+    eve: { el: 5, az: -78, sky: [9, 2.6, .012, .93], sun: ['#ffb070', 2.1], hemi: ['#f3c9b0', '#4a3c30', .3], env: .38, fog: '#e7c3ad', exp: 1.05, glow: 3, inside: .3 },
+  };
+  const sunDir = new THREE.Vector3();
+  const mkSky = sc => { const s = new Sky(); s.scale.setScalar(sc); return s; };
+  const sky = mkSky(180), envSky = mkSky(60); sky.userData.noAO = true; scene.add(sky);
+  const pmrem = new THREE.PMREMGenerator(renderer), envScene = new THREE.Scene(); envScene.add(envSky);
   const center = new THREE.Vector3(W / 2, 2.5, H / 2);
-  const sun = new THREE.DirectionalLight('#fff0d8', 3.2); sun.position.copy(center).addScaledVector(sunDir, 35); sun.target.position.copy(center);
+  const sun = new THREE.DirectionalLight('#fff0d8', 3.2); sun.target.position.copy(center);
   sun.castShadow = true; sun.shadow.mapSize.set(4096, 4096); sun.shadow.bias = -.0004; sun.shadow.normalBias = .02;
-  Object.assign(sun.shadow.camera, { left: -11, right: 11, top: 11, bottom: -11, near: 5, far: 70 }); sun.shadow.camera.updateProjectionMatrix();
-  scene.add(sun, sun.target, new THREE.HemisphereLight('#d5e6ff', '#7a6a55', .35));
+  Object.assign(sun.shadow.camera, { left: -14, right: 14, top: 14, bottom: -14, near: 5, far: 80 }); sun.shadow.camera.updateProjectionMatrix();
+  const hemi = new THREE.HemisphereLight('#d5e6ff', '#7a6a55', .35);
+  scene.add(sun, sun.target, hemi);
+  let envRT = null, light = 'eve';
+  const applyLight = k => {
+    const L = LIGHT[k]; light = k;
+    sunDir.setFromSphericalCoords(1, THREE.MathUtils.degToRad(90 - L.el), THREE.MathUtils.degToRad(L.az));
+    for (const s of [sky, envSky]) { const u = s.material.uniforms; [u.turbidity.value, u.rayleigh.value, u.mieCoefficient.value, u.mieDirectionalG.value] = L.sky; u.sunPosition.value.copy(sunDir); }
+    if (envRT) envRT.dispose(); envRT = pmrem.fromScene(envScene, 0, .1, 200); scene.environment = envRT.texture; scene.environmentIntensity = L.env;
+    sun.color.set(L.sun[0]); sun.intensity = L.sun[1]; sun.position.copy(center).addScaledVector(sunDir, 40);
+    hemi.color.set(L.hemi[0]); hemi.groundColor.set(L.hemi[1]); hemi.intensity = L.hemi[2];
+    scene.fog.color.set(L.fog); renderer.toneMappingExposure = L.exp;
+    MAT.glow.emissiveIntensity = L.glow;
+    for (const k2 of ['plaster', 'ceiling', 'wallTile', 'sheer']) { MAT[k2].emissive.set('#ffc98a'); MAT[k2].emissiveIntensity = L.inside * (k2 === 'sheer' ? 2.2 : 1); }
+    for (const q of lights) q.l.intensity = k === 'eve' ? q.i : 0;
+    renderer.shadowMap.needsUpdate = true;
+  };
+  applyLight('eve');
   const lamp = new THREE.PointLight('#ffd9a8', 0, 0, 2); scene.add(lamp);          // svjetlo u sobi, samo u pogledu iz sobe
 
   // ---------- kamera, kontrole, postprocesiranje (GTAO) ----------
@@ -1407,7 +1547,7 @@ function initReal() {
   composer.addPass(gtao); composer.addPass(new OutputPass());
 
   const HOME = {
-    house: [new THREE.Vector3(-9, 8, 23), new THREE.Vector3(W / 2, 2.6, H / 2)],
+    house: [new THREE.Vector3(-7.5, 4.4, 22), new THREE.Vector3(W / 2 - .5, 2.5, H / 2)],
     upper: [new THREE.Vector3(-4.5, 17, 17), new THREE.Vector3(W / 2, FH, H / 2)],
     ground: [new THREE.Vector3(-4.5, 14, 17), new THREE.Vector3(W / 2, 0, H / 2)],
   };
@@ -1457,6 +1597,9 @@ function initReal() {
     vr = v; FLOORS.upper = UP[v]; vbtns.forEach(b => b.classList.toggle('on', b.dataset.var === v)); setVis(); redraw();
   };
   vbtns.forEach(b => b.onclick = () => setVar(b.dataset.var));
+  const lbtns = [...wrap.querySelectorAll('[data-light]')];                       // Dan / Veče
+  const setLight = k => { applyLight(k); lbtns.forEach(b => b.classList.toggle('on', b.dataset.light === k)); redraw(); };
+  lbtns.forEach(b => b.onclick = () => setLight(b.dataset.light));
 
   // ---------- pogled iz sobe ----------
   const lookRoom = () => {
@@ -1532,8 +1675,8 @@ function initReal() {
     camera.aspect = w / h; camera.updateProjectionMatrix(); redraw();
   }
   new ResizeObserver(resize).observe(cv);
-  resize(); setMode('house'); setVar('H');
-  window.real3d = { setMode, setVar, enter: (fk, name) => { const s = spans.find(q => q.fk === fk && q.l[2] === name && (!q.v || q.v === vr)); if (s) enter(fk, s.l); }, leave, camera, controls, redraw };   // za provjeru
+  resize(); setMode('house'); setVar('H'); setLight('eve');
+  window.real3d = { setMode, setVar, setLight, enter: (fk, name) => { const s = spans.find(q => q.fk === fk && q.l[2] === name && (!q.v || q.v === vr)); if (s) enter(fk, s.l); }, leave, camera, controls, redraw };   // za provjeru
 }
 </script>
 </body>
