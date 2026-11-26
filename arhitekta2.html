@@ -321,7 +321,7 @@ const plans = {
     gaps: [[0, 2, 2.20], [2, 8], [6, 10], [4, 'W'], [9, 'S'], [10, 'S'], [10, 12], [11, 12], [12, 13], [11, 13],     // dnevni
            [17, 'S', 9.55], [21, 'N', 3.80], [20, 21], [15, 14]],                                                   // hol, kotlovnica, kupatilo
     glass: [
-      [0, 5.35, .30, 3.65], [.30, 8.70, 1.60, .30],                                // ugaoni prozor dnevnog (JZ): staklo do ugla s obje strane
+      [0, 5.35, .30, 3.35],                                                        // prozor dnevnog (zapad)
       [10.70, 1.70, .30, .60], [10.70, 6.73, .30, .60],                            // istok: kupatilo, mesdžid
     ],
     doors: [
@@ -1369,7 +1369,7 @@ function initReal() {
       if (!along && gx < e) add('sill', [-.05, 0, bot - .04, bot, gz - .03, gz + gd + .03]);
       if (!along && gx + gw > P.W - e) add('sill', [P.W, P.W + .05, bot - .04, bot, gz - .03, gz + gd + .03]);
     }
-    // zavjese uz ivice vanjskih otvora (iznutra), žardinjere ispod prozora sprata na jugu, stub ugaonog prozora
+    // zavjese uz ivice vanjskih otvora (iznutra), žardinjere ispod prozora sprata na jugu
     const e = .01, perim = q => q[0] < e || q[1] < e || q[0] + q[2] > P.W - e || q[1] + q[3] > P.H - e;
     const openings = [...P.glass, ...P.doors.map(d => d.r).filter(q => q[1] + q[3] > P.H - e)].filter(perim);
     const flowers = [];
@@ -1382,7 +1382,6 @@ function initReal() {
         for (let u = gx + .16; u < gx + gw - .12; u += .11) flowers.push([u, y0 + .9 + rnd() * .06, P.H + .1 + rnd() * .1, .07 + rnd() * .03]);
       }
     }
-    if (y0 === 0) add('frame', [.11, .19, .9, 2.2, 8.81, 8.89]);                      // stub ugaonog prozora (JZ)
     const group = new THREE.Group(); toGroup(B, group); scene.add(group);
     if (flowers.length) group.add(blobs(flowers, MAT.flower, .8), blobs(flowers.map(f => [f[0] + .04, f[1] - .05, f[2] - .03, f[3] * .9]), MAT.bush, .8));
     return group;
