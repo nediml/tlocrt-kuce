@@ -130,7 +130,7 @@
     <canvas id="r3d-canvas" role="img" aria-label="Realistični 3D prikaz kuće"></canvas><div class="lab3d" id="r3d-lab"></div>
     <p class="r3d-msg" id="r3d-msg">Učitavam realistični prikaz…</p>
   </div>
-  <p class="lead" style="margin-top:8px">Pretpostavke, nisu od arhitekte: četvorovodni krov 25° s prepustom 50 cm, materijali i boje (parket, keramika, tepih u mesdžidu, antracit prozori), teren (brdo na sjeveru do nivoa prizemlja, ravno na jugu). Sunce: popodne, s jugozapada.</p>
+  <p class="lead" style="margin-top:8px">Pretpostavke, nisu od arhitekte: četvorovodni krov 25° s prepustom 50 cm, materijali i boje (parket, keramika, tepih u mesdžidu, antracit prozori), teren (ravan plato na sjeveru u nivou prizemlja, ravno na jugu). Terasa iza kuće od kamenih ploča, L oko sjeverozapadnog ugla: 9,45 × 3 m uz sjever (do izlaza iz vešeraja) i 3 × 3 m niz zapad; zapadni krak je na stubovima, iznad izlaza iz kotlovnice, sa staklenom ogradom. Sunce: popodne, s jugozapada.</p>
 
   <h2>Pozicija na parceli</h2>
   <div class="plan"><svg id="svg-site" viewBox="95 10 1100 1220" role="img" aria-label="Pozicija kuće na parceli"></svg></div>
@@ -1199,6 +1199,7 @@ function initReal() {
     wallTile: S({ map: tex(512, 1.2, tiles('#f3f2ef', .02, '#cdc8c0', 2, 4, 3)), roughness: .12 }),
     carpet: S({ map: tex(512, 2.4, carpet), roughness: 1 }),
     deck: S({ map: tex(512, 1.2, tiles('#b7b0a3', .06, '#8a857b', 2, 2, 5)), roughness: .8 }),
+    slabs: S({ map: tex(512, 1.2, tiles('#c9c2b4', .10, '#8c867b', 2, 2, 3)), roughness: .7 }),   // kamene ploče 60 × 60
     stone: S({ map: tex(256, 1, plain('#d6ccbb', 10, .08)), roughness: .45 }),
     sill: S({ color: '#d7d2c8', roughness: .5 }),
     oak: S({ map: tex(512, 1, grain('#ba9063')), roughness: .55 }),
@@ -1346,7 +1347,7 @@ function initReal() {
     const smooth = (a, b, t) => { t = Math.min(1, Math.max(0, (t - a) / (b - a))); return t * t * (3 - 2 * t); };
     const hTer = (x, z) => {
       if (x > .1 && x < W - .1 && z > .1 && z < H - .1) return -.6;                // ispod kuće
-      return -.12 + (FH - .4) * smooth(2.0, -.3, z) + Math.max(0, -z - 3) * .05;
+      return -.12 + FH * smooth(2.0, -.3, z) + Math.max(0, -z - 6.5) * .05;     // ravan plato na sjeveru (2,88), dalje blago raste
     };
     const axis = (a, b, extra) => { const s = new Set(extra); for (let v = a; v <= b + 1e-6; v += .5) s.add(+v.toFixed(2)); return [...s].sort((p, q) => p - q); };
     const xs = axis(-50, 61, [.2, W - .2]), zs = axis(-50, 59, [.2, H - .2]);
@@ -1360,6 +1361,20 @@ function initReal() {
     const B = makeBufs();
     boxInto(B, [-.8, W + .8, -.12, -.02, H, H + 2.4], 0, n => n[1] > .5 ? 'paving' : 'concrete');      // uz južnu fasadu
     boxInto(B, [W, W + 2, -.12, -.02, 3.0, H + 2.4], 0, n => n[1] > .5 ? 'paving' : 'concrete');       // ulaz s istoka
+    // terasa iza kuće: L oko SZ ugla, kamene ploče, vrh 2 cm ispod poda prizemlja; zapadni krak na stubovima (ispod su vrata kotlovnice)
+    const tt = FH - .02, slab = n => n[1] > .5 ? 'slabs' : n[1] < -.5 ? 'concrete' : 'stone';
+    boxInto(B, [-3, 6.45, tt - .2, tt, -3, 0], 0, slab);                                               // sjeverni krak 9,45 × 3
+    boxInto(B, [-3, 0, tt - .2, tt, 0, 3], 0, slab);                                                   // zapadni krak 3 × 3
+    for (const [x, z] of [[-2.95, .45], [-2.95, 2.70], [-.40, 2.70]]) boxInto(B, [x, x + .25, -.6, tt - .2, z, z + .25], 0, () => 'concrete');
+    const rail = (x0, x1, z0, z1) => {                                                                  // staklena ograda 1,0 m, antracit rukohvat i stubići
+      const L = Math.max(x1 - x0, z1 - z0), alongX = x1 - x0 > z1 - z0, n = Math.max(1, Math.round(L / 1.5));
+      const at = (a, b, ya, yb) => alongX ? [x0 + a, x0 + b, ya, yb, z0, z1] : [x0, x1, ya, yb, z0 + a, z0 + b];
+      boxInto(B, at(0, L, tt + .96, tt + 1.0), 0, () => 'frame');
+      for (let i = 0; i <= n; i++) { const a = Math.min(L - .05, i * L / n); boxInto(B, at(a, a + .05, tt, tt + .96), 0, () => 'frame'); }
+      const t = alongX ? [x0, x1, tt + .1, tt + .94, (z0 + z1) / 2 - .005, (z0 + z1) / 2 + .005] : [(x0 + x1) / 2 - .005, (x0 + x1) / 2 + .005, tt + .1, tt + .94, z0, z1];
+      boxInto(B, t, 0, n => (alongX ? n[2] : n[0]) ? 'glass' : null);
+    };
+    rail(-3, -2.95, -.2, 3); rail(-2.95, 0, 2.95, 3);
     const g = new THREE.Group(); toGroup(B, g); scene.add(g);
   }
 
