@@ -263,7 +263,7 @@ const plans = {
     W: 11.0, H: 9.0, hill: '▲ brdo – suteren je ukopan, sjeverni zid 40 cm, bez prozora',
     hatch: [.06, .08, 10.88, .22],
     rooms: [
-      [.30, .40, 4.50, 2.40], [5.00, .40, 1.55, 2.40], [8.85, .40, 1.85, 2.40],   // kotlovnica, ostava, kupatilo 1
+      [.30, .40, 4.20, 2.40], [4.70, .40, 1.85, 2.40], [8.85, .40, 1.85, 2.40],   // kotlovnica, ostava, kupatilo 1
       [.30, 3.00, 6.05, 5.70], [7.70, 3.00, 3.00, 2.15], [7.70, 5.35, 3.00, 3.35], [6.33, 3.80, 1.17, 4.90], // dnevni, ulazni hol, mesdžid
     ],
     walls: [[8.65, 3.00, .20, .80]],
@@ -276,12 +276,12 @@ const plans = {
     ],
     cols: [
       [.15, 2.90], [.15, 5.25], [.15, 8.85], [10.85, 2.90], [10.85, 5.25], [10.85, 8.85],
-      [4.20, 2.90], [6.45, 2.90], [8.75, 2.90], [6.45, 3.70], [7.60, 3.70], [8.75, 3.70],
+      [4.60, 2.90], [6.45, 2.90], [8.75, 2.90], [6.45, 3.70], [7.60, 3.70], [8.75, 3.70],
       [7.60, 5.25], [7.60, 8.85],
     ],
     skipDims: [0, 3, 4, 6],
     xdims: [
-      [1.40, .57, '4,50'], [1.55, 2.73, '4,50'], [.47, 1.60, '2,40', 1], [4.74, .75, '2,40', 1],          // kotlovnica
+      [1.40, .57, '4,20'], [1.55, 2.73, '4,20'], [.47, 1.60, '2,40', 1], [4.44, .75, '2,40', 1],          // kotlovnica
       [3.32, 3.17, '6,05'], [.47, 5.85, '5,70', 1], [2.50, 8.63, '7,20'], [6.92, 3.97, '1,15'], [7.44, 8.30, '4,90', 1],   // dnevni
       [10.25, 3.17, '1,85'], [9.02, 3.63, '0,80', 1], [8.27, 3.97, '1,15'],                             // ulazni hol
       [9.20, 5.08, '3,00'], [10.64, 3.35, '2,15', 1],
@@ -289,7 +289,7 @@ const plans = {
     extra: `<path class="kibla" d="M970 770L1035 835M1035 835L1035 805M1035 835L1005 835"/>`
       + kota(.75, 1.35) + kota(8.50, 8.25),
     stairs: [6.55, .40, 2.10, 3.40, '7,14 m²'],
-    chim: [[4.10, 2.40, .70, .40]],                                               // dvokanalni dimnjak: kotao + šporet
+    chim: [[3.80, 2.40, .70, .40]],                                               // dvokanalni dimnjak: kotao + šporet
     gaps: [[0, 2, 2.20], [2, 8], [6, 10], [4, 'W'], [9, 'S'], [10, 'S'], [10, 12], [11, 12], [12, 13], [11, 13],     // dnevni
            [17, 'S', 9.55], [21, 'N', 3.80], [20, 21], [15, 14]],                                                   // hol, kotlovnica, kupatilo
     glass: [
@@ -298,7 +298,7 @@ const plans = {
     ],
     doors: [
       { r: [0, 1.95, .30, .80], s: [[.30, 2.75, 1.10, 2.75, .30, 1.95]] },                    // kotlovnica vani
-      { r: [4.80, 1.20, .20, .80], s: [[4.80, 1.20, 4.00, 1.20, 4.80, 2.00]] },                // kotlovnica – ostava
+      { r: [4.50, 1.20, .20, .80], s: [[4.50, 1.20, 3.70, 1.20, 4.50, 2.00]] },                // kotlovnica – ostava
       { r: [5.10, 2.80, .80, .20], s: [[5.90, 3.00, 5.90, 3.80, 5.10, 3.00]] },                // ostava – dnevni
       { r: [9.90, 2.80, .70, .20], s: [[10.60, 2.80, 10.60, 2.10, 9.90, 2.80]] },              // kupatilo 1
       { r: [7.50, 3.80, .20, .90], s: [[7.50, 3.80, 6.60, 3.80, 7.50, 4.70]] },                                                   // dnevni – hol
@@ -318,14 +318,14 @@ const plans = {
       [9.80, .40, .90, .90], [9.00, .40, .40, .65], [8.85, 1.55, .45, .55],                    // tuš, šolja, umivaonik
       [8.85, 3.00, .90, .45],                                                                 // ormar
       [7.70, 6.25, .30, 2.45], [8.90, 5.35, 1.80, .60],                                        // mesdžid: police, radni sto
-      [2.05, 1.75, 1.00, 1.00], [3.20, 1.85, .80, .90],                                        // pelet, kotao (uz južni zid, kotao do dimnjaka)
+      [1.75, 1.75, 1.00, 1.00], [2.95, 1.85, .80, .90],                                        // pelet, kotao (uz južni zid, kotao do dimnjaka)
       [4.30, 3.00, .60, .60],                                                                  // šporet na drva
     ],
     fh: [.9, .9, .9,  .75, .45, .45, .45, .45, .45, .45,  .7, .7,  .4, .5,  .1, .4, .85,  2.1,  2.0, .75,  1.5, 1.4,  .85],
     fk: ['kitchen:S', 'counter:E', 'counter:S', 'table', 'chair:E', 'chair:E', 'chair:W', 'chair:W', 'chair:S', 'chair:N',
          'sofa:E', 'sofa2:S', 'coffee', 'tv:W', 'shower:NE', 'wc:S', 'vanity:E', 'wardrobe:S', 'shelf:E', 'desk:S', 'pellet:N', 'boiler:N', 'cooker:S'],
     labels: [
-      [2.55, 1.00, 'Kotlovnica', '4,50 × 2,40', '10,52 m²'], [5.77, 1.40, 'Ostava', '1,55 × 2,40', '3,72 m²'],
+      [2.40, 1.00, 'Kotlovnica', '4,20 × 2,40', '10,08 m²'], [5.62, 1.40, 'Ostava', '1,85 × 2,40', '4,44 m²'],
       [4.40, 4.10, 'Dnevni boravak', 's kuhinjom i trpezarijom', '40,12 m²'],
       [8.75, 4.35, 'Ulazni hol', '5,53 m²'], [9.30, 6.85, 'Mesdžid', '+ radna soba', '10,05 m²'],
     ],
@@ -333,10 +333,10 @@ const plans = {
       [2.25, 3.30, 'kuhinja'], [3.90, 9.40, 'izlaz'], [8.90, 9.40, 'izlaz'], [1.75, 4.98, 'poluotok'], [1.70, 7.10, 'sto'], [4.17, 7.10, 'garnitura'],
       [7.30, 6.70, 'TV'], [8.35, 7.60, 'police'], [9.80, 5.62, 'radni sto'], [10.22, 7.65, 'kibla'], [9.30, 3.28, 'ormar'],
       [7.02, 2.35, 'ostava ispod'], [7.02, 2.55, 'stepeništa'],
-      [2.55, 2.20, 'pelet'], [3.60, 2.25, 'kotao'], [4.45, 2.33, 'dimnjak'], [4.60, 3.28, 'šporet'], [11.28, 3.58, 'ulaz'],
+      [2.25, 2.20, 'pelet'], [3.35, 2.25, 'kotao'], [4.15, 2.33, 'dimnjak'], [4.60, 3.28, 'šporet'], [11.28, 3.58, 'ulaz'],
       [10.25, .90, 'tuš'], [10.05, 1.75, 'Kupatilo 1'], [10.05, 1.97, '4,44 m²'],
     ],
-    top: [[.30, 4.80, '4,50'], [5.00, 6.55, '1,55'], [6.55, 8.65, '2,10'], [8.85, 10.70, '1,85']],
+    top: [[.30, 4.50, '4,20'], [4.70, 6.55, '1,85'], [6.55, 8.65, '2,10'], [8.85, 10.70, '1,85']],
     bottom: [[.30, 1.90, '1,60'], [1.90, 3.10, '1,20'], [3.10, 4.70, '1,60'], [4.70, 6.30, '1,60'],
              [6.30, 7.50, '1,20'], [8.10, 9.70, '1,60'], [9.70, 11.00, '1,30']],
     right: [[0, 1.70, '1,70'], [1.70, 2.30, '0,60'], [2.30, 3.70, '1,40'], [3.70, 5.10, '1,40'], [5.10, 6.73, '1,63'],
@@ -485,7 +485,7 @@ function mkUpper(o) {
     padS: balc.some(b => b[1] >= 9) ? .9 : 0, padW: balc.some(b => b[0] < 0) ? 1.2 : 0,
     xdims: [[3.60, N(.47), fmt(par[2])], [r2(4.44 + dx), LS ? 2.15 : 1.80, fmt(dN), 1], [2.75, r2(yN - .07), '2,40'], [.47, r2(4.00 - sh), fmt(nS - nw), 1],
             [1.20, nS - .07, '1,80'], [2.04, r2(4.45 - sh), fmt(nS - yN), 1]],
-    stairs: [6.55, nw, 2.10, r2(3.80 - nw), (2.10 * (3.80 - nw)).toFixed(2).replace('.', ',') + ' m²'], chim: [[4.10, 2.40, .70, .40]], rail: [7.70, 3.80, 8.65, 3.80],
+    stairs: [6.55, nw, 2.10, r2(3.80 - nw), (2.10 * (3.80 - nw)).toFixed(2).replace('.', ',') + ' m²'], chim: [[3.80, 2.40, .70, .40]], rail: [7.70, 3.80, 8.65, 3.80],
     top: [[.30, xw, fmt(par[2])], [nx[0], 6.35, fmt(nx[2])], [6.55, 8.65, '2,10'], [8.85, 10.70, '1,85']],
     bottom, right: [[nw, yN, fmt(dN)], [yC, yW, fmt(r2(yW - yC))], [yS, 8.70, fmt(dS)]],
   };
@@ -1007,7 +1007,7 @@ function view3d(P, id, opt) {
 // ---------- varijante sprata: tlocrt + 3D za svaku, jedna ispod druge ----------
 const VARS = [
   { id: 'A', o: { terrace: true, laundry: 'N' }, ter: 'ostaje (JZ ugao)', ves: 'sjever', balk: '–', txt: 'terasa ostaje · vešeraj na sjeveru' },
-  { id: 'B', o: { laundry: 'N', parExit: true, follow: true }, ter: 'ukinuta', ves: 'sjever', balk: 'bez; izlaz na sjever iz vešeraja i spavaće', txt: 'bez terase i balkona · vešeraj na sjeveru, izlaz na sjever · izlaz iz spavaće na sjever · zid hodnika na gredi suterena · zid vešeraja 30 cm od zida suterena · pregrada dječijih soba laka (gips)' },
+  { id: 'B', o: { laundry: 'N', parExit: true, follow: true }, ter: 'ukinuta', ves: 'sjever', balk: 'bez; izlaz na sjever iz vešeraja i spavaće', txt: 'bez terase i balkona · vešeraj na sjeveru, izlaz na sjever · izlaz iz spavaće na sjever · zid hodnika na gredi suterena · zid spavaća / vešeraj na zidu kotlovnica / ostava · pregrada dječijih soba laka (gips)' },
   { id: 'C', o: { laundry: 'N', balc: 'kids' }, ter: 'ukinuta', ves: 'sjever', balk: 'mali na svakoj dječijoj sobi', txt: 'bez terase · mali balkon na svakoj dječijoj sobi · vešeraj na sjeveru' },
   { id: 'D', o: { laundry: 'N', balc: 'parents' }, ter: 'ukinuta', ves: 'sjever', balk: 'bočni, soba roditelja', txt: 'bez terase · bočni balkon iz sobe roditelja · vešeraj na sjeveru' },
   { id: 'E', o: { laundry: 'S' }, ter: 'ukinuta', ves: 'između dječijih soba', balk: 'bez', txt: 'bez terase i balkona · vešeraj između dječijih soba · garderoba roditelja' },
