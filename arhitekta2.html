@@ -1836,7 +1836,7 @@ function initReal() {
     camera.aspect = w / h; camera.updateProjectionMatrix(); redraw();
   }
   new ResizeObserver(resize).observe(cv);
-  resize(); setMode('house'); setVar('B'); setLight('eve'); setRoof('hip'); setTile('dark');
+  resize(); setMode('house'); setVar('B'); setLight('day'); setRoof('gable'); setTile('dark');
   window.real3d = { setMode, setVar, setLight, setRoof, setTile, enter: (fk, name) => { const s = spans.find(q => q.fk === fk && q.l[2] === name && (!q.v || q.v === vr)); if (s) enter(fk, s.l); }, leave, camera, controls, redraw };   // za provjeru
 }
 </script>
