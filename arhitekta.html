@@ -138,7 +138,7 @@
     <canvas id="r3d-canvas" role="img" aria-label="Realistični 3D prikaz kuće"></canvas><div class="lab3d" id="r3d-lab"></div>
     <p class="r3d-msg" id="r3d-msg">Učitavam realistični prikaz…</p>
   </div>
-  <p class="lead" style="margin-top:8px">Pretpostavke, nisu od arhitekte: krov po izboru – četvorovodni ili dvovodni (sljeme istok–zapad) 25° s prepustom 50 cm, ravni (tanka ploča s padom 5° ka sjeveru i prepustom 50 cm) ili atika po presjeku arhitekte (ploča strši 55 cm, atika do +7,31, iza nje krov od +7,10 na sjeveru do +6,25 na jugu); crijep po izboru: tamni ili mediteran (terakota); strop sprata +6,05; ivice stepenica istaknute narandžasto; izgled po referentnoj slici (krem žbuka, kamena obloga na punim stubovima suterena i na dimnjaku, tamni crijep, antracit prozori, zavjese, žardinjere, bašta, rasvjeta uveče); unutra parket, keramika, tepih u mesdžidu; teren (ravan plato na sjeveru u nivou prizemlja, ravno na jugu). Terasa iza kuće od kamenih ploča, 9,45 × 4 m uz sjever, sa staklenom ogradom na sjevernoj i zapadnoj ivici (od 3 m zapadno od kuće do izlaza iz vešeraja), leži na platou, bez nosača, odvojena od kuće fugom od 2 cm; na nju se izlazi iz vešeraja i iz spavaće. Do terase vode kamene stepenice u cik-cak na istoku (18 stepenica, podest na pola), uz kameni potporni zid uz rub platoa. Dan: popodnevno sunce s jugozapada; Veče: zalazak na zapadu.</p>
+  <p class="lead" style="margin-top:8px">Pretpostavke, nisu od arhitekte: krov po izboru – četvorovodni ili dvovodni (sljeme istok–zapad) 25° s prepustom 50 cm, ravni (tanka ploča s padom 5° ka sjeveru i prepustom 50 cm) ili atika po presjeku arhitekte (ploča strši 55 cm, atika do +7,31, iza nje krov od +7,10 na sjeveru do +6,25 na jugu); crijep po izboru: tamni ili mediteran (terakota); strop sprata +6,05; ivice stepenica istaknute narandžasto; izgled po referentnoj slici (krem žbuka, kamena obloga na punim stubovima suterena i na dimnjaku, tamni crijep, antracit prozori, zavjese, žardinjere, bašta, rasvjeta uveče); unutra parket, keramika, tepih u mesdžidu; teren (ravan plato na sjeveru u nivou prizemlja, ravno na jugu). Iza kuće je ravan plato u nivou prizemlja; na njega se izlazi iz vešeraja i iz spavaće. Dan: popodnevno sunce s jugozapada; Veče: zalazak na zapadu.</p>
 
   <h2>Pozicija na parceli</h2>
   <div class="plan"><svg id="svg-site" viewBox="95 10 1100 1220" role="img" aria-label="Pozicija kuće na parceli"></svg></div>
@@ -996,14 +996,14 @@ function view3d(P, id, opt) {
 // ---------- varijante sprata: tlocrt + 3D za svaku, jedna ispod druge ----------
 const VARS = [
   { id: 'A', o: { terrace: true, laundry: 'N' }, ter: 'ostaje (JZ ugao)', ves: 'sjever', balk: '–', txt: 'terasa ostaje · vešeraj na sjeveru' },
-  { id: 'B', o: { laundry: 'N', parExit: true, follow: true }, ter: 'ukinuta', ves: 'sjever', balk: 'bez; izlaz na sjever iz vešeraja i spavaće', txt: 'bez terase i balkona · vešeraj na sjeveru, izlaz na sjever · izlaz iz spavaće na terasu (sjever) · zid hodnika na gredi suterena · zid vešeraja 30 cm od zida suterena · pregrada dječijih soba laka (gips)' },
+  { id: 'B', o: { laundry: 'N', parExit: true, follow: true }, ter: 'ukinuta', ves: 'sjever', balk: 'bez; izlaz na sjever iz vešeraja i spavaće', txt: 'bez terase i balkona · vešeraj na sjeveru, izlaz na sjever · izlaz iz spavaće na sjever · zid hodnika na gredi suterena · zid vešeraja 30 cm od zida suterena · pregrada dječijih soba laka (gips)' },
   { id: 'C', o: { laundry: 'N', balc: 'kids' }, ter: 'ukinuta', ves: 'sjever', balk: 'mali na svakoj dječijoj sobi', txt: 'bez terase · mali balkon na svakoj dječijoj sobi · vešeraj na sjeveru' },
   { id: 'D', o: { laundry: 'N', balc: 'parents' }, ter: 'ukinuta', ves: 'sjever', balk: 'bočni, soba roditelja', txt: 'bez terase · bočni balkon iz sobe roditelja · vešeraj na sjeveru' },
   { id: 'E', o: { laundry: 'S' }, ter: 'ukinuta', ves: 'između dječijih soba', balk: 'bez', txt: 'bez terase i balkona · vešeraj između dječijih soba · garderoba roditelja' },
   { id: 'F', o: { laundry: 'S', balc: 'shared' }, ter: 'ukinuta', ves: 'između dječijih soba', balk: 'zajednički: obje sobe i vešeraj', txt: 'bez terase · zajednički balkon dječijih soba i vešeraja · garderoba roditelja' },
   { id: 'G', o: { laundry: 'S', balc: 'laundry' }, ter: 'ukinuta', ves: 'između dječijih soba', balk: 'mali, samo kod vešeraja', txt: 'bez terase · mali balkon kod vešeraja · garderoba roditelja' },
   { id: 'H', o: { terrace: true, laundry: 'N', shift: .20, parExit: true }, ter: 'ostaje (JZ ugao)', ves: 'sjever', balk: 'izlaz iz spavaće na sjever',
-    txt: 'kao A, dječije sobe 20 cm dublje · izlaz iz spavaće na terasu (sjever) · sjeverne sobe 3,10 m · zid prema dječijim sobama 30 cm sjevernije od grede, stepenište ulazi 30 cm u hodnik' },
+    txt: 'kao A, dječije sobe 20 cm dublje · izlaz iz spavaće na sjever · sjeverne sobe 3,10 m · zid prema dječijim sobama 30 cm sjevernije od grede, stepenište ulazi 30 cm u hodnik' },
 ];
 const tools3d = id => `<div class="tools3d">
       <button id="b3d-walls-${id}" type="button">Zidovi: presjek na 1,20 m</button>
@@ -1505,18 +1505,14 @@ function initReal() {
 
   // ---------- teren: brdo na sjeveru do nivoa prizemlja, ravno na jugu; trava i opločnik ----------
   const smooth = (a, b, t) => { t = Math.min(1, Math.max(0, (t - a) / (b - a))); return t * t * (3 - 2 * t); };
-  const RW0 = 11.0, RW1 = 18.5;                                                   // potporni zid uz rub platoa, istočno od kuće
   const hTer = (x, z) => {
     if (x > .1 && x < W - .1 && z > .1 && z < H - .1) return -.6;                  // ispod kuće
-    const b = -.12 + FH * smooth(2.0, -.3, z) + Math.max(0, -z - 6.5) * .05;    // ravan plato na sjeveru (2,88), dalje blago raste
-    if (x < RW0 - .05 || x > RW1 + 2) return b;
-    const st = z < .15 ? FH - .12 + Math.max(0, -z - 6.5) * .05 : -.12, k = smooth(RW1, RW1 + 2, x);   // uz zid: stepenast teren
-    return st * (1 - k) + b * k;
+    return -.12 + FH * smooth(2.0, -.3, z) + Math.max(0, -z - 6.5) * .05;       // ravan plato na sjeveru (2,88), dalje blago raste
   };
   const lights = [];                                                              // svjetla koja gore samo uveče
   {
     const axis = (a, b, extra) => { const s = new Set(extra); for (let v = a; v <= b + 1e-6; v += .5) s.add(+v.toFixed(2)); return [...s].sort((p, q) => p - q); };
-    const xs = axis(-50, 61, [.2, W - .2, 12.0, 13.2, 15.6, 16.8]), zs = axis(-50, 59, [.1, .2, .3, 1.5, 2.7, H - .2]);
+    const xs = axis(-50, 61, [.2, W - .2]), zs = axis(-50, 59, [.1, .2, H - .2]);
     const pos = [], uv = [], idx = [];
     for (const z of zs) for (const x of xs) { pos.push(x, hTer(x, z), z); uv.push(x, z); }
     const nx = xs.length;
@@ -1530,46 +1526,6 @@ function initReal() {
     boxInto(B, [W, W + 2, -.12, -.02, 3.0, H], 0, n => n[1] > .5 ? 'slabs' : 'stone');                   // ulaz s istoka
     boxInto(B, [-2.4, -.8, -.12, -.07, 3.2, H + TS], 0, n => n[1] > .5 ? 'gravel' : 'stone');           // šljunčana gredica uz zapad
     boxInto(B, [-2.45, -2.4, -.12, -.03, 3.2, H + TS], 0, () => 'frame'); boxInto(B, [-2.45, -.8, -.12, -.03, H + TS, H + TS + .05], 0, () => 'frame');
-    // terasa iza kuće: kamene ploče, vrh 2 cm ispod poda prizemlja; leži na platou, bez nosača, odvojena od kuće fugom 2 cm
-    const tt = FH - .02, fg = .02, slab = n => n[1] > .5 ? 'slabs' : n[1] < -.5 ? 'concrete' : 'stone';
-    boxInto(B, [-3, 6.45, tt - .35, tt, -4, -fg], 0, slab);                                            // 9,45 × 4 m
-    const rail = (x0, x1, z0, z1) => {                                                                  // staklena ograda 1,0 m, antracit rukohvat i stubići
-      const alongX = x1 - x0 > z1 - z0, L = alongX ? x1 - x0 : z1 - z0, n = Math.max(1, Math.round(L / 1.5));
-      const at = (a, b, ya, yb) => alongX ? [x0 + a, x0 + b, ya, yb, z0, z1] : [x0, x1, ya, yb, z0 + a, z0 + b];
-      boxInto(B, at(0, L, tt + .96, tt + 1.0), 0, () => 'frame');
-      for (let i = 0; i <= n; i++) { const a = Math.min(L - .05, i * L / n); boxInto(B, at(a, a + .05, tt, tt + .96), 0, () => 'frame'); }
-      const m = alongX ? (z0 + z1) / 2 : (x0 + x1) / 2;
-      boxInto(B, alongX ? [x0, x1, tt + .1, tt + .94, m - .005, m + .005] : [m - .005, m + .005, tt + .1, tt + .94, z0, z1], 0, n => (alongX ? n[2] : n[0]) ? 'glass' : null);
-    };
-    rail(-3, 6.45, -4, -3.95); rail(-3, -2.95, -3.95, -fg);
-
-    // stepenice cik-cak istočno: potporni zid, donji krak → podest → gornji krak (18 × 17,2 cm, gazište 30 cm, širina 1,2 m)
-    const rs = (tt + .12) / 18, yb = -.12, td = .3, sx = 13.2, stairG = new THREE.Group(); scene.add(stairG);
-    const st = n => n[1] > .5 ? 'slabs' : n[1] < -.5 ? 'concrete' : 'stoneClad';
-    boxInto(B, [RW0, RW1, -.6, tt - .005, 0, .3], 0, n => n[1] > .5 ? 'stone' : 'stoneClad');                     // potporni zid
-    for (let k = 1; k <= 8; k++) boxInto(B, [sx + (k - 1) * td, sx + k * td, -.6, yb + k * rs, 1.5, 2.7], 0, st);   // donji krak, prema istoku
-    boxInto(B, [sx + 2.4, sx + 3.6, -.6, yb + 9 * rs, .3, 2.7], 0, st);                                           // podest
-    for (let k = 10; k <= 17; k++) { const xe = sx + 2.4 - (k - 10) * td; boxInto(B, [xe - td, xe, -.6, yb + k * rs, .3, 1.5], 0, st); }   // gornji krak, nazad
-    boxInto(B, [12.0, sx, -.6, tt, .3, 1.5], 0, st);                                                              // gornji podest
-    boxInto(B, [6.45, sx, tt - .12, tt, -1.6, -fg], 0, slab); boxInto(B, [RW0 + .02, sx, tt - .12, tt, -fg, .3], 0, slab);   // staza do terase
-    boxInto(B, [RW0, sx, -.12, -.02, 1.5, 3.0], 0, n => n[1] > .5 ? 'slabs' : 'stone');                           // veza sa stazom kod ulaza
-    rail(sx, RW1, .1, .15); rail(RW0, 12.0, .1, .15);                                                             // ograda na zidu, osim izlaza
-    const sbar = (x0, y0, x1, y1, z) => {                                                                           // kosa prečka
-      const m = new THREE.Mesh(new THREE.BoxGeometry(Math.hypot(x1 - x0, y1 - y0), .045, .045), MAT.frame);
-      m.position.set((x0 + x1) / 2, (y0 + y1) / 2, z); m.rotation.z = Math.atan2(y1 - y0, x1 - x0); m.castShadow = m.receiveShadow = true; stairG.add(m);
-    };
-    const post = (x, z, y) => boxInto(B, [x - .025, x + .025, y, y + .95, z - .025, z + .025], 0, () => 'frame');
-    const flight = (xa, ya, xb, yb2, z) => { for (const h of [.92, .48]) sbar(xa, ya + h, xb, yb2 + h, z); };
-    const f1 = x => yb + rs * (Math.floor((x - sx) / td) + 1), f2 = x => yb + rs * (10 + Math.floor((sx + 2.4 - x) / td));
-    flight(sx, yb + rs, sx + 2.4, yb + 9 * rs, 2.66); for (const x of [sx + .15, sx + 1.2, sx + 2.25]) post(x, 2.66, f1(x));   // donji krak, vanjska ivica
-    const yL = yb + 9 * rs;                                                                                         // podest: vanjske ivice
-    for (const h of [.92, .48]) { sbar(sx + 2.4, yL + h, sx + 3.6, yL + h, 2.66); }
-    for (const h of [.92, .48]) boxInto(B, [sx + 3.555, sx + 3.6, yL + h - .022, yL + h + .022, .3, 2.7], 0, () => 'frame');
-    post(sx + 3.575, 2.66, yL); post(sx + 3.575, .35, yL); post(sx + 3.575, 1.5, yL);
-    flight(sx + 2.4, yb + 10 * rs, sx, yb + 17 * rs, 1.47); for (const x of [sx + 2.25, sx + 1.2, sx + .15]) post(x, 1.47, f2(x));   // gornji krak, iznad donjeg
-    for (const h of [.92, .48]) { sbar(12.0, tt + h, sx, tt + h, 1.47); boxInto(B, [12.0, 12.045, tt + h - .022, tt + h + .022, .3, 1.5], 0, () => 'frame'); }   // gornji podest
-    post(12.025, 1.47, tt); post(12.025, .35, tt);
-
     // vrata kotlovnice (zapad): kamena ploča ispred i zidna lampa iznad
     boxInto(B, [-1.2, 0, -.12, -.02, 1.85, 3.05], 0, n => n[1] > .5 ? 'slabs' : 'stone');
     boxInto(B, [-.1, 0, 2.25, 2.55, 2.29, 2.41], 0, () => 'black');
