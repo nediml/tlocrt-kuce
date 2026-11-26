@@ -99,8 +99,7 @@
   .kota { font-size: 13px; fill: #1d4f91; }
   .fn { font-size: 12px; fill: var(--ink); text-anchor: middle; }
   .ubeam { fill: none; stroke: #808080; stroke-width: 3; stroke-dasharray: 11 7; }
-  .arch { fill: none; stroke: #d32f2f; stroke-width: 2.5; stroke-dasharray: 9 6; stroke-linejoin: round; }
-  .archt { font-size: 13px; fill: #d32f2f; paint-order: stroke; stroke: var(--floor); stroke-width: 3px; stroke-linejoin: round; }
+  .uwall { fill: none; stroke: #808080; stroke-width: 2; stroke-dasharray: 6 5; }
   .gap { stroke: #a8a196; stroke-width: 1.2; stroke-dasharray: 4 3; }
   .gapt { font-size: 10px; fill: #9c958a; text-anchor: middle; paint-order: stroke; stroke: var(--floor); stroke-width: 3px; stroke-linejoin: round; }
   .fd { font-size: 9px; fill: var(--ink); text-anchor: middle; }
@@ -157,7 +156,7 @@
       <span><i style="background:none;border-top:3px dashed var(--wall);border-radius:0;height:0;vertical-align:4px"></i>greda / zid iznad</span>
       <span><i style="background:none;border-top:3px dashed #808080;border-radius:0;height:0;vertical-align:4px"></i>greda u suterenu (ispod), na tlocrtu sprata</span>
       <span><i style="background:none;border-top:2px dashed #a8a196;border-radius:0;height:0;vertical-align:4px"></i>razmak između namještaja (cm)</span>
-      <span><i style="background:none;border-top:2px dashed #d32f2f;border-radius:0;height:0;vertical-align:4px"></i>zid i dimnjak po tlocrtu arhitekte (gdje su pomjereni)</span>
+      <span><i style="background:none;border-top:2px dashed #808080;border-radius:0;height:0;vertical-align:4px"></i>zid u suterenu (ispod), na tlocrtu sprata</span>
       <span>mjere: prostorije u m, vrata i namještaj u cm</span>
     </div>
   </div>
@@ -294,14 +293,6 @@ const plans = {
     ],
     walls: [[8.65, 3.00, .20, .80]],
     over: [[6.55, 3.60, .95, .20]],                                               // zid ispod gornjeg kraka
-    arch: [                                                                       // zidovi i dimnjak po tlocrtu arhitekte, samo ono što smo pomjerili
-      [2.50, .40, 3.10, .40, 3.10, .70, 2.50, .70],                               // dimnjak
-      [4.10, .40, 4.30, .40, 4.30, 2.80, 4.10, 2.80],                             // kotlovnica – ostava
-      [6.45, .40, 6.65, .40, 6.65, 3.60, 7.80, 3.60, 7.80, 3.80, 6.45, 3.80],     // ostava – stepenište i zid ispod gornjeg kraka
-      [8.75, .40, 8.95, .40, 8.95, 3.80, 8.75, 3.80],                             // stepenište – kupatilo 1
-      [6.90, 5.15, 7.50, 5.15, 7.50, 5.35, 7.10, 5.35, 7.10, 8.70, 6.90, 8.70],   // dnevni – mesdžid, s nastavkom zida hol – mesdžid
-    ],
-    archt: [[3.18, .61, 'dimnjak po arhitekti']],
     hiwall: [[6.35, .40, .20, 2.40]],                                            // zid samo iznad stepenica, ispod otvoreno prema ostavi
     beams: [
       [.30, 5.15, 7.50, 5.15], [.30, 5.35, 7.50, 5.35],                           // greda preko dnevnog
@@ -378,6 +369,32 @@ const plans = {
   },
 
 };
+
+// unutrašnji zidovi etaže (ivice zid ↔ prostorija) kao linije, za sivi isprekidani prikaz na etaži iznad; vanjski zidovi se preskaču
+function wallLines(P) {
+  const inR = (r, x, y) => x > r[0] && x < r[0] + r[2] && y > r[1] && y < r[1] + r[3], forced = [...(P.walls || []), ...(P.over || [])];
+  const rects = [...P.rooms, P.stairs, ...forced, ...P.glass, ...P.doors.map(d => d.r)], uq = a => [...new Set(a.map(n => +n.toFixed(3)))].sort((a, b) => a - b);
+  const xs = uq([0, P.W, ...rects.flatMap(r => [r[0], r[0] + r[2]])]), ys = uq([0, P.H, ...rects.flatMap(r => [r[1], r[1] + r[3]])]);
+  const kind = (x, y) => {                                                        // 0 = prostor, 1 = unutrašnji zid, 2 = vanjski zid ili van
+    if (x < .31 || x > P.W - .31 || y < .41 || y > P.H - .31) return 2;
+    if (forced.some(r => inR(r, x, y))) return 1;
+    return [...P.rooms, P.stairs].some(r => inR(r, x, y)) ? 0 : 1;
+  };
+  const segs = { v: new Map(), h: new Map() }, push = (m, k, a, b) => { if (!m.has(k)) m.set(k, []); m.get(k).push([a, b]); };
+  for (let i = 0; i < xs.length - 1; i++) for (let j = 0; j < ys.length - 1; j++) {
+    const cx = (xs[i] + xs[i + 1]) / 2, cy = (ys[j] + ys[j + 1]) / 2, k = kind(cx, cy);
+    if (k !== 1) continue;
+    if (i > 0 && kind((xs[i - 1] + xs[i]) / 2, cy) === 0) push(segs.v, xs[i], ys[j], ys[j + 1]);
+    if (i + 2 < xs.length && kind((xs[i + 1] + xs[i + 2]) / 2, cy) === 0) push(segs.v, xs[i + 1], ys[j], ys[j + 1]);
+    if (j > 0 && kind(cx, (ys[j - 1] + ys[j]) / 2) === 0) push(segs.h, ys[j], xs[i], xs[i + 1]);
+    if (j + 2 < ys.length && kind(cx, (ys[j + 1] + ys[j + 2]) / 2) === 0) push(segs.h, ys[j + 1], xs[i], xs[i + 1]);
+  }
+  const out = [], merge = l => l.sort((a, b) => a[0] - b[0]).reduce((m, q) => { const t = m[m.length - 1]; if (t && q[0] <= t[1] + 1e-6) t[1] = Math.max(t[1], q[1]); else m.push([...q]); return m; }, []);
+  segs.v.forEach((l, x) => merge(l).forEach(([a, b]) => out.push([x, a, x, b])));
+  segs.h.forEach((l, y) => merge(l).forEach(([a, b]) => out.push([a, y, b, y])));
+  return out;
+}
+const SU_WALLS = wallLines(plans.ground);
 
 // ---------- prizemlje (sprat): varijante po prijedlozima arhitekte od 25. 11. 2026. ----------
 // Zajedničko: sjeverne sobe 3,30, zid u liniji s krajem stepeništa, hodnik 1,35, zid iznad grede suterena, južne sobe 3,35.
@@ -487,18 +504,13 @@ function mkUpper(o) {
 
   return {
     W: 11.0, H: 9.0, hill: '▲ sjever – prizemlje je iznad terena' + (LS ? '' : ': izlaz iz vešeraja'),
-    under: plans.ground.beams,                                                    // grede suterena, crtaju se sivo isprekidano
+    under: plans.ground.beams, uwalls: SU_WALLS,                                  // grede i unutrašnji zidovi suterena, crtaju se sivo isprekidano
     rooms, terrace, walls: sh ? [[6.35, yC, .20, sh], [8.65, yC, .20, sh]] : [], skipDims: [0, 1],   // bočni zidovi stepeništa koji ulaze u hodnik
     balc, glass, doors, furn, fh, fk, labels, tiny, gaps, lab3, info,
     padS: balc.some(b => b[1] >= 9) ? .9 : 0, padW: balc.some(b => b[0] < 0) ? 1.2 : 0,
     xdims: [[3.60, N(.47), fmt(par[2])], [r2(4.44 + dx), LS ? 2.15 : 1.80, fmt(dN), 1], [2.75, r2(yN - .07), '2,40'], [.47, r2(4.00 - sh), fmt(nS - nw), 1],
             [1.20, nS - .07, '1,80'], [2.04, r2(4.45 - sh), fmt(nS - yN), 1]],
     stairs: [6.55, nw, 2.10, r2(3.80 - nw), (2.10 * (3.80 - nw)).toFixed(2).replace('.', ',') + ' m²'], chim: [[4.10, 2.40, .70, .40]], rail: [7.70, 3.80, 8.65, 3.80],
-    arch: [                                                                       // iz arhitektinog suterena: dimnjak i zidovi stepenišnog okna
-      [2.50, .40, 3.10, .40, 3.10, .70, 2.50, .70],
-      [6.45, .30, 6.65, .30, 6.65, 3.80, 6.45, 3.80], [8.75, .30, 8.95, .30, 8.95, 3.80, 8.75, 3.80],
-    ],
-    archt: [[2.30, .90, 'dimnjak po arhitekti']],
     top: [[.30, xw, fmt(par[2])], [nx[0], 6.35, fmt(nx[2])], [6.55, 8.65, '2,10'], [8.85, 10.70, '1,85']],
     bottom, right: [[nw, yN, fmt(dN)], [yC, yW, fmt(r2(yW - yC))], [yS, 8.70, fmt(dS)]],
   };
@@ -529,8 +541,7 @@ function render(p) {
   });
   if (p.extra) s += p.extra;
   (p.under || []).forEach(b => s += line(...b, 'ubeam'));                          // grede etaže ispod
-  (p.arch || []).forEach(a => s += `<polygon points="${a.map(v => v * U).join(' ')}" class="arch"/>`);
-  (p.archt || []).forEach(t => s += text(...t, 'archt'));
+  (p.uwalls || []).forEach(b => s += line(...b, 'uwall'));                         // zidovi etaže ispod
   p.labels.forEach(l => s += label(...l));
   p.tiny.forEach(t => s += text(...t, 'tiny'));
   [...p.rooms.filter((r, i) => !(p.skipDims || []).includes(i)), p.stairs, ...(p.terrace ? [p.terrace] : [])].forEach(r => s += wdims(r));
