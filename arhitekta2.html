@@ -116,12 +116,14 @@
   <h1>Tlocrt kuće – Su + P, 11,00 × 9,00 m · verzija 2</h1>
   <p class="lead">Su + P, gabarit 11,00 × 9,00 m. Suteren je isti kao u <a href="arhitekta.html">prethodnoj verziji</a>. Prizemlje (sprat) je nacrtano u 8 varijanti: A–G po prijedlozima arhitekte od 25. 11. 2026, H je naša izmjena varijante A. Namještaj je naš prijedlog, arhitekta ga nije crtao.</p>
 
-  <h2 id="realisticno">Realistični 3D – suteren i varijanta H <small>prevucite za okretanje · točkić (nakon klika) ili štipanje za zum · klik na ime sobe: pogled iz sobe</small></h2>
+  <h2 id="realisticno">Realistični 3D – suteren i varijante H / B <small>prevucite za okretanje · točkić (nakon klika) ili štipanje za zum · klik na ime sobe: pogled iz sobe</small></h2>
   <div class="plan v3d" id="real3d">
     <div class="tools3d">
       <button type="button" data-mode="house">Cijela kuća</button>
-      <button type="button" data-mode="upper">Prizemlje H</button>
+      <button type="button" data-mode="upper">Prizemlje</button>
       <button type="button" data-mode="ground">Suteren</button>
+      <button type="button" data-var="H">Varijanta H</button>
+      <button type="button" data-var="B">Varijanta B</button>
       <button id="r3d-reset" type="button">Reset pogleda</button>
       <button id="r3d-zin" type="button" class="zoom" aria-label="Približi" title="Približi">+</button>
       <button id="r3d-zout" type="button" class="zoom" aria-label="Udalji" title="Udalji">−</button>
@@ -373,6 +375,7 @@ const plans = {
 // Zajedničko: sjeverne sobe 3,30, zid u liniji s krajem stepeništa, hodnik 1,35, zid iznad grede suterena, južne sobe 3,35.
 // o.terrace: terasa u JZ uglu ostaje · o.laundry: 'N' vešeraj na sjeveru, 'S' između dječijih soba
 // o.balc: 'kids' | 'parents' | 'shared' | 'laundry' (balkoni izvan gabarita, 1,20 m)
+// o.parExit: balkonska vrata iz spavaće roditelja na zapadni krak terase iza kuće
 // o.shift: za toliko se linija hodnika pomjera na sjever (dječije sobe dublje, sjeverne pliće)
 function mkUpper(o) {
   const T = !!o.terrace, LS = o.laundry === 'S', B = o.balc || '', r2 = n => +n.toFixed(2);
@@ -393,11 +396,12 @@ function mkUpper(o) {
   const bed = F([1.00, nw, 1.80, 2.00], .5, 'bed:S'); F([.50, nw, .45, .45], .5, 'night:S'); F([2.85, nw, .45, .45], .5, 'night:S');
   F([1.50, r2(3.85 - sh), .60, T ? 1.15 : 1.30], 2.1, 'wardrobe:W');
   D([3.40, yN, .80, .20], [3.40, yN, 3.40, r2(yN - .80), 4.20, yN]);                               // roditelji
-  glass.push(B === 'parents' ? [0, .90, .30, 1.20] : [0, 1.20, .30, 1.40], [0, r2((T ? 3.95 : 4.05) - sh), .30, .60], [10.70, 2.10, .30, .60], [10.70, r2(4.10 - sh), .30, .70]);
+  glass.push(B === 'parents' ? [0, .90, .30, 1.20] : o.parExit ? [0, .70, .30, 1.20] : [0, 1.20, .30, 1.40], [0, r2((T ? 3.95 : 4.05) - sh), .30, .60], [10.70, 2.10, .30, .60], [10.70, r2(4.10 - sh), .30, .70]);
   labels.push([2.05, r2(2.78 - sh / 2), 'Roditelji', m2(par, niche) + ' s proširenjem'], [4.30, r2(4.50 - sh), 'Hodnik', m2(hall)]);
   tiny.push([1.90, N(1.40), 'krevet'], [1.80, r2(4.50 - sh), 'ormar'], [3.55, 2.36, 'dimnjak'], [8.18, 4.02, 'ograda']);
   gaps.push([bed, 'S', 1.15], [bed, 'W']);
   info.par = m2(par, niche);
+  if (o.parExit) D([0, 2.20, .30, .80], [.30, 3.00, 1.10, 3.00, .30, 2.20]);                    // izlaz iz spavaće na terasu iza kuće (zapad)
   if (B === 'parents') { D([0, 2.40, .30, .90], [.30, 3.30, 1.20, 3.30, .30, 2.40]); BK(-1.20, 1.40, 1.20, 2.20); }   // bočni balkon
   if (!LS) {                                                                                     // vešeraj na sjeveru, s izlazom
     const wd = F([3.90, nw, .60, 2.10], 2.1, 'wardrobe:W'); gaps.push([bed, wd]);
@@ -1002,14 +1006,14 @@ view3d(plans.ground, 'ground', { labels: [[9.85, 1.6, 'Kupatilo 1'], [7.6, 1.0, 
 // ---------- varijante sprata: tlocrt + 3D za svaku, jedna ispod druge ----------
 const VARS = [
   { id: 'A', o: { terrace: true, laundry: 'N' }, ter: 'ostaje (JZ ugao)', ves: 'sjever', balk: '–', txt: 'terasa ostaje · vešeraj na sjeveru' },
-  { id: 'B', o: { laundry: 'N' }, ter: 'ukinuta', ves: 'sjever', balk: 'bez, izlaz na sjever', txt: 'bez terase i balkona · vešeraj na sjeveru, izlaz na sjever' },
+  { id: 'B', o: { laundry: 'N', parExit: true }, ter: 'ukinuta', ves: 'sjever', balk: 'bez; izlaz na sjever i iz spavaće na zapad', txt: 'bez terase i balkona · vešeraj na sjeveru, izlaz na sjever · izlaz iz spavaće na terasu (zapad)' },
   { id: 'C', o: { laundry: 'N', balc: 'kids' }, ter: 'ukinuta', ves: 'sjever', balk: 'mali na svakoj dječijoj sobi', txt: 'bez terase · mali balkon na svakoj dječijoj sobi · vešeraj na sjeveru' },
   { id: 'D', o: { laundry: 'N', balc: 'parents' }, ter: 'ukinuta', ves: 'sjever', balk: 'bočni, soba roditelja', txt: 'bez terase · bočni balkon iz sobe roditelja · vešeraj na sjeveru' },
   { id: 'E', o: { laundry: 'S' }, ter: 'ukinuta', ves: 'između dječijih soba', balk: 'bez', txt: 'bez terase i balkona · vešeraj između dječijih soba · garderoba roditelja' },
   { id: 'F', o: { laundry: 'S', balc: 'shared' }, ter: 'ukinuta', ves: 'između dječijih soba', balk: 'zajednički: obje sobe i vešeraj', txt: 'bez terase · zajednički balkon dječijih soba i vešeraja · garderoba roditelja' },
   { id: 'G', o: { laundry: 'S', balc: 'laundry' }, ter: 'ukinuta', ves: 'između dječijih soba', balk: 'mali, samo kod vešeraja', txt: 'bez terase · mali balkon kod vešeraja · garderoba roditelja' },
-  { id: 'H', o: { terrace: true, laundry: 'N', shift: .20 }, ter: 'ostaje (JZ ugao)', ves: 'sjever', balk: '–',
-    txt: 'kao A, dječije sobe 20 cm dublje · sjeverne sobe 3,10 m · zid prema dječijim sobama 30 cm sjevernije od grede, stepenište ulazi 30 cm u hodnik' },
+  { id: 'H', o: { terrace: true, laundry: 'N', shift: .20, parExit: true }, ter: 'ostaje (JZ ugao)', ves: 'sjever', balk: 'izlaz iz spavaće na zapad',
+    txt: 'kao A, dječije sobe 20 cm dublje · izlaz iz spavaće na terasu (zapad) · sjeverne sobe 3,10 m · zid prema dječijim sobama 30 cm sjevernije od grede, stepenište ulazi 30 cm u hodnik' },
 ];
 const tools3d = id => `<div class="tools3d">
       <button id="b3d-walls-${id}" type="button">Zidovi: presjek na 1,20 m</button>
@@ -1065,7 +1069,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
-// ---------- realistični 3D: suteren + prizemlje varijanta H (three.js) ----------
+// ---------- realistični 3D: suteren + prizemlje varijante H / B (three.js) ----------
 // Geometrija dolazi iz view3d(..., { headless: true }), pa uvijek prati tlocrt; ovdje se boje pretvaraju u materijale.
 const wrap = document.getElementById('real3d'), cv = document.getElementById('r3d-canvas'), labBox = document.getElementById('r3d-lab'), msgEl = document.getElementById('r3d-msg');
 const say = t => { msgEl.textContent = t; msgEl.style.display = t ? '' : 'none'; };
@@ -1082,12 +1086,15 @@ if ('IntersectionObserver' in window) {
 function initReal() {
   const FH = 3.0;                                                                 // spratna visina: pod suterena → pod prizemlja
   const inR = (r, x, z) => x > r[0] && x < r[0] + r[2] && z > r[1] && z < r[1] + r[3];
-  const PG = plans.ground, PU = mkUpper(VARS.find(v => v.id === 'H').o);
+  const PG = plans.ground;
+  const mkU = id => { const P = mkUpper(VARS.find(v => v.id === id).o);                // prizemlje po varijanti
+    return { P, y0: FH, labels: [...P.labels.map(l => l.slice(0, 3)), ...P.lab3], res: view3d(P, 'real-u' + id, { headless: true, full: true, down: true, stairs: 'hole' }) }; };
+  const UP = { H: mkU('H'), B: mkU('B') }, PU = UP.H.P;
+  let vr = 'H';
   const FLOORS = {
     ground: { P: PG, y0: 0, labels: [...PG.labels.map(l => l.slice(0, 3)), [9.85, 1.6, 'Kupatilo 1'], [7.6, 1.0, 'Stepenište']],
               res: view3d(PG, 'real-g', { headless: true, full: true, wallH: FH - .25, allSteps: true }) },
-    upper:  { P: PU, y0: FH, labels: [...PU.labels.map(l => l.slice(0, 3)), ...PU.lab3],
-              res: view3d(PU, 'real-u', { headless: true, full: true, down: true, stairs: 'hole' }) },
+    upper: UP.H,
   };
 
   // ---------- renderer ----------
@@ -1315,7 +1322,8 @@ function initReal() {
     }
     const group = new THREE.Group(); toGroup(B, group); scene.add(group); return group;
   }
-  const groups = { ground: buildFloor(FLOORS.ground), upper: buildFloor(FLOORS.upper) };
+  const groups = { ground: buildFloor(FLOORS.ground) };
+  for (const k in UP) UP[k].group = buildFloor(UP[k]);
 
   // ---------- strop prizemlja, krov (četvorovodni 25°, prepust 50 cm) i dimnjak ----------
   const W = PG.W, H = PG.H, ye = FH + 2.85, o = .5, pitch = 25 * Math.PI / 180, rise = (H / 2 + o) * Math.tan(pitch), ry = ye + .18 + rise;
@@ -1415,10 +1423,10 @@ function initReal() {
 
   // ---------- natpisi soba (klik: pogled iz sobe) ----------
   const spans = [];
-  for (const fk of ['ground', 'upper']) for (const l of FLOORS[fk].labels) {
+  for (const [fk, F, v] of [['ground', FLOORS.ground, null], ...Object.entries(UP).map(([k, F]) => ['upper', F, k])]) for (const l of F.labels) {
     const e = document.createElement('span'); e.textContent = l[2]; labBox.appendChild(e);
-    if (inR(FLOORS[fk].P.stairs, l[0], l[1])) e.className = 'nogo'; else { e.title = 'Pogled iz sobe'; e.setAttribute('role', 'button'); e.onclick = () => enter(fk, l); }
-    spans.push({ e, fk, l });
+    if (inR(F.P.stairs, l[0], l[1])) e.className = 'nogo'; else { e.title = 'Pogled iz sobe'; e.setAttribute('role', 'button'); e.onclick = () => enter(fk, l); }
+    spans.push({ e, fk, l, v });
   }
 
   const v3 = new THREE.Vector3();
@@ -1426,7 +1434,7 @@ function initReal() {
     composer.render();
     const w = cv.clientWidth, h = cv.clientHeight;
     for (const s of spans) {
-      const fk = room ? room.fk : mode, show = mode !== 'house' && s.fk === fk && !(room && room.l === s.l);
+      const fk = room ? room.fk : mode, show = mode !== 'house' && s.fk === fk && (!s.v || s.v === vr) && !(room && room.l === s.l);
       if (show) { v3.set(s.l[0], FLOORS[s.fk].y0 + 1.25, s.l[1]).project(camera); }
       const vis = show && v3.z < 1 && Math.abs(v3.x) < 1.05 && Math.abs(v3.y) < 1.05;
       s.e.style.display = vis ? '' : 'none';
@@ -1439,7 +1447,7 @@ function initReal() {
 
   const setVis = () => {
     const fk = room && room.fk;
-    groups.upper.visible = mode !== 'ground' || fk === 'ground';                  // u sobi suterena prizemlje daje strop
+    for (const k in UP) UP[k].group.visible = k === vr && (mode !== 'ground' || fk === 'ground');   // u sobi suterena prizemlje daje strop
     groups.roof.visible = mode === 'house' || fk === 'upper';
     renderer.shadowMap.needsUpdate = true;
   };
@@ -1451,6 +1459,12 @@ function initReal() {
     controls.target.copy(HOME[m][1]); camera.position.copy(HOME[m][0]).sub(HOME[m][1]).multiplyScalar(k).add(HOME[m][1]); controls.update(); setVis(); redraw();
   };
   btns.forEach(b => b.onclick = () => setMode(b.dataset.mode));
+  const vbtns = [...wrap.querySelectorAll('[data-var]')];                         // varijanta prizemlja: H / B
+  const setVar = v => {
+    if (room && room.fk === 'upper') leave(false);
+    vr = v; FLOORS.upper = UP[v]; vbtns.forEach(b => b.classList.toggle('on', b.dataset.var === v)); setVis(); redraw();
+  };
+  vbtns.forEach(b => b.onclick = () => setVar(b.dataset.var));
 
   // ---------- pogled iz sobe ----------
   const lookRoom = () => {
@@ -1526,8 +1540,8 @@ function initReal() {
     camera.aspect = w / h; camera.updateProjectionMatrix(); redraw();
   }
   new ResizeObserver(resize).observe(cv);
-  resize(); setMode('house');
-  window.real3d = { setMode, enter: (fk, name) => { const s = spans.find(q => q.fk === fk && q.l[2] === name); if (s) enter(fk, s.l); }, leave, camera, controls, redraw };   // za provjeru
+  resize(); setMode('house'); setVar('H');
+  window.real3d = { setMode, setVar, enter: (fk, name) => { const s = spans.find(q => q.fk === fk && q.l[2] === name && (!q.v || q.v === vr)); if (s) enter(fk, s.l); }, leave, camera, controls, redraw };   // za provjeru
 }
 </script>
 </body>
