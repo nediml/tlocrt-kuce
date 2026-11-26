@@ -128,6 +128,8 @@
       <button type="button" data-roof="gable">Dvovodni</button>
       <button type="button" data-roof="slab">Ravni krov</button>
       <button type="button" data-roof="para">Atika</button>
+      <button type="button" data-tile="dark">Tamni crijep</button>
+      <button type="button" data-tile="med">Mediteran</button>
       <button id="r3d-reset" type="button">Reset pogleda</button>
       <button id="r3d-zin" type="button" class="zoom" aria-label="Približi" title="Približi">+</button>
       <button id="r3d-zout" type="button" class="zoom" aria-label="Udalji" title="Udalji">−</button>
@@ -136,7 +138,7 @@
     <canvas id="r3d-canvas" role="img" aria-label="Realistični 3D prikaz kuće"></canvas><div class="lab3d" id="r3d-lab"></div>
     <p class="r3d-msg" id="r3d-msg">Učitavam realistični prikaz…</p>
   </div>
-  <p class="lead" style="margin-top:8px">Pretpostavke, nisu od arhitekte: krov po izboru – četvorovodni ili dvovodni (sljeme istok–zapad) 25° s prepustom 50 cm, ravni (tanka ploča s padom 5° ka sjeveru i prepustom 50 cm) ili atika po presjeku arhitekte (ploča strši 55 cm, atika do +7,31, iza nje krov od +7,10 na sjeveru do +6,25 na jugu); strop sprata +6,05; ivice stepenica istaknute narandžasto; izgled po referentnoj slici (krem žbuka, kamena obloga na punim stubovima suterena i na dimnjaku, tamni crijep, antracit prozori, zavjese, žardinjere, bašta, rasvjeta uveče); unutra parket, keramika, tepih u mesdžidu; teren (ravan plato na sjeveru u nivou prizemlja, ravno na jugu). Terasa iza kuće od kamenih ploča, 9,45 × 4 m uz sjever, sa staklenom ogradom na sjevernoj i zapadnoj ivici (od 3 m zapadno od kuće do izlaza iz vešeraja), leži na platou, bez nosača, odvojena od kuće fugom od 2 cm; na nju se izlazi iz vešeraja i iz spavaće. Do terase vode kamene stepenice u cik-cak na istoku (18 stepenica, podest na pola), uz kameni potporni zid uz rub platoa. Dan: popodnevno sunce s jugozapada; Veče: zalazak na zapadu.</p>
+  <p class="lead" style="margin-top:8px">Pretpostavke, nisu od arhitekte: krov po izboru – četvorovodni ili dvovodni (sljeme istok–zapad) 25° s prepustom 50 cm, ravni (tanka ploča s padom 5° ka sjeveru i prepustom 50 cm) ili atika po presjeku arhitekte (ploča strši 55 cm, atika do +7,31, iza nje krov od +7,10 na sjeveru do +6,25 na jugu); crijep po izboru: tamni ili mediteran (terakota); strop sprata +6,05; ivice stepenica istaknute narandžasto; izgled po referentnoj slici (krem žbuka, kamena obloga na punim stubovima suterena i na dimnjaku, tamni crijep, antracit prozori, zavjese, žardinjere, bašta, rasvjeta uveče); unutra parket, keramika, tepih u mesdžidu; teren (ravan plato na sjeveru u nivou prizemlja, ravno na jugu). Terasa iza kuće od kamenih ploča, 9,45 × 4 m uz sjever, sa staklenom ogradom na sjevernoj i zapadnoj ivici (od 3 m zapadno od kuće do izlaza iz vešeraja), leži na platou, bez nosača, odvojena od kuće fugom od 2 cm; na nju se izlazi iz vešeraja i iz spavaće. Do terase vode kamene stepenice u cik-cak na istoku (18 stepenica, podest na pola), uz kameni potporni zid uz rub platoa. Dan: popodnevno sunce s jugozapada; Veče: zalazak na zapadu.</p>
 
   <h2>Pozicija na parceli</h2>
   <div class="plan"><svg id="svg-site" viewBox="95 10 1100 1220" role="img" aria-label="Pozicija kuće na parceli"></svg></div>
@@ -1184,6 +1186,21 @@ function initReal() {
     grainNoise(g, px, 10);
   };
 
+  const medTiles = (g, px) => {                                                   // mediteran crijep (kanalica): valovi 20 cm, redovi 40 cm, terakota
+    const rows = 5, th = px / rows, n = 10, tw = px / n, base = ['#b5522e', '#c8643a', '#9c4424', '#bf5a32'];
+    g.fillStyle = '#7a3018'; g.fillRect(0, 0, px, px);
+    for (let r = 0; r < rows; r++) for (let i = 0; i < n; i++) {
+      const x = i * tw, y = r * th, c = base[Math.floor(rnd() * base.length)], v = (rnd() - .5) * .16;
+      const gr = g.createLinearGradient(x, 0, x + tw, 0);
+      gr.addColorStop(0, shade(c, v - .45)); gr.addColorStop(.3, shade(c, v + .05)); gr.addColorStop(.5, shade(c, v + .22)); gr.addColorStop(.7, shade(c, v + .05)); gr.addColorStop(1, shade(c, v - .45));
+      g.fillStyle = gr; g.fillRect(x, y, tw, th);
+      const sh = g.createLinearGradient(0, y + th * .8, 0, y + th);                  // sjena preklopa
+      sh.addColorStop(0, 'rgba(40,12,4,0)'); sh.addColorStop(1, 'rgba(40,12,4,.55)');
+      g.fillStyle = sh; g.fillRect(x, y + th * .8, tw, th * .2);
+    }
+    grainNoise(g, px, 14);
+  };
+
   // ---------- materijali ----------
   const S = o => new THREE.MeshStandardMaterial(o);
   const MAT = {
@@ -1244,6 +1261,8 @@ function initReal() {
     grass: S({ map: tex(512, 5, grass), roughness: 1 }),
     paving: S({ map: tex(512, 2, pavers), roughness: .85 }),
     roof: S({ map: tex(512, 2, roofTiles), roughness: .6 }),
+    roofMed: S({ map: tex(512, 2, medTiles), roughness: .7 }),
+    ridge: S({ color: '#2e3134', roughness: .5 }),                                       // sljeme dvovodnog: boja prati crijep
     chimney: S({ map: tex(1024, 1.6, ledge), roughness: .85 }),
   };
   const BYKEY = { 'C.cut': 'cut', 'C.stair': 'stone', 'C.shaft': 'concrete', 'C.glass': 'glass', 'C.furn': 'oak', 'C.furnTop': 'oak',
@@ -1380,7 +1399,7 @@ function initReal() {
   // ---------- strop prizemlja (+6,05), krov i dimnjak: četvorovodni / dvovodni 25°, ravni (ploča 5° ka sjeveru), atika po presjeku arhitekte ----------
   const W = PG.W, H = PG.H, ye = FH + 3.05, o = .5, pitch = 25 * Math.PI / 180, rise = (H / 2 + o) * Math.tan(pitch), ry = ye + .18 + rise;
   const roof = new THREE.Group(); scene.add(roof); groups.roof = roof;
-  const roofs = {}; for (const k of ['hip', 'gable', 'slab', 'para']) { roofs[k] = new THREE.Group(); roof.add(roofs[k]); }
+  const roofs = {}, tileMeshes = []; for (const k of ['hip', 'gable', 'slab', 'para']) { roofs[k] = new THREE.Group(); roof.add(roofs[k]); }
   {
     const [cx, cz, cw, cd] = PU.chim[0];
     const chimney = (B, top) => { boxInto(B, [cx, cx + cw, ye - .3, top, cz, cz + cd], 0, () => 'chimney'); boxInto(B, [cx - .05, cx + cw + .05, top, top + .06, cz - .05, cz + cd + .05], 0, () => 'concrete'); };
@@ -1414,7 +1433,7 @@ function initReal() {
     tri([[xb, e0, zb], [xb, e0, za], [rx1, ry, zr]], E1); tri([[xa, e0, za], [xa, e0, zb], [rx0, ry, zr]], W1);       // istok, zapad
     const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
     geo.computeVertexNormals();
-    const m = new THREE.Mesh(geo, MAT.roof); m.castShadow = m.receiveShadow = true; roofs.hip.add(m);
+    const m = new THREE.Mesh(geo, MAT.roof); m.castShadow = m.receiveShadow = true; roofs.hip.add(m); tileMeshes.push(m);
     }
 
     { // dvovodni: 25°, sljeme istok–zapad, strehe 50 cm na jugu i sjeveru, zabati na istoku i zapadu s prepustom 30 cm
@@ -1433,7 +1452,7 @@ function initReal() {
       quad(B, 'facade', [[x0, yR(zA) - .02, zA], [x1, yR(zA) - .02, zA], [x1, yR(zB) - .02, zB], [x0, yR(zB) - .02, zB]], [0, -1, 0], [0, 2]);   // podgled prepusta zabata
       quad(B, 'lacquer', [[xo, yR(zA) - .2, zA], [xo, yR(zB) - .2, zB], [xo, yR(zB) + .03, zB], [xo, yR(zA) + .03, zA]], [n, 0, 0], [2, 1]);   // opšiva zabata
     }
-    boxInto(B, [xa, xb, yr - .04, yr + .07, zr - .12, zr + .12], 0, () => 'frame');      // sljeme
+    boxInto(B, [xa, xb, yr - .04, yr + .07, zr - .12, zr + .12], 0, () => 'ridge');      // sljeme
     lamps(B, () => ye - .01, dl.filter(([, z]) => z < 0 || z > H));
     chimney(B, yr + .45);
     toGroup(B, roofs.gable);
@@ -1444,7 +1463,7 @@ function initReal() {
     tri([[xb, e0, za], [xa, e0, za], [xa, yr, zr]], N1); tri([[xb, e0, za], [xa, yr, zr], [xb, yr, zr]], N1);       // sjever
     const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
     geo.computeVertexNormals();
-    const m = new THREE.Mesh(geo, MAT.roof); m.castShadow = m.receiveShadow = true; roofs.gable.add(m);
+    const m = new THREE.Mesh(geo, MAT.roof); m.castShadow = m.receiveShadow = true; roofs.gable.add(m); tileMeshes.push(m);
     }
 
     { // ravni: tanka ploča 25 cm s opšivom, prepust 50 cm, pad 5° ka sjeveru; fasada se diže do ploče (sjever 30 cm, sa strane klin)
@@ -1699,6 +1718,10 @@ function initReal() {
   const rbtns = [...wrap.querySelectorAll('[data-roof]')];                         // krov: četvorovodni / dvovodni / ravni / atika
   const setRoof = k => { for (const r in roofs) roofs[r].visible = r === k; rbtns.forEach(b => b.classList.toggle('on', b.dataset.roof === k)); renderer.shadowMap.needsUpdate = true; redraw(); };
   rbtns.forEach(b => b.onclick = () => setRoof(b.dataset.roof));
+  const tbtns = [...wrap.querySelectorAll('[data-tile]')];                         // crijep: tamni / mediteran
+  const setTile = k => { for (const m of tileMeshes) m.material = k === 'med' ? MAT.roofMed : MAT.roof; MAT.ridge.color.set(k === 'med' ? '#a2482a' : '#2e3134');
+    tbtns.forEach(b => b.classList.toggle('on', b.dataset.tile === k)); renderer.shadowMap.needsUpdate = true; redraw(); };
+  tbtns.forEach(b => b.onclick = () => setTile(b.dataset.tile));
   const lbtns = [...wrap.querySelectorAll('[data-light]')];                       // Dan / Veče
   const setLight = k => { applyLight(k); lbtns.forEach(b => b.classList.toggle('on', b.dataset.light === k)); redraw(); };
   lbtns.forEach(b => b.onclick = () => setLight(b.dataset.light));
@@ -1777,8 +1800,8 @@ function initReal() {
     camera.aspect = w / h; camera.updateProjectionMatrix(); redraw();
   }
   new ResizeObserver(resize).observe(cv);
-  resize(); setMode('house'); setVar('B'); setLight('eve'); setRoof('hip');
-  window.real3d = { setMode, setVar, setLight, setRoof, enter: (fk, name) => { const s = spans.find(q => q.fk === fk && q.l[2] === name && (!q.v || q.v === vr)); if (s) enter(fk, s.l); }, leave, camera, controls, redraw };   // za provjeru
+  resize(); setMode('house'); setVar('B'); setLight('eve'); setRoof('hip'); setTile('dark');
+  window.real3d = { setMode, setVar, setLight, setRoof, setTile, enter: (fk, name) => { const s = spans.find(q => q.fk === fk && q.l[2] === name && (!q.v || q.v === vr)); if (s) enter(fk, s.l); }, leave, camera, controls, redraw };   // za provjeru
 }
 </script>
 </body>
