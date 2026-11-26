@@ -383,7 +383,7 @@ function mkUpper(o) {
   const T = !!o.terrace, LS = o.laundry === 'S', B = o.balc || '', r2 = n => +n.toFixed(2);
   // sjeverni zid sprata je 20 cm (nw); sh = koliko su linije hodnika sjevernije nego kod arhitekte; N() pomjera sve uz sjeverni zid
   const nw = .20, dy = o.shift || 0, sh = r2(dy + .30 - nw), N = y => r2(y - (.30 - nw));
-  const FW = !!o.follow, xw = FW ? 4.80 : 4.50, dx = r2(xw - 4.50);                         // follow: zidovi na nosećim zidovima suterena
+  const FW = !!o.follow, xw = o.xw || 4.50, dx = r2(xw - 4.50);                             // follow: zid hodnika na gredi suterena · xw: zid roditelji / vešeraj
   const yN = r2(3.60 - sh), yC = r2(3.80 - sh), yW = FW ? 5.15 : r2(5.15 - sh), yS = FW ? 5.35 : r2(5.35 - sh), dN = r2(3.30 - dy), dS = r2(8.70 - yS);   // linije zidova i dubine soba
   const m2 = (...rs) => rs.reduce((a, r) => a + r[2] * r[3], 0).toFixed(1).replace('.', ',') + ' m²';
   const rooms = [], glass = [], doors = [], furn = [], fh = [], fk = [], labels = [], tiny = [], gaps = [], balc = [];
@@ -1016,7 +1016,7 @@ view3d(plans.ground, 'ground', { labels: [[9.85, 1.6, 'Kupatilo 1'], [7.6, 1.0, 
 // ---------- varijante sprata: tlocrt + 3D za svaku, jedna ispod druge ----------
 const VARS = [
   { id: 'A', o: { terrace: true, laundry: 'N' }, ter: 'ostaje (JZ ugao)', ves: 'sjever', balk: '–', txt: 'terasa ostaje · vešeraj na sjeveru' },
-  { id: 'B', o: { laundry: 'N', parExit: true, follow: true }, ter: 'ukinuta', ves: 'sjever', balk: 'bez; izlaz na sjever iz vešeraja i spavaće', txt: 'bez terase i balkona · vešeraj na sjeveru, izlaz na sjever · izlaz iz spavaće na terasu (sjever) · zidovi sprata na nosećim zidovima suterena · pregrada dječijih soba laka (gips)' },
+  { id: 'B', o: { laundry: 'N', parExit: true, follow: true }, ter: 'ukinuta', ves: 'sjever', balk: 'bez; izlaz na sjever iz vešeraja i spavaće', txt: 'bez terase i balkona · vešeraj na sjeveru, izlaz na sjever · izlaz iz spavaće na terasu (sjever) · zid hodnika na gredi suterena · zid vešeraja 30 cm od zida suterena · pregrada dječijih soba laka (gips)' },
   { id: 'C', o: { laundry: 'N', balc: 'kids' }, ter: 'ukinuta', ves: 'sjever', balk: 'mali na svakoj dječijoj sobi', txt: 'bez terase · mali balkon na svakoj dječijoj sobi · vešeraj na sjeveru' },
   { id: 'D', o: { laundry: 'N', balc: 'parents' }, ter: 'ukinuta', ves: 'sjever', balk: 'bočni, soba roditelja', txt: 'bez terase · bočni balkon iz sobe roditelja · vešeraj na sjeveru' },
   { id: 'E', o: { laundry: 'S' }, ter: 'ukinuta', ves: 'između dječijih soba', balk: 'bez', txt: 'bez terase i balkona · vešeraj između dječijih soba · garderoba roditelja' },
