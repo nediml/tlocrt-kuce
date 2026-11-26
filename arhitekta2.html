@@ -132,7 +132,7 @@
     <canvas id="r3d-canvas" role="img" aria-label="Realistični 3D prikaz kuće"></canvas><div class="lab3d" id="r3d-lab"></div>
     <p class="r3d-msg" id="r3d-msg">Učitavam realistični prikaz…</p>
   </div>
-  <p class="lead" style="margin-top:8px">Pretpostavke, nisu od arhitekte: četvorovodni krov 25° s prepustom 50 cm, materijali i boje (parket, keramika, tepih u mesdžidu, antracit prozori), teren (ravan plato na sjeveru u nivou prizemlja, ravno na jugu). Terasa iza kuće od kamenih ploča, L oko sjeverozapadnog ugla: 9,45 × 3 m uz sjever (do izlaza iz vešeraja) i 3 × 3 m niz zapad; terasa je odvojena od kuće fugom od 2 cm i nema nosača: sjeverni krak leži na platou, zapadni na nasipu iza kamenog podzida, sa staklenom ogradom. Zbog nasipa su vanjska vrata kotlovnice ukinuta (ulaz samo iz ostave). Sunce: popodne, s jugozapada.</p>
+  <p class="lead" style="margin-top:8px">Pretpostavke, nisu od arhitekte: četvorovodni krov 25° s prepustom 50 cm, materijali i boje (parket, keramika, tepih u mesdžidu, antracit prozori), teren (ravan plato na sjeveru u nivou prizemlja, ravno na jugu). Terasa iza kuće od kamenih ploča, 9,45 × 3 m uz sjever (od 3 m zapadno od kuće do izlaza iz vešeraja), leži na platou, bez nosača, odvojena od kuće fugom od 2 cm; u varijantama B i H na nju se izlazi i iz spavaće. Sunce: popodne, s jugozapada.</p>
 
   <h2>Pozicija na parceli</h2>
   <div class="plan"><svg id="svg-site" viewBox="95 10 1100 1220" role="img" aria-label="Pozicija kuće na parceli"></svg></div>
@@ -324,6 +324,7 @@ const plans = {
       [10.70, 1.70, .30, .60], [10.70, 6.73, .30, .60],                            // istok: kupatilo, mesdžid
     ],
     doors: [
+      { r: [0, 1.95, .30, .80], s: [[.30, 2.75, 1.10, 2.75, .30, 1.95]] },                    // kotlovnica vani
       { r: [4.80, 1.20, .20, .80], s: [[4.80, 1.20, 4.00, 1.20, 4.80, 2.00]] },                // kotlovnica – ostava
       { r: [5.10, 2.80, .80, .20], s: [[5.90, 3.00, 5.90, 3.80, 5.10, 3.00]] },                // ostava – dnevni
       { r: [9.90, 2.80, .70, .20], s: [[10.60, 2.80, 10.60, 2.10, 9.90, 2.80]] },              // kupatilo 1
@@ -374,7 +375,7 @@ const plans = {
 // Zajedničko: sjeverne sobe 3,30, zid u liniji s krajem stepeništa, hodnik 1,35, zid iznad grede suterena, južne sobe 3,35.
 // o.terrace: terasa u JZ uglu ostaje · o.laundry: 'N' vešeraj na sjeveru, 'S' između dječijih soba
 // o.balc: 'kids' | 'parents' | 'shared' | 'laundry' (balkoni izvan gabarita, 1,20 m)
-// o.parExit: balkonska vrata iz spavaće roditelja na zapadni krak terase iza kuće
+// o.parExit: vrata iz spavaće roditelja na sjevernu terasu iza kuće (krevet 25 cm zapadnije)
 // o.shift: za toliko se linija hodnika pomjera na sjever (dječije sobe dublje, sjeverne pliće)
 function mkUpper(o) {
   const T = !!o.terrace, LS = o.laundry === 'S', B = o.balc || '', r2 = n => +n.toFixed(2);
@@ -392,15 +393,18 @@ function mkUpper(o) {
   const nS = r2((T ? 5.05 : 5.15) - sh), par = [.30, nw, 4.20, dN], niche = [.30, yN, 1.80, r2(nS - yN)];
   const nx = [4.70, nw, 1.65, dN], bath = [8.85, nw, 1.85, dN], hall = [2.30, yC, 8.40, 1.35];
   rooms.push(par, niche, nx, bath, hall);
-  const bed = F([1.00, nw, 1.80, 2.00], .5, 'bed:S'); F([.50, nw, .45, .45], .5, 'night:S'); F([2.85, nw, .45, .45], .5, 'night:S');
+  const PX = o.parExit ? -.25 : 0;                                                              // s izlazom na sjever krevet ide zapadnije
+  const bed = F([1.00 + PX, nw, 1.80, 2.00], .5, 'bed:S');
+  if (PX) { F([.30, nw, .40, .45], .5, 'night:S'); F([2.60, nw, .40, .45], .5, 'night:S'); }
+  else { F([.50, nw, .45, .45], .5, 'night:S'); F([2.85, nw, .45, .45], .5, 'night:S'); }
   F([1.50, r2(3.85 - sh), .60, T ? 1.15 : 1.30], 2.1, 'wardrobe:W');
   D([3.40, yN, .80, .20], [3.40, yN, 3.40, r2(yN - .80), 4.20, yN]);                               // roditelji
-  glass.push(B === 'parents' ? [0, .90, .30, 1.20] : o.parExit ? [0, .70, .30, 1.20] : [0, 1.20, .30, 1.40], [0, r2((T ? 3.95 : 4.05) - sh), .30, .60], [10.70, 2.10, .30, .60], [10.70, r2(4.10 - sh), .30, .70]);
+  glass.push(B === 'parents' ? [0, .90, .30, 1.20] : [0, 1.20, .30, 1.40], [0, r2((T ? 3.95 : 4.05) - sh), .30, .60], [10.70, 2.10, .30, .60], [10.70, r2(4.10 - sh), .30, .70]);
   labels.push([2.05, r2(2.78 - sh / 2), 'Roditelji', m2(par, niche) + ' s proširenjem'], [4.30, r2(4.50 - sh), 'Hodnik', m2(hall)]);
-  tiny.push([1.90, N(1.40), 'krevet'], [1.80, r2(4.50 - sh), 'ormar'], [3.55, 2.36, 'dimnjak'], [8.18, 4.02, 'ograda']);
+  tiny.push([1.90 + PX, N(1.40), 'krevet'], [1.80, r2(4.50 - sh), 'ormar'], [3.55, 2.36, 'dimnjak'], [8.18, 4.02, 'ograda']);
   gaps.push([bed, 'S', 1.15], [bed, 'W']);
   info.par = m2(par, niche);
-  if (o.parExit) D([0, 2.20, .30, .80], [.30, 3.00, 1.10, 3.00, .30, 2.20]);                    // izlaz iz spavaće na terasu iza kuće (zapad)
+  if (o.parExit) D([3.05, 0, .80, nw], [3.85, nw, 3.85, r2(nw + .80), 3.05, nw]);               // izlaz iz spavaće na terasu iza kuće (sjever)
   if (B === 'parents') { D([0, 2.40, .30, .90], [.30, 3.30, 1.20, 3.30, .30, 2.40]); BK(-1.20, 1.40, 1.20, 2.20); }   // bočni balkon
   if (!LS) {                                                                                     // vešeraj na sjeveru, s izlazom
     const wd = F([3.90, nw, .60, 2.10], 2.1, 'wardrobe:W'); gaps.push([bed, wd]);
@@ -1005,14 +1009,14 @@ view3d(plans.ground, 'ground', { labels: [[9.85, 1.6, 'Kupatilo 1'], [7.6, 1.0, 
 // ---------- varijante sprata: tlocrt + 3D za svaku, jedna ispod druge ----------
 const VARS = [
   { id: 'A', o: { terrace: true, laundry: 'N' }, ter: 'ostaje (JZ ugao)', ves: 'sjever', balk: '–', txt: 'terasa ostaje · vešeraj na sjeveru' },
-  { id: 'B', o: { laundry: 'N', parExit: true }, ter: 'ukinuta', ves: 'sjever', balk: 'bez; izlaz na sjever i iz spavaće na zapad', txt: 'bez terase i balkona · vešeraj na sjeveru, izlaz na sjever · izlaz iz spavaće na terasu (zapad)' },
+  { id: 'B', o: { laundry: 'N', parExit: true }, ter: 'ukinuta', ves: 'sjever', balk: 'bez; izlaz na sjever iz vešeraja i spavaće', txt: 'bez terase i balkona · vešeraj na sjeveru, izlaz na sjever · izlaz iz spavaće na terasu (sjever)' },
   { id: 'C', o: { laundry: 'N', balc: 'kids' }, ter: 'ukinuta', ves: 'sjever', balk: 'mali na svakoj dječijoj sobi', txt: 'bez terase · mali balkon na svakoj dječijoj sobi · vešeraj na sjeveru' },
   { id: 'D', o: { laundry: 'N', balc: 'parents' }, ter: 'ukinuta', ves: 'sjever', balk: 'bočni, soba roditelja', txt: 'bez terase · bočni balkon iz sobe roditelja · vešeraj na sjeveru' },
   { id: 'E', o: { laundry: 'S' }, ter: 'ukinuta', ves: 'između dječijih soba', balk: 'bez', txt: 'bez terase i balkona · vešeraj između dječijih soba · garderoba roditelja' },
   { id: 'F', o: { laundry: 'S', balc: 'shared' }, ter: 'ukinuta', ves: 'između dječijih soba', balk: 'zajednički: obje sobe i vešeraj', txt: 'bez terase · zajednički balkon dječijih soba i vešeraja · garderoba roditelja' },
   { id: 'G', o: { laundry: 'S', balc: 'laundry' }, ter: 'ukinuta', ves: 'između dječijih soba', balk: 'mali, samo kod vešeraja', txt: 'bez terase · mali balkon kod vešeraja · garderoba roditelja' },
-  { id: 'H', o: { terrace: true, laundry: 'N', shift: .20, parExit: true }, ter: 'ostaje (JZ ugao)', ves: 'sjever', balk: 'izlaz iz spavaće na zapad',
-    txt: 'kao A, dječije sobe 20 cm dublje · izlaz iz spavaće na terasu (zapad) · sjeverne sobe 3,10 m · zid prema dječijim sobama 30 cm sjevernije od grede, stepenište ulazi 30 cm u hodnik' },
+  { id: 'H', o: { terrace: true, laundry: 'N', shift: .20, parExit: true }, ter: 'ostaje (JZ ugao)', ves: 'sjever', balk: 'izlaz iz spavaće na sjever',
+    txt: 'kao A, dječije sobe 20 cm dublje · izlaz iz spavaće na terasu (sjever) · sjeverne sobe 3,10 m · zid prema dječijim sobama 30 cm sjevernije od grede, stepenište ulazi 30 cm u hodnik' },
 ];
 const tools3d = id => `<div class="tools3d">
       <button id="b3d-walls-${id}" type="button">Zidovi: presjek na 1,20 m</button>
@@ -1159,15 +1163,6 @@ function initReal() {
     for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) { g.fillStyle = shade(base, (rnd() - .5) * vari); g.fillRect(i * tw + gw / 2, j * th + gw / 2, tw - gw, th - gw); }
     blotch(g, px, 20, px * .05, px * .2, 'rgba(0,0,0,.025)'); grainNoise(g, px, 5);
   };
-  const rubble = (g, px) => {                                                     // lomljeni kamen u redovima, fuga od maltera
-    const rows = 6, rh = px / rows, cols = ['#b3a893', '#a89c86', '#c0b6a2', '#9c927f', '#b8ad97'];
-    g.fillStyle = '#7e786d'; g.fillRect(0, 0, px, px);
-    for (let r = 0; r < rows; r++) {
-      let x = -rnd() * px * .12;
-      while (x < px) { const w = px * (.12 + rnd() * .16), h = rh - 4 - rnd() * 5; g.fillStyle = shade(cols[Math.floor(rnd() * cols.length)], (rnd() - .5) * .16); g.fillRect(x + 3, r * rh + 3, w - 6, h); x += w; }
-    }
-    blotch(g, px, 30, px * .03, px * .12, 'rgba(0,0,0,.05)'); grainNoise(g, px, 14);
-  };
   const pavers = (g, px) => {                                                     // betonski opločnici 20 × 40, na vez
     const rows = 10, th = px / rows, tw = th * 2; g.fillStyle = '#6f6c66'; g.fillRect(0, 0, px, px);
     for (let r = 0; r < rows; r++) for (let x = (r % 2) * -th; x < px; x += tw) { g.fillStyle = shade('#a29e96', (rnd() - .5) * .12); g.fillRect(x + 1.5, r * th + 1.5, tw - 3, th - 3); }
@@ -1215,7 +1210,6 @@ function initReal() {
     carpet: S({ map: tex(512, 2.4, carpet), roughness: 1 }),
     deck: S({ map: tex(512, 1.2, tiles('#b7b0a3', .06, '#8a857b', 2, 2, 5)), roughness: .8 }),
     slabs: S({ map: tex(512, 1.2, tiles('#c9c2b4', .10, '#8c867b', 2, 2, 3)), roughness: .7 }),   // kamene ploče 60 × 60
-    wallStone: S({ map: tex(512, 2.0, rubble), roughness: .92 }),                // kameni podzid
     stone: S({ map: tex(256, 1, plain('#d6ccbb', 10, .08)), roughness: .45 }),
     sill: S({ color: '#d7d2c8', roughness: .5 }),
     oak: S({ map: tex(512, 1, grain('#ba9063')), roughness: .55 }),
@@ -1378,21 +1372,9 @@ function initReal() {
     const B = makeBufs();
     boxInto(B, [-.8, W + .8, -.12, -.02, H, H + 2.4], 0, n => n[1] > .5 ? 'paving' : 'concrete');      // uz južnu fasadu
     boxInto(B, [W, W + 2, -.12, -.02, 3.0, H + 2.4], 0, n => n[1] > .5 ? 'paving' : 'concrete');       // ulaz s istoka
-    // terasa iza kuće: L oko SZ ugla, kamene ploče, vrh 2 cm ispod poda prizemlja; odvojena od kuće fugom 2 cm, bez nosača:
-    // sjeverni krak leži na platou, zapadni na nasipu iza kamenog podzida
+    // terasa iza kuće: kamene ploče, vrh 2 cm ispod poda prizemlja; leži na platou, bez nosača, odvojena od kuće fugom 2 cm
     const tt = FH - .02, fg = .02, slab = n => n[1] > .5 ? 'slabs' : n[1] < -.5 ? 'concrete' : 'stone';
-    boxInto(B, [-3, 6.45, tt - .2, tt, -3, -fg], 0, slab);                                             // sjeverni krak 9,45 × 3
-    boxInto(B, [-3, -fg, -.6, tt, -fg, 3], 0, n => n[1] > .5 ? 'slabs' : n[1] < -.5 ? 'concrete' : 'wallStone');   // zapadni krak 3 × 3, nasip + podzid
-    boxInto(B, [-3.03, -fg, tt - .06, tt, 2.98, 3.03], 0, () => 'stone'); boxInto(B, [-3.03, -2.98, tt - .06, tt, -.3, 3.03], 0, () => 'stone');   // kapa podzida
-    const rail = (x0, x1, z0, z1) => {                                                                  // staklena ograda 1,0 m, antracit rukohvat i stubići
-      const L = Math.max(x1 - x0, z1 - z0), alongX = x1 - x0 > z1 - z0, n = Math.max(1, Math.round(L / 1.5));
-      const at = (a, b, ya, yb) => alongX ? [x0 + a, x0 + b, ya, yb, z0, z1] : [x0, x1, ya, yb, z0 + a, z0 + b];
-      boxInto(B, at(0, L, tt + .96, tt + 1.0), 0, () => 'frame');
-      for (let i = 0; i <= n; i++) { const a = Math.min(L - .05, i * L / n); boxInto(B, at(a, a + .05, tt, tt + .96), 0, () => 'frame'); }
-      const t = alongX ? [x0, x1, tt + .1, tt + .94, (z0 + z1) / 2 - .005, (z0 + z1) / 2 + .005] : [(x0 + x1) / 2 - .005, (x0 + x1) / 2 + .005, tt + .1, tt + .94, z0, z1];
-      boxInto(B, t, 0, n => (alongX ? n[2] : n[0]) ? 'glass' : null);
-    };
-    rail(-3, -2.95, -.2, 3); rail(-2.95, 0, 2.95, 3);
+    boxInto(B, [-3, 6.45, tt - .35, tt, -3, -fg], 0, slab);                                            // 9,45 × 3 m
     const g = new THREE.Group(); toGroup(B, g); scene.add(g);
   }
 
