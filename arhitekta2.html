@@ -1098,11 +1098,11 @@ function initReal() {
   const mkU = id => { const P = mkUpper(VARS.find(v => v.id === id).o);                // prizemlje po varijanti
     return { P, y0: FH, labels: [...P.labels.map(l => l.slice(0, 3)), ...P.lab3], res: view3d(P, 'real-u' + id, { headless: true, full: true, down: true, stairs: 'hole', closedExt: true }) }; };
   const UP = { H: mkU('H'), B: mkU('B') }, PU = UP.H.P;
-  let vr = 'H';
+  let vr = 'B';                                                                  // početna varijanta prizemlja
   const FLOORS = {
     ground: { P: PG, y0: 0, labels: [...PG.labels.map(l => l.slice(0, 3)), [9.85, 1.6, 'Kupatilo 1'], [7.6, 1.0, 'Stepenište']],
               res: view3d(PG, 'real-g', { headless: true, full: true, wallH: FH - .25, allSteps: true, closedExt: true }) },
-    upper: UP.H,
+    upper: UP.B,
   };
 
   // ---------- renderer ----------
@@ -1712,7 +1712,7 @@ function initReal() {
     camera.aspect = w / h; camera.updateProjectionMatrix(); redraw();
   }
   new ResizeObserver(resize).observe(cv);
-  resize(); setMode('house'); setVar('H'); setLight('eve');
+  resize(); setMode('house'); setVar('B'); setLight('eve');
   window.real3d = { setMode, setVar, setLight, enter: (fk, name) => { const s = spans.find(q => q.fk === fk && q.l[2] === name && (!q.v || q.v === vr)); if (s) enter(fk, s.l); }, leave, camera, controls, redraw };   // za provjeru
 }
 </script>
