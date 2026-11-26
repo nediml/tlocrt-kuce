@@ -108,12 +108,12 @@
 <body>
 <main>
   <h1>Tlocrt kuće – Su + P, 11,00 × 9,00 m · verzija 2</h1>
-  <p class="lead">Su + P, gabarit 11,00 × 9,00 m. Suteren je isti kao u <a href="arhitekta.html">prethodnoj verziji</a>. Prizemlje (sprat) je nacrtano u 7 varijanti po prijedlozima arhitekte od 25. 11. 2026. Namještaj je naš prijedlog, arhitekta ga nije crtao.</p>
+  <p class="lead">Su + P, gabarit 11,00 × 9,00 m. Suteren je isti kao u <a href="arhitekta.html">prethodnoj verziji</a>. Prizemlje (sprat) je nacrtano u 8 varijanti: A–G po prijedlozima arhitekte od 25. 11. 2026, H je naša izmjena varijante A. Namještaj je naš prijedlog, arhitekta ga nije crtao.</p>
 
   <h2>Pozicija na parceli</h2>
   <div class="plan"><svg id="svg-site" viewBox="95 10 1100 1220" role="img" aria-label="Pozicija kuće na parceli"></svg></div>
 
-  <h2>Suteren <small>po tlocrtu arhitekte, izmijenjeni mesdžid i vrata u dnevni · bruto 99,0 m², neto 82,8 m²</small></h2>
+  <h2>Suteren <small>po tlocrtu arhitekte, izmijenjeni mesdžid i vrata u dnevni · bruto 99,0 m², neto 81,8 m²</small></h2>
   <div class="bar">
     <div class="legend">
       <span><i style="background:var(--wall)"></i>zid (vanjski 30 cm, pregradni 20 cm)</span>
@@ -143,7 +143,7 @@
     <canvas id="gl3d-ground" role="img" aria-label="3D prikaz suterena"></canvas><div class="lab3d" id="lab3d-ground"></div></div>
 
   <h2 id="varijante">Prizemlje (sprat) – varijante <small>po prijedlozima arhitekte od 25. 11. 2026.</small></h2>
-  <p class="lead">U svim varijantama: sjeverne sobe duboke 3,30 m, zid prema hodniku u liniji s krajem stepeništa, hodnik 1,35 m, zid prema dječijim sobama tačno iznad grede u suterenu, dječije sobe duboke 3,35 m. Balkoni su konzolni, 1,20 m izvan gabarita, vrata se otvaraju unutra.</p>
+  <p class="lead">U varijantama A–G: sjeverne sobe duboke 3,30 m, zid prema hodniku u liniji s krajem stepeništa, hodnik 1,35 m, zid prema dječijim sobama tačno iznad grede u suterenu, dječije sobe duboke 3,35 m. Balkoni su konzolni, 1,20 m izvan gabarita, vrata se otvaraju unutra. Varijanta H je A s dječijim sobama dubljim 20 cm (3,55 m): sjeverne sobe su 3,10 m, zid prema dječijim sobama je 20 cm sjevernije od grede, a stepenište ulazi 20 cm u hodnik.</p>
   <div class="plan tablewrap"><table>
     <thead><tr><th>Varijanta</th><th>Terasa</th><th>Vešeraj</th><th>Balkon</th><th>Roditelji</th><th>Dječije sobe</th><th>Vešeraj, mjere</th></tr></thead>
     <tbody id="var-rows"></tbody>
@@ -153,7 +153,7 @@
     <thead><tr><th>Varijanta</th><th>Bruto sprat, zatvoreno</th><th>Terasa / balkoni</th><th>Bruto sprat, ukupno</th><th>Bruto kuća (Su + P)</th><th>Neto sprat</th><th>Neto kuća (Su + P)</th></tr></thead>
     <tbody id="area-rows"></tbody>
   </table></div>
-  <p class="lead" style="margin-top:8px">Bruto = površina po vanjskim ivicama zidova; terasa i balkoni su otvoreni i računati punom površinom, bez koeficijenta. Neto = zbir prostorija i stepeništa, bez zidova. Suteren: bruto 99,0 m², neto 82,8 m².</p>
+  <p class="lead" style="margin-top:8px">Bruto = površina po vanjskim ivicama zidova; terasa i balkoni su otvoreni i računati punom površinom, bez koeficijenta. Neto = zbir prostorija i stepeništa, bez zidova. Suteren: bruto 99,0 m², neto 81,8 m².</p>
   <div id="variants"></div>
 </main>
 
@@ -350,8 +350,10 @@ const plans = {
 // Zajedničko: sjeverne sobe 3,30, zid u liniji s krajem stepeništa, hodnik 1,35, zid iznad grede suterena, južne sobe 3,35.
 // o.terrace: terasa u JZ uglu ostaje · o.laundry: 'N' vešeraj na sjeveru, 'S' između dječijih soba
 // o.balc: 'kids' | 'parents' | 'shared' | 'laundry' (balkoni izvan gabarita, 1,20 m)
+// o.shift: za toliko se linija hodnika pomjera na sjever (dječije sobe dublje, sjeverne pliće)
 function mkUpper(o) {
-  const T = !!o.terrace, LS = o.laundry === 'S', B = o.balc || '';
+  const T = !!o.terrace, LS = o.laundry === 'S', B = o.balc || '', dy = o.shift || 0, r2 = n => +n.toFixed(2);
+  const yN = r2(3.60 - dy), yC = r2(3.80 - dy), yW = r2(5.15 - dy), yS = r2(5.35 - dy), dN = r2(3.30 - dy), dS = r2(3.35 + dy);   // linije zidova i dubine soba
   const m2 = (...rs) => rs.reduce((a, r) => a + r[2] * r[3], 0).toFixed(1).replace('.', ',') + ' m²';
   const rooms = [], glass = [], doors = [], furn = [], fh = [], fk = [], labels = [], tiny = [], gaps = [], balc = [];
   const lab3 = [[7.6, .9, 'Stepenište'], [9.8, 2.2, 'Kupatilo']], info = {};
@@ -360,15 +362,15 @@ function mkUpper(o) {
   const BK = (x, y, w, h) => { balc.push([x, y, w, h]); tiny.push([x + w / 2, y + h / 2, 'balkon'], [x + w / 2, y + h / 2 + .22, `${fmt(w)} × ${fmt(h)}`]); };
 
   // sjever: roditelji s proširenjem, vešeraj ili garderoba, kupatilo; hodnik
-  const nS = T ? 5.05 : 5.15, par = [.30, .30, 4.20, 3.30], niche = [.30, 3.60, 1.80, +(nS - 3.60).toFixed(2)];
-  const nx = [4.70, .30, 1.65, 3.30], bath = [8.85, .30, 1.85, 3.30], hall = [2.30, 3.80, 8.40, 1.35];
+  const nS = r2((T ? 5.05 : 5.15) - dy), par = [.30, .30, 4.20, dN], niche = [.30, yN, 1.80, r2(nS - yN)];
+  const nx = [4.70, .30, 1.65, dN], bath = [8.85, .30, 1.85, dN], hall = [2.30, yC, 8.40, 1.35];
   rooms.push(par, niche, nx, bath, hall);
   const bed = F([1.00, .30, 1.80, 2.00], .5, 'bed:S'); F([.50, .30, .45, .45], .5, 'night:S'); F([2.85, .30, .45, .45], .5, 'night:S');
-  F([1.50, 3.85, .60, T ? 1.15 : 1.30], 2.1, 'wardrobe:W');
-  D([3.40, 3.60, .80, .20], [3.40, 3.60, 3.40, 2.80, 4.20, 3.60]);                               // roditelji
-  glass.push(B === 'parents' ? [0, .90, .30, 1.20] : [0, 1.20, .30, 1.40], [0, T ? 3.95 : 4.05, .30, .60], [10.70, 2.10, .30, .60], [10.70, 4.10, .30, .70]);
-  labels.push([2.05, 2.78, 'Roditelji', m2(par, niche) + ' s proširenjem'], [4.30, 4.50, 'Hodnik', m2(hall)]);
-  tiny.push([1.90, 1.40, 'krevet'], [1.80, 4.50, 'ormar'], [3.55, 2.36, 'dimnjak'], [8.18, 4.02, 'ograda']);
+  F([1.50, r2(3.85 - dy), .60, T ? 1.15 : 1.30], 2.1, 'wardrobe:W');
+  D([3.40, yN, .80, .20], [3.40, yN, 3.40, r2(yN - .80), 4.20, yN]);                               // roditelji
+  glass.push(B === 'parents' ? [0, .90, .30, 1.20] : [0, 1.20, .30, 1.40], [0, r2((T ? 3.95 : 4.05) - dy), .30, .60], [10.70, 2.10, .30, .60], [10.70, r2(4.10 - dy), .30, .70]);
+  labels.push([2.05, r2(2.78 - dy / 2), 'Roditelji', m2(par, niche) + ' s proširenjem'], [4.30, r2(4.50 - dy), 'Hodnik', m2(hall)]);
+  tiny.push([1.90, 1.40, 'krevet'], [1.80, r2(4.50 - dy), 'ormar'], [3.55, 2.36, 'dimnjak'], [8.18, 4.02, 'ograda']);
   gaps.push([bed, 'S', 1.15], [bed, 'W']);
   info.par = m2(par, niche);
   if (B === 'parents') { D([0, 2.40, .30, .90], [.30, 3.30, 1.20, 3.30, .30, 2.40]); BK(-1.20, 1.40, 1.20, 2.20); }   // bočni balkon
@@ -377,30 +379,30 @@ function mkUpper(o) {
     F([4.70, 1.60, .60, .60], .85, 'washer:E'); const sm = F([4.80, 2.20, .60, .60], .85, 'washer:E');
     F([4.70, .30, .60, .70], .9, 'sinkcab:E'); F([4.70, 1.00, .45, .60], 1.8, 'shelf:E');
     gaps.push([sm, 'E', 2.50]);
-    D([5.45, 0, .80, .30], [6.25, .30, 6.25, 1.10, 5.45, .30]); D([5.45, 3.60, .80, .20], [6.25, 3.60, 6.25, 2.80, 5.45, 3.60]);
+    D([5.45, 0, .80, .30], [6.25, .30, 6.25, 1.10, 5.45, .30]); D([5.45, yN, .80, .20], [6.25, yN, 6.25, r2(yN - .80), 5.45, yN]);
     tiny.push([4.20, 1.40, 'ormar'], [5.85, 1.75, 'vešeraj'], [5.85, 1.97, m2(nx)], [5.00, 1.95, 'VM'], [5.10, 2.55, 'SM'], [5.85, .75, 'izlaz']);
-    lab3.push([5.85, 1.9, 'Vešeraj']); info.ves = '1,65 × 3,30 · ' + m2(nx);
+    lab3.push([5.85, 1.9, 'Vešeraj']); info.ves = '1,65 × ' + fmt(dN) + ' · ' + m2(nx);
   } else {                                                                                       // garderoba roditelja umjesto vešeraja
-    F([5.75, .30, .60, 3.30], 2.1, 'wardrobe:W'); F([4.80, 3.00, .95, .60], 2.1, 'wardrobe:N');
+    F([5.75, .30, .60, dN], 2.1, 'wardrobe:W'); F([4.80, r2(3.00 - dy), .95, .60], 2.1, 'wardrobe:N');
     D([4.50, 1.00, .20, .80], [4.50, 1.00, 3.70, 1.00, 4.50, 1.80]);
     tiny.push([5.25, 1.75, 'garderoba'], [5.25, 1.97, m2(nx)]);
     lab3.push([5.3, 1.6, 'Garderoba']);
   }
   F([8.85, .30, 1.80, .75], .55, 'tub:S'); const wc = F([10.05, 1.35, .65, .40], .4, 'wc:W'), van = F([8.85, 1.35, .45, .55], .85, 'vanity:E');
   gaps.push([van, wc]);
-  D([9.15, 3.60, .70, .20], [9.15, 3.60, 9.15, 2.90, 9.85, 3.60]);                               // kupatilo
-  tiny.push([9.82, .72, 'kada'], [9.82, 2.45, 'kupatilo'], [9.82, 2.67, m2(bath)]);
+  D([9.15, yN, .70, .20], [9.15, yN, 9.15, r2(yN - .70), 9.85, yN]);                               // kupatilo
+  tiny.push([9.82, .72, 'kada'], [9.82, r2(2.45 - dy), 'kupatilo'], [9.82, r2(2.67 - dy), m2(bath)]);
 
   // dječija soba: u = odmak od vanjskog bočnog zida (krevet na sprat), flip = zrcalno; k.sdoor = balkonska vrata na jugu
   const kid = (name, x0, w, flip, k = {}) => {
-    const r = [x0, 5.35, w, 3.35]; rooms.push(r);
+    const r = [x0, yS, w, dS]; rooms.push(r);
     const X = (u, uw = 0) => +(flip ? x0 + w - u - uw : x0 + u).toFixed(2);
     const [w1, w2] = k.ward || [1.50, 1.50], off = k.off || 0, e2 = off + w1 + .05 + w2;
     const bunk = F([X(0, .95), 6.70, .95, 2.00], 1.7, flip ? 'bunk:W:f' : 'bunk:E');
-    const a1 = F([X(off, w1), 5.35, w1, .60], 2.1, 'wardrobe:S'), a2 = F([X(off + w1 + .05, w2), 5.35, w2, .60], 2.1, 'wardrobe:S');
+    const a1 = F([X(off, w1), yS, w1, .60], 2.1, 'wardrobe:S'), a2 = F([X(off + w1 + .05, w2), yS, w2, .60], 2.1, 'wardrobe:S');
     const d1 = F([X(1.15, 1.30), 8.10, 1.30, .60], .75, 'desk:N');
-    tiny.push([X(off + w1 / 2), 5.70, 'ormar'], [X(e2 - w2 / 2), 5.70, 'ormar'], [X(1.80), 8.45, 'sto'], [X(.47), 7.65, 'krevet'], [X(.47), 7.87, 'na sprat']);
-    D([X(w - .90, .80), 5.15, .80, .20], [X(w - .10), 5.35, X(w - .10), 6.15, X(w - .90), 5.35]);   // iz hodnika
+    tiny.push([X(off + w1 / 2), r2(yS + .35), 'ormar'], [X(e2 - w2 / 2), r2(yS + .35), 'ormar'], [X(1.80), 8.45, 'sto'], [X(.47), 7.65, 'krevet'], [X(.47), 7.87, 'na sprat']);
+    D([X(w - .90, .80), yW, .80, .20], [X(w - .10), yS, X(w - .10), r2(yS + .80), X(w - .90), yS]);   // iz hodnika
     if (k.sdoor) {
       glass.push([X(1.20, 1.20), 8.70, 1.20, .30]);
       D([X(2.65, .90), 8.70, .90, .30], [X(3.55), 8.70, X(3.55), 7.80, X(2.65), 8.70]);            // na balkon, otvara se unutra
@@ -411,14 +413,14 @@ function mkUpper(o) {
     }
     if (off < .9) gaps.push([a1, bunk]);
     gaps.push([bunk, d1]);
-    labels.push([X(w / 2 + .15), 6.70, name, `${fmt(w)} × 3,35`, m2(r)]);
-    info.kid = `${fmt(w)} × 3,35 · ${m2(r)}`;
+    labels.push([X(w / 2 + .15), 6.70, name, `${fmt(w)} × ${fmt(dS)}`, m2(r)]);
+    info.kid = `${fmt(w)} × ${fmt(dS)} · ${m2(r)}`;
   };
 
   let terrace, bottom;
   if (T) {                                                                                       // terasa u JZ uglu ostaje
-    terrace = [.10, 5.35, 1.90, 3.55];
-    D([.45, 5.05, .90, .30], [.45, 5.35, .45, 6.25, 1.35, 5.35]); D([2.00, 5.55, .30, .90], [2.00, 6.45, 1.10, 6.45, 2.00, 5.55]);
+    terrace = [.10, yS, 1.90, r2(3.55 + dy)];
+    D([.45, nS, .90, .30], [.45, yS, .45, r2(yS + .90), 1.35, yS]); D([2.00, 5.55, .30, .90], [2.00, 6.45, 1.10, 6.45, 2.00, 5.55]);
     kid('Dječaci', 2.30, 4.10, false, { ward: [1.05, 1.05], off: .95 }); kid('Djevojčice', 6.60, 4.10, true);
     F([.55, 7.10, .90, .90], .75, 'table'); labels.push([1.05, 8.35, 'Terasa', m2(terrace)]);
     bottom = [[0, 2.00, '2,00'], [2.30, 6.40, '4,10'], [6.60, 10.70, '4,10']];
@@ -428,25 +430,26 @@ function mkUpper(o) {
     if (B === 'kids') { BK(1.40, 9.00, 2.90, 1.20); BK(6.70, 9.00, 2.90, 1.20); }
     bottom = [[.30, 5.40, '5,10'], [5.60, 10.70, '5,10']];
   } else {                                                                                       // bez terase: vešeraj između dječijih soba
-    const k = { sdoor: B === 'shared' }, lr = [4.60, 5.35, 1.80, 3.35], sd = B === 'shared' || B === 'laundry';
+    const k = { sdoor: B === 'shared' }, lr = [4.60, yS, 1.80, dS], sd = B === 'shared' || B === 'laundry';
     kid('Dječaci', .30, 4.10, false, k); rooms.push(lr); kid('Djevojčice', 6.60, 4.10, true, k);
     F([4.60, 6.30, .60, .70], .9, 'sinkcab:E'); F([4.60, 7.05, .60, .60], .85, 'washer:E'); F([4.60, 7.65, .60, .60], .85, 'washer:E');
     F([5.95, 6.30, .45, 1.20], 1.8, 'shelf:W');
-    D([5.10, 5.15, .80, .20], [5.90, 5.35, 5.90, 6.15, 5.10, 5.35]);
+    D([5.10, yW, .80, .20], [5.90, yS, 5.90, r2(yS + .80), 5.10, yS]);
     if (sd) D([5.25, 8.70, .90, .30], [6.15, 8.70, 6.15, 7.80, 5.25, 8.70]); else glass.push([5.00, 8.70, 1.00, .30]);
     if (B === 'shared') BK(2.60, 9.00, 5.80, 1.20);
     if (B === 'laundry') BK(4.30, 9.00, 2.40, 1.20);
     tiny.push([5.57, 6.80, 'vešeraj'], [5.57, 7.02, m2(lr)], [4.90, 7.40, 'VM'], [4.90, 8.00, 'SM']);
-    lab3.push([5.5, 7.0, 'Vešeraj']); info.ves = '1,80 × 3,35 · ' + m2(lr);
+    lab3.push([5.5, 7.0, 'Vešeraj']); info.ves = '1,80 × ' + fmt(dS) + ' · ' + m2(lr);
     bottom = [[.30, 4.40, '4,10'], [4.60, 6.40, '1,80'], [6.60, 10.70, '4,10']];
   }
 
   return {
     W: 11.0, H: 9.0, hill: '▲ sjever – prizemlje je iznad terena' + (LS ? '' : ': izlaz iz vešeraja'),
-    rooms, terrace, walls: [], skipDims: [0, 1], balc, glass, doors, furn, fh, fk, labels, tiny, gaps, lab3, info,
+    rooms, terrace, walls: dy ? [[6.35, yC, .20, dy], [8.65, yC, .20, dy]] : [], skipDims: [0, 1],   // bočni zidovi stepeništa koji ulaze u hodnik
+    balc, glass, doors, furn, fh, fk, labels, tiny, gaps, lab3, info,
     padS: balc.some(b => b[1] >= 9) ? .9 : 0, padW: balc.some(b => b[0] < 0) ? 1.2 : 0,
-    xdims: [[3.60, .47, '4,20'], [4.44, LS ? 2.15 : 1.80, '3,30', 1], [2.75, 3.53, '2,40'], [.47, 4.00, fmt(nS - .30), 1],
-            [1.20, nS - .07, '1,80'], [2.04, 4.45, fmt(nS - 3.60), 1]],
+    xdims: [[3.60, .47, '4,20'], [4.44, LS ? 2.15 : 1.80, fmt(dN), 1], [2.75, r2(yN - .07), '2,40'], [.47, r2(4.00 - dy), fmt(nS - .30), 1],
+            [1.20, nS - .07, '1,80'], [2.04, r2(4.45 - dy), fmt(nS - yN), 1]],
     stairs: [6.55, .30, 2.10, 3.50, '7,35 m²'], chim: [[4.10, 2.40, .70, .40]], rail: [7.70, 3.80, 8.65, 3.80],
     arch: [                                                                       // iz arhitektinog suterena: dimnjak i zidovi stepenišnog okna
       [2.50, .40, 3.10, .40, 3.10, .70, 2.50, .70],
@@ -454,7 +457,7 @@ function mkUpper(o) {
     ],
     archt: [[2.30, .90, 'dimnjak po arhitekti']],
     top: [[.30, 4.50, '4,20'], [4.70, 6.35, '1,65'], [6.55, 8.65, '2,10'], [8.85, 10.70, '1,85']],
-    bottom, right: [[.30, 3.60, '3,30'], [3.80, 5.15, '1,35'], [5.35, 8.70, '3,35']],
+    bottom, right: [[.30, yN, fmt(dN)], [yC, yW, '1,35'], [yS, 8.70, fmt(dS)]],
   };
 }
 
@@ -929,6 +932,8 @@ const VARS = [
   { id: 'E', o: { laundry: 'S' }, ter: 'ukinuta', ves: 'između dječijih soba', balk: 'bez', txt: 'bez terase i balkona · vešeraj između dječijih soba · garderoba roditelja' },
   { id: 'F', o: { laundry: 'S', balc: 'shared' }, ter: 'ukinuta', ves: 'između dječijih soba', balk: 'zajednički: obje sobe i vešeraj', txt: 'bez terase · zajednički balkon dječijih soba i vešeraja · garderoba roditelja' },
   { id: 'G', o: { laundry: 'S', balc: 'laundry' }, ter: 'ukinuta', ves: 'između dječijih soba', balk: 'mali, samo kod vešeraja', txt: 'bez terase · mali balkon kod vešeraja · garderoba roditelja' },
+  { id: 'H', o: { terrace: true, laundry: 'N', shift: .20 }, ter: 'ostaje (JZ ugao)', ves: 'sjever', balk: '–',
+    txt: 'kao A, dječije sobe 20 cm dublje · sjeverne sobe 3,10 m · zid prema dječijim sobama nije iznad grede, stepenište ulazi 20 cm u hodnik' },
 ];
 const tools3d = id => `<div class="tools3d">
       <button id="b3d-walls-${id}" type="button">Zidovi: presjek na 1,20 m</button>
@@ -937,12 +942,22 @@ const tools3d = id => `<div class="tools3d">
       <button id="b3d-zout-${id}" type="button" class="zoom" aria-label="Udalji" title="Udalji">−</button>
       <button id="b3d-full-${id}" type="button">Cijeli ekran</button>
     </div>`;
-// 3D se pali tek kad sekcija dođe blizu ekrana, da se ne otvara 8 WebGL prikaza odjednom
+// 3D se pali tek kad sekcija dođe blizu ekrana, da se ne otvara 9 WebGL prikaza odjednom
 const lazy3d = 'IntersectionObserver' in window
   ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { lazy3d.unobserve(e.target); e.target.init3d(); } }), { rootMargin: '600px' }) : null;
 // kvadrature: bruto po vanjskim ivicama zidova (terasa u gabaritu je otvorena), neto = prostorije + stepenište
 const f1 = n => n.toFixed(1).replace('.', ',');
-const netOf = p => p.rooms.reduce((a, r) => a + r[2] * r[3], 0) + p.stairs[2] * p.stairs[3];
+const netOf = p => {                                                             // unija prostorija i stepeništa (preklopi se ne broje dvaput), bez zidova
+  const rs = [...p.rooms, p.stairs], ws = p.walls || [], all = [...rs, ...ws], uq = a => [...new Set(a.map(n => +n.toFixed(3)))].sort((a, b) => a - b);
+  const xs = uq(all.flatMap(r => [r[0], r[0] + r[2]])), ys = uq(all.flatMap(r => [r[1], r[1] + r[3]]));
+  const hit = (l, x, y) => l.some(r => x > r[0] && x < r[0] + r[2] && y > r[1] && y < r[1] + r[3]);
+  let sum = 0;
+  for (let i = 0; i + 1 < xs.length; i++) for (let j = 0; j + 1 < ys.length; j++) {
+    const cx = (xs[i] + xs[i + 1]) / 2, cy = (ys[j] + ys[j + 1]) / 2;
+    if (hit(rs, cx, cy) && !hit(ws, cx, cy)) sum += (xs[i + 1] - xs[i]) * (ys[j + 1] - ys[j]);
+  }
+  return sum;
+};
 const G0 = plans.ground.W * plans.ground.H, N0 = netOf(plans.ground);
 VARS.forEach(v => {
   const P = mkUpper(v.o), id = 'v' + v.id, sec = document.createElement('section');
